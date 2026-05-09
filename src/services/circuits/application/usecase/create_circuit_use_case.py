@@ -1,5 +1,5 @@
 import uuid
-from src.services.circuits.domain.entities import Circuit
+from src.services.circuits.domain.entities.circuit import Circuit
 from src.services.circuits.domain.repository import ICircuitRepository
 
 

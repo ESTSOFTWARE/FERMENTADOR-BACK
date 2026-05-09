@@ -1,16 +1,14 @@
 from abc import ABC, abstractmethod
-from src.services.auth.domain.entities.entities import User
+from src.services.auth.domain.entities.user import User
 
 
 class IAuthRepository(ABC):
 
     @abstractmethod
-    async def get_user_by_email(self, email: str) -> User | None:
-        ...
+    async def get_user_by_email(self, email: str) -> User | None: ...
 
     @abstractmethod
-    async def get_user_by_id(self, user_id: int) -> User | None:
-        ...
+    async def get_user_by_id(self, user_id: int) -> User | None: ...
 
     @abstractmethod
     async def create_user(
@@ -21,5 +19,26 @@ class IAuthRepository(ABC):
         password:   str,
         role_id:    int,
         circuit_id: int | None = None,
-    ) -> User:
-        ...
+    ) -> User: ...
+
+    @abstractmethod
+    async def get_user_by_google_id(self, google_id: str) -> User | None: ...
+
+    @abstractmethod
+    async def get_user_by_github_id(self, github_id: str) -> User | None: ...
+
+    @abstractmethod
+    async def create_user_with_google(
+        self, name: str, last_name: str, email: str, google_id: str
+    ) -> User: ...
+
+    @abstractmethod
+    async def create_user_with_github(
+        self, name: str, last_name: str, email: str, github_id: str
+    ) -> User: ...
+
+    @abstractmethod
+    async def link_google(self, user_id: int, google_id: str) -> None: ...
+
+    @abstractmethod
+    async def link_github(self, user_id: int, github_id: str) -> None: ...

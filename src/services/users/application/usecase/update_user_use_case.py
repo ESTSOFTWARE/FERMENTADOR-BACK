@@ -1,4 +1,4 @@
-from src.services.users.domain.entities.entities import User
+from src.services.users.domain.entities.user import User
 from src.services.users.domain.repository import IUserRepository
 from src.core.security import hash_password
 from src.core.exceptions import UserNotFoundException, UserAlreadyExistsException

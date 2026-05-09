@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from src.services.circuits.domain.entities.entities import Circuit
+from src.services.circuits.domain.entities.circuit import Circuit
 
 
 class ICircuitRepository(ABC):

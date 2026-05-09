@@ -41,6 +41,19 @@ class Settings(BaseSettings):
             f"@{self.RABBITMQ_HOST}:{self.RABBITMQ_PORT}/"
         )
 
+    # ── OAuth — Google ────────────────────────────────
+    GOOGLE_CLIENT_ID:     str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_REDIRECT_URI:  str = "http://localhost:8000/api/auth/callback/google"
+
+    # ── OAuth — GitHub ────────────────────────────────
+    GITHUB_CLIENT_ID:     str = ""
+    GITHUB_CLIENT_SECRET: str = ""
+    GITHUB_REDIRECT_URI:  str = "http://localhost:8000/api/auth/callback/github"
+
+    # ── Frontend ──────────────────────────────────────
+    FRONTEND_URL: str = "http://localhost:3000"
+
     # ── Sensores ──────────────────────────────────
     SENSOR_TYPES: list[str] = [
         "alcohol",

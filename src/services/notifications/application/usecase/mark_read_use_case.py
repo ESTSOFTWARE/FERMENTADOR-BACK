@@ -1,4 +1,4 @@
-from src.services.notifications.domain.entities.entities import Notification
+from src.services.notifications.domain.entities.notification import Notification
 from src.services.notifications.domain.repository import INotificationRepository
 
 

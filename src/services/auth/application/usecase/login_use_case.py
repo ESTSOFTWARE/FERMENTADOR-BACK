@@ -14,7 +14,7 @@ class LoginUseCase:
         if not user:
             raise InvalidCredentialsException()
 
-        if not verify_password(password, user.password):
+        if not user.password or not verify_password(password, user.password):
             raise InvalidCredentialsException()
 
         role_name = user.role.name if user.role else "estudiante"

@@ -30,16 +30,18 @@ CREATE TABLE circuits (
 );
 
 CREATE TABLE users (
-    id            INT AUTO_INCREMENT PRIMARY KEY,
-    name          VARCHAR(100)  NOT NULL,
-    last_name     VARCHAR(100)  NOT NULL,
-    password      VARCHAR(255)  NOT NULL,
-    email         VARCHAR(150)  NOT NULL UNIQUE,
-    role_id       INT           NOT NULL DEFAULT 3,
-    profile_image LONGTEXT      NULL DEFAULT NULL,
-    circuit_id    INT           DEFAULT NULL,
-    created_by    INT           DEFAULT NULL,
-    created_at    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id               INT AUTO_INCREMENT PRIMARY KEY,
+    name             VARCHAR(100)  NOT NULL,
+    last_name        VARCHAR(100)  NOT NULL,
+    password         VARCHAR(255)  NULL DEFAULT NULL,
+    email            VARCHAR(150)  NOT NULL UNIQUE,
+    role_id          INT           NOT NULL DEFAULT 3,
+    profile_image    LONGTEXT      NULL DEFAULT NULL,
+    circuit_id       INT           DEFAULT NULL,
+    created_by       INT           DEFAULT NULL,
+    created_at       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    oauth_google_id  VARCHAR(100)  NULL DEFAULT NULL,
+    oauth_github_id  VARCHAR(100)  NULL DEFAULT NULL,
     CONSTRAINT fk_user_role    FOREIGN KEY (role_id)    REFERENCES roles(id)    ON DELETE RESTRICT,
     CONSTRAINT fk_user_circuit FOREIGN KEY (circuit_id) REFERENCES circuits(id) ON DELETE SET NULL,
     CONSTRAINT fk_user_creator FOREIGN KEY (created_by) REFERENCES users(id)   ON DELETE SET NULL
@@ -229,6 +231,8 @@ CREATE TABLE notifications (
 -- Índices
 CREATE INDEX idx_users_circuit            ON users(circuit_id);
 CREATE INDEX idx_users_created_by         ON users(created_by);
+CREATE INDEX idx_users_oauth_google       ON users(oauth_google_id);
+CREATE INDEX idx_users_oauth_github       ON users(oauth_github_id);
 CREATE INDEX idx_alcohol_session_time      ON alcohol_sensor(session_id, timestamp);
 CREATE INDEX idx_density_session_time      ON density_sensor(session_id, timestamp);
 CREATE INDEX idx_conductivity_session_time ON conductivity_sensor(session_id, timestamp);
