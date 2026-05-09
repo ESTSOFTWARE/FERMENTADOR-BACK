@@ -1,6 +1,6 @@
 from datetime import datetime, timezone, timedelta
 from src.services.users.domain.repository import IUserRepository
-from src.services.circuits.domain.repository import ICircuitRepository
+from src.services.users.domain.circuit_lookup import ICircuitLookup
 from src.core.security import create_access_token
 from src.core.exceptions import (
     InvalidActivationCodeException,
@@ -16,7 +16,7 @@ class ActivateMyCircuitUseCase:
     def __init__(
         self,
         user_repository:    IUserRepository,
-        circuit_repository: ICircuitRepository,
+        circuit_repository: ICircuitLookup,
     ):
         self._user_repo    = user_repository
         self._circuit_repo = circuit_repository

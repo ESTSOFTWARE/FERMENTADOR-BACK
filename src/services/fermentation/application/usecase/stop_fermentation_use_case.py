@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
-from src.services.fermentation.domain.entities.entities import FermentationSession
+from src.services.fermentation.domain.entities.fermentation_session import FermentationSession
 from src.services.fermentation.domain.repository import IFermentationRepository
-from src.services.sensors.domain.repository import ISensorRepository
 from src.core.threads.sensor_thread_manager import thread_manager
 from src.core.exceptions import (
     FermentationSessionNotFoundException,
@@ -11,18 +10,12 @@ from src.core.exceptions import (
 
 class StopFermentationUseCase:
 
-    def __init__(
-        self,
-        fermentation_repository: IFermentationRepository,
-        sensor_repository:       ISensorRepository,
-    ):
+    def __init__(self, fermentation_repository: IFermentationRepository):
         self._fermentation_repo = fermentation_repository
-        self._sensor_repo       = sensor_repository
 
     async def execute(
         self,
         session_id:     int,
-        circuit,
         interrupted_by: int | None = None,
     ) -> FermentationSession:
         session = await self._fermentation_repo.get_session_by_id(session_id)
@@ -32,20 +25,21 @@ class StopFermentationUseCase:
         if session.status != "running":
             raise FermentationNotRunningException()
 
-        now    = datetime.now(timezone.utc)
-        status = "interrupted" if interrupted_by else "completed"
+        now        = datetime.now(timezone.utc)
+        status     = "interrupted" if interrupted_by else "completed"
+        circuit_id = session.circuit_id
 
-        active_sensors = thread_manager.get_active_sensors(circuit.id)
+        active_sensors = thread_manager.get_active_sensors(circuit_id)
         for sensor_type in active_sensors:
-            latest = await self._sensor_repo.get_latest_reading(
-                circuit_id=circuit.id,
+            latest_value = await self._fermentation_repo.get_latest_sensor_reading(
+                circuit_id=circuit_id,
                 sensor_type=sensor_type,
             )
-            if latest:
+            if latest_value is not None:
                 await self._fermentation_repo.update_sensor_final(
                     session_id=session_id,
                     sensor_type=sensor_type,
-                    value=latest.value,
+                    value=latest_value,
                 )
 
         await self._calculate_efficiency(session_id)
@@ -65,7 +59,7 @@ class StopFermentationUseCase:
                 action="generated",
             )
 
-        thread_manager.stop_session(circuit.id)
+        thread_manager.stop_session(circuit_id)
         return session
 
     async def _calculate_efficiency(self, session_id: int) -> None:

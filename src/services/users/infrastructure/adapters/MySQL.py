@@ -1,6 +1,6 @@
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select, update, delete
-from src.services.auth.infrastructure.adapters.MySQL import UserModel, RoleModel
+from src.core.models.user_models import UserModel, RoleModel
 from src.services.users.domain.repository import IUserRepository
 from src.services.users.domain.entities.user import User
 

@@ -1,4 +1,4 @@
-from src.services.fermentation.domain.entities.entities import ReportHistory
+from src.services.fermentation.domain.entities.report_history import ReportHistory
 from src.services.fermentation.domain.repository import IFermentationRepository
 
 

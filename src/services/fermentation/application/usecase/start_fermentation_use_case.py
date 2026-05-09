@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
-from src.services.fermentation.domain.entities.entities import FermentationSession
+from src.services.fermentation.domain.entities.fermentation_session import FermentationSession
 from src.services.fermentation.domain.repository import IFermentationRepository
-from src.services.sensors.domain.repository import ISensorRepository
 from src.core.threads.sensor_thread_manager import thread_manager
 from src.core.exceptions import (
     FermentationSessionNotFoundException,
@@ -12,15 +11,10 @@ from src.core.exceptions import (
 
 class StartFermentationUseCase:
 
-    def __init__(
-        self,
-        fermentation_repository: IFermentationRepository,
-        sensor_repository:       ISensorRepository,
-    ):
+    def __init__(self, fermentation_repository: IFermentationRepository):
         self._fermentation_repo = fermentation_repository
-        self._sensor_repo       = sensor_repository
 
-    async def execute(self, session_id: int, circuit) -> FermentationSession:
+    async def execute(self, session_id: int) -> FermentationSession:
         session = await self._fermentation_repo.get_session_by_id(session_id)
         if not session:
             raise FermentationSessionNotFoundException()
@@ -41,21 +35,23 @@ class StartFermentationUseCase:
             actual_start=now,
         )
 
-        active_sensors = circuit.get_active_sensors()
+        circuit_id     = session.circuit_id
+        active_sensors = await self._fermentation_repo.get_active_sensors_for_circuit(circuit_id)
+
         for sensor_type in active_sensors:
-            latest = await self._sensor_repo.get_latest_reading(
-                circuit_id=circuit.id,
+            latest_value = await self._fermentation_repo.get_latest_sensor_reading(
+                circuit_id=circuit_id,
                 sensor_type=sensor_type,
             )
-            if latest:
+            if latest_value is not None:
                 await self._fermentation_repo.update_sensor_initial(
                     session_id=session_id,
                     sensor_type=sensor_type,
-                    value=latest.value,
+                    value=latest_value,
                 )
 
         thread_manager.start_session(
-            circuit_id=circuit.id,
+            circuit_id=circuit_id,
             session_id=session_id,
             active_sensors=active_sensors,
         )

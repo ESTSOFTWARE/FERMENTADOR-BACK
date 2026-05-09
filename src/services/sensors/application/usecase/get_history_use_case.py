@@ -1,5 +1,5 @@
 from datetime import datetime
-from src.services.sensors.domain.entities.entities import SensorReading
+from src.services.sensors.domain.entities.sensor_reading import SensorReading
 from src.services.sensors.domain.repository import ISensorRepository
 from src.core.exceptions import BadRequestException
 

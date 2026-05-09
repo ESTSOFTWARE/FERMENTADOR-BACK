@@ -11,20 +11,9 @@ from src.services.fermentation.domain.entities.fermentation_report import Fermen
 from src.services.fermentation.domain.entities.fermentation_status import FermentationStatus
 from src.services.fermentation.domain.entities.report_history import ReportHistory
 from src.services.fermentation.domain.repository import IFermentationRepository
+from src.services.fermentation.infrastructure.mappers.sensor_mappings import SENSOR_TABLE_MAP, SENSOR_REPORT_MAP
 
 
-SENSOR_REPORT_MAP = {
-    "alcohol":      ("alcohol_initial",      "alcohol_final",      "alcohol_deactivated_at",      "alcohol_last_reading"),
-    "density":      ("density_initial",      "density_final",      "density_deactivated_at",      "density_last_reading"),
-    "conductivity": ("conductivity_initial", "conductivity_final", "conductivity_deactivated_at", "conductivity_last_reading"),
-    "ph":           ("ph_initial",           "ph_final",           "ph_deactivated_at",           "ph_last_reading"),
-    "temperature":  ("temperature_initial",  "temperature_final",  "temperature_deactivated_at",  "temperature_last_reading"),
-    "turbidity":    ("turbidity_initial",    "turbidity_final",    "turbidity_deactivated_at",    "turbidity_last_reading"),
-    "rpm":          ("rpm_initial",          "rpm_final",          "rpm_deactivated_at",          "rpm_last_reading"),
-}
-
-
-# ── Modelos ORM ───────────────────────────────────────────────────────────────
 class FermentationSessionModel(Base):
     __tablename__ = "fermentation_sessions"
     __table_args__ = {"extend_existing": True}
@@ -350,20 +339,50 @@ class FermentationRepository(IFermentationRepository):
 
     async def get_user_id_by_circuit(self, circuit_id: int) -> int | None:
         """
-        Retorna el user_id del admin/dueño del circuito.
-        Ahora buscamos en users.circuit_id en lugar de circuits.user_id.
-        Priorizamos el admin (role_id=1), luego el primer usuario encontrado.
+        Retorna el user_id del dueño de la sesión activa en el circuito.
+        Buscamos en fermentation_sessions en lugar de users para evitar
+        acoplamiento con el servicio de auth.
         """
-        from src.services.auth.infrastructure.adapters.MySQL import UserModel
         async with self._session_factory() as session:
             result = await session.execute(
-                select(UserModel.id)
-                .where(UserModel.circuit_id == circuit_id)
-                # role_id 1=admin tiene prioridad
-                .order_by(UserModel.role_id.asc())
+                select(FermentationSessionModel.user_id)
+                .where(
+                    FermentationSessionModel.circuit_id == circuit_id,
+                    FermentationSessionModel.status == "running",
+                )
+                .order_by(FermentationSessionModel.id.desc())
                 .limit(1)
             )
             return result.scalar_one_or_none()
+
+    async def get_active_sensors_for_circuit(self, circuit_id: int) -> list[str]:
+        async with self._session_factory() as session:
+            result = await session.execute(
+                text(
+                    "SELECT sensor_alcohol_on, sensor_density_on, sensor_conductivity_on,"
+                    " sensor_ph_on, sensor_temperature_on, sensor_turbidity_on, sensor_rpm_on"
+                    " FROM circuits WHERE id = :id"
+                ),
+                {"id": circuit_id},
+            )
+            row = result.fetchone()
+            if not row:
+                return []
+            keys = ["alcohol", "density", "conductivity", "ph", "temperature", "turbidity", "rpm"]
+            return [k for k, v in zip(keys, row) if v]
+
+    async def get_latest_sensor_reading(self, circuit_id: int, sensor_type: str) -> float | None:
+        entry = SENSOR_TABLE_MAP.get(sensor_type)
+        if not entry:
+            return None
+        table, col = entry
+        async with self._session_factory() as session:
+            result = await session.execute(
+                text(f"SELECT {col} FROM {table} WHERE circuit_id = :cid ORDER BY timestamp DESC LIMIT 1"),
+                {"cid": circuit_id},
+            )
+            row = result.fetchone()
+            return float(row[0]) if row else None
 
     async def get_active_formula_factor(self) -> float:
         async with self._session_factory() as session:

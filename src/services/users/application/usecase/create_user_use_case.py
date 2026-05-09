@@ -1,7 +1,7 @@
 from datetime import datetime, timezone, timedelta
-from src.services.users.domain.entities.entities import User
+from src.services.users.domain.entities.user import User
 from src.services.users.domain.repository import IUserRepository
-from src.services.circuits.domain.repository import ICircuitRepository
+from src.services.users.domain.circuit_lookup import ICircuitLookup
 from src.core.security import hash_password
 from src.core.exceptions import (
     UserAlreadyExistsException,
@@ -21,7 +21,7 @@ class CreateUserUseCase:
     def __init__(
         self,
         user_repository:    IUserRepository,
-        circuit_repository: ICircuitRepository,
+        circuit_repository: ICircuitLookup,
     ):
         self._user_repo    = user_repository
         self._circuit_repo = circuit_repository

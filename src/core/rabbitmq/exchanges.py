@@ -66,6 +66,25 @@ class ExchangeManager:
         await commands_queue.bind(commands_exchange, routing_key="commands.#")
         logger.info("[Exchanges] circuit.commands configurado")
 
+        # ── Exchange sensor.events (eventos internos entre servicios) ─────────
+        sensor_events_exchange = await channel.declare_exchange(
+            "sensor.events",
+            aio_pika.ExchangeType.TOPIC,
+            durable=True,
+        )
+        sensor_deactivated_queue = await channel.declare_queue(
+            "sensor.deactivated.queue",
+            durable=True,
+            arguments={
+                "x-message-ttl": 300_000,
+                "x-max-length":  5_000,
+            },
+        )
+        await sensor_deactivated_queue.bind(
+            sensor_events_exchange, routing_key="sensor.deactivated"
+        )
+        logger.info("[Exchanges] sensor.events configurado")
+
 
 # Instancia global
 exchange_manager = ExchangeManager()

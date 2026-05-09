@@ -35,7 +35,10 @@ async def lifespan(app: FastAPI):
         from src.services.notifications.application.usecase.send_notification_use_case import SendNotificationUseCase
         from src.services.notifications.infrastructure.adapters.MySQL import NotificationRepository
         from src.services.fermentation.infrastructure.adapters.MySQL import FermentationRepository
+        from src.services.fermentation.infrastructure.event_consumer import fermentation_event_consumer
         from src.core.database import AsyncSessionLocal
+
+        fermentation_repo = FermentationRepository(AsyncSessionLocal)
 
         consumer.set_dependencies(
             save_reading_use_case=SaveReadingUseCase(
@@ -44,7 +47,11 @@ async def lifespan(app: FastAPI):
             send_notification_use_case=SendNotificationUseCase(
                 NotificationRepository(AsyncSessionLocal)
             ),
-            fermentation_repository=FermentationRepository(AsyncSessionLocal),
+            fermentation_repository=fermentation_repo,
+        )
+
+        fermentation_event_consumer.set_dependencies(
+            fermentation_repository=fermentation_repo,
         )
 
         from src.core.threads.sensor_thread_manager import thread_manager
@@ -52,9 +59,10 @@ async def lifespan(app: FastAPI):
         thread_manager.set_thread_class(SensorThread)
 
         await consumer.start()
+        await fermentation_event_consumer.start()
 
         rabbitmq_available = True
-        logger.info("RabbitMQ conectado y consumer iniciado")
+        logger.info("RabbitMQ conectado y consumers iniciados")
 
     except Exception as e:
         logger.warning(
@@ -73,8 +81,10 @@ async def lifespan(app: FastAPI):
         from src.core.rabbitmq.consumer import consumer
         from src.core.rabbitmq.connection import rabbitmq
         from src.core.threads.sensor_thread_manager import thread_manager
+        from src.services.fermentation.infrastructure.event_consumer import fermentation_event_consumer
 
         await consumer.stop()
+        await fermentation_event_consumer.stop()
         thread_manager.stop_all()
         await rabbitmq.disconnect()
         logger.info("RabbitMQ desconectado")

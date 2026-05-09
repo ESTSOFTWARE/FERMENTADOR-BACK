@@ -1,4 +1,4 @@
-from src.services.circuits.domain.entities.entities import Circuit
+from src.services.circuits.domain.entities import Circuit
 from src.services.circuits.domain.repository import ICircuitRepository
 from src.core.exceptions import CircuitNotFoundException
 

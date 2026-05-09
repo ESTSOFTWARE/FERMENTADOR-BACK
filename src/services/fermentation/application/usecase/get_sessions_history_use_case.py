@@ -1,4 +1,4 @@
-from src.services.fermentation.domain.entities.entities import FermentationSession
+from src.services.fermentation.domain.entities.fermentation_session import FermentationSession
 from src.services.fermentation.domain.repository import IFermentationRepository
 
 

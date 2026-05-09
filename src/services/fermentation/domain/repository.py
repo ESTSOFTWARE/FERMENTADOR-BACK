@@ -1,10 +1,8 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from src.services.fermentation.domain.entities.entities import (
-    FermentationSession,
-    FermentationReport,
-    ReportHistory,
-)
+from src.services.fermentation.domain.entities.fermentation_session import FermentationSession
+from src.services.fermentation.domain.entities.fermentation_report import FermentationReport
+from src.services.fermentation.domain.entities.report_history import ReportHistory
 
 
 class IFermentationRepository(ABC):
@@ -123,5 +121,13 @@ class IFermentationRepository(ABC):
         ...
 
     @abstractmethod
-    async def get_active_by_user(self, user_id: int): 
+    async def get_active_by_user(self, user_id: int):
+        ...
+
+    @abstractmethod
+    async def get_active_sensors_for_circuit(self, circuit_id: int) -> list[str]:
+        ...
+
+    @abstractmethod
+    async def get_latest_sensor_reading(self, circuit_id: int, sensor_type: str) -> float | None:
         ...

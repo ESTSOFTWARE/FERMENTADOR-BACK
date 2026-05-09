@@ -1,7 +1,8 @@
-from src.services.sensors.domain.entities.entities import SensorReading
+from src.services.sensors.domain.entities.sensor_reading import SensorReading
 from src.services.sensors.domain.repository import ISensorRepository
 from src.core.websocket.websocket_manager import ws_manager
 from src.core.websocket.schemas import SensorDataMessage, SensorDeactivatedMessage
+from src.core.rabbitmq.publisher import publisher
 from datetime import datetime, timezone
 
 
@@ -17,7 +18,6 @@ class SaveReadingUseCase:
         value:       float,
         session_id:  int | None = None,
     ) -> SensorReading:
-        """Persiste la lectura y hace broadcast al front vía WS."""
         reading = await self._repo.save_reading(
             circuit_id=circuit_id,
             sensor_type=sensor_type,
@@ -44,18 +44,17 @@ class SaveReadingUseCase:
         session_id:  int,
         value:       float,
     ) -> None:
-        """Notifica al módulo de fermentación que el sensor fue desactivado."""
-        from src.services.fermentation.infrastructure.adapters.MySQL import FermentationRepository
-        from src.core.database import AsyncSessionLocal
-
         now = datetime.now(timezone.utc)
 
-        fermentation_repo = FermentationRepository(AsyncSessionLocal)
-        await fermentation_repo.update_sensor_deactivation(
-            session_id=session_id,
-            sensor_type=sensor_type,
-            last_reading=value,
-            deactivated_at=now,
+        await publisher.publish_raw(
+            exchange="sensor.events",
+            routing_key="sensor.deactivated",
+            payload={
+                "session_id":     session_id,
+                "sensor_type":    sensor_type,
+                "last_reading":   value,
+                "deactivated_at": now.isoformat(),
+            },
         )
 
         if ws_manager.is_circuit_connected(circuit_id):
@@ -63,6 +62,7 @@ class SaveReadingUseCase:
                 circuit_id=circuit_id,
                 sensor_type=sensor_type,
                 session_id=session_id,
-                deactivated_at=now,
+                last_reading=value,
+                occurred_at=now,
             )
             await ws_manager.broadcast_sensor(circuit_id, msg)

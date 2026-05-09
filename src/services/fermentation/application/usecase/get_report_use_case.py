@@ -1,4 +1,4 @@
-from src.services.fermentation.domain.entities.entities import FermentationReport
+from src.services.fermentation.domain.entities.fermentation_report import FermentationReport
 from src.services.fermentation.domain.repository import IFermentationRepository
 from src.core.exceptions import FermentationReportNotFoundException
 
