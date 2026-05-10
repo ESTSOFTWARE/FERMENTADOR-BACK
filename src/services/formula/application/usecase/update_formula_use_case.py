@@ -1,6 +1,6 @@
+from src.core.exceptions import BadRequestException, FormulaNotFoundException
 from src.services.formula.domain.entities.efficiency_formula import EfficiencyFormula
 from src.services.formula.domain.repository import IFormulaRepository
-from src.core.exceptions import FormulaNotFoundException, BadRequestException
 
 
 class UpdateFormulaUseCase:

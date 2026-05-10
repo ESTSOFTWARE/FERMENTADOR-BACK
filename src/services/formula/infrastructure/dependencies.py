@@ -1,5 +1,5 @@
-from src.services.formula.infrastructure.adapters.MySQL import FormulaRepository
 from src.core.database import AsyncSessionLocal
+from src.services.formula.infrastructure.adapters.MySQL import FormulaRepository
 
 
 def get_formula_repository() -> FormulaRepository:

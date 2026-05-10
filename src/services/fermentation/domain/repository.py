@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from src.services.fermentation.domain.entities.fermentation_session import FermentationSession
+
 from src.services.fermentation.domain.entities.fermentation_report import FermentationReport
+from src.services.fermentation.domain.entities.fermentation_session import FermentationSession
 from src.services.fermentation.domain.entities.report_history import ReportHistory
 
 

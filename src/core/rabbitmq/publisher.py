@@ -1,9 +1,11 @@
 import json
 import logging
+
 import aio_pika
+
+from src.core.exceptions import MessagePublishException
 from src.core.rabbitmq.connection import rabbitmq
 from src.core.websocket.schemas import CommandMessage
-from src.core.exceptions import MessagePublishException
 
 logger = logging.getLogger(__name__)
 

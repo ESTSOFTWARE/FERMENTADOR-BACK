@@ -1,9 +1,22 @@
-from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Text, text, update, select
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    select,
+    text,
+    update,
+)
 from sqlalchemy.orm import relationship
+
 from src.core.database import Base
+from src.core.exceptions import FormulaNotFoundException
 from src.services.formula.domain.entities.efficiency_formula import EfficiencyFormula
 from src.services.formula.domain.repository import IFormulaRepository
-from src.core.exceptions import FormulaNotFoundException
 
 
 # ── Modelo ORM ────────────────────────────────────────────────────────────────
@@ -41,7 +54,7 @@ class FormulaRepository(IFormulaRepository):
         async with self._session_factory() as session:
             result = await session.execute(
                 select(EfficiencyFormulaModel)
-                .where(EfficiencyFormulaModel.is_active == True)
+                .where(EfficiencyFormulaModel.is_active == True)  # noqa: E712
                 .limit(1)
             )
             model = result.scalar_one_or_none()
@@ -73,9 +86,12 @@ class FormulaRepository(IFormulaRepository):
         updated_by:        int,
     ) -> EfficiencyFormula:
         values = {"updated_by": updated_by}
-        if name              is not None: values["name"]              = name
-        if conversion_factor is not None: values["conversion_factor"] = conversion_factor
-        if description       is not None: values["description"]       = description
+        if name is not None:
+            values["name"] = name
+        if conversion_factor is not None:
+            values["conversion_factor"] = conversion_factor
+        if description is not None:
+            values["description"] = description
 
         async with self._session_factory() as session:
             await session.execute(

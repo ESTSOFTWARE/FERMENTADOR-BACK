@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+
 from src.services.fermentation.domain.entities.fermentation_status import FermentationStatus
 
 

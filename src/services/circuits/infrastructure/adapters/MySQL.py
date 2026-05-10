@@ -1,7 +1,8 @@
-from datetime import datetime, timezone, timedelta
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, text, update, delete
+from datetime import datetime, timedelta, timezone
+
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, delete, select, text, update
 from sqlalchemy.orm import relationship
-from sqlalchemy import select
+
 from src.core.database import Base
 from src.services.circuits.domain.entities.circuit import Circuit
 from src.services.circuits.domain.repository import ICircuitRepository
@@ -141,7 +142,7 @@ class CircuitRepository(ICircuitRepository):
             result = await session.execute(
                 delete(CircuitModel)
                 .where(
-                    CircuitModel.is_active == False,
+                    CircuitModel.is_active == False,  # noqa: E712
                     CircuitModel.created_at <= expiration_threshold,
                 )
             )

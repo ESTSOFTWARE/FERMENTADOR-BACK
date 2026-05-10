@@ -1,8 +1,13 @@
 import traceback
-from src.services.fermentation.application.usecase.get_active_fermentation_use_case import GetActiveFermentationUseCase
-from src.services.fermentation.infrastructure.adapters.MySQL import FermentationRepository
-from src.services.fermentation.domain.dto.fermentation_session_schema import FermentationSessionResponse
+
 from src.core.database import AsyncSessionLocal
+from src.services.fermentation.application.usecase.get_active_fermentation_use_case import (
+    GetActiveFermentationUseCase,
+)
+from src.services.fermentation.domain.dto.fermentation_session_schema import (
+    FermentationSessionResponse,
+)
+from src.services.fermentation.infrastructure.adapters.MySQL import FermentationRepository
 
 
 async def get_active(circuit_id, user_id=None):

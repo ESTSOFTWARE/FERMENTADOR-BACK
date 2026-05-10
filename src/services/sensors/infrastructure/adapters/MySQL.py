@@ -1,5 +1,7 @@
 from datetime import datetime
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, Float, text, select
+
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, select, text
+
 from src.core.database import Base
 from src.services.sensors.domain.entities.sensor_reading import SensorReading
 from src.services.sensors.domain.repository import ISensorRepository
@@ -137,9 +139,12 @@ class SensorRepository(ISensorRepository):
                 .where(Model.circuit_id == circuit_id)
                 .order_by(Model.timestamp.asc())
             )
-            if session_id: query = query.where(Model.session_id == session_id)
-            if from_dt:    query = query.where(Model.timestamp >= from_dt)
-            if to_dt:      query = query.where(Model.timestamp <= to_dt)
+            if session_id:
+                query = query.where(Model.session_id == session_id)
+            if from_dt:
+                query = query.where(Model.timestamp >= from_dt)
+            if to_dt:
+                query = query.where(Model.timestamp <= to_dt)
 
             result = await session.execute(query)
             return [

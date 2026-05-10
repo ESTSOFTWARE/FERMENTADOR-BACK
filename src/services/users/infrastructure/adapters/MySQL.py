@@ -1,8 +1,9 @@
+from sqlalchemy import delete, select, update
 from sqlalchemy.orm import selectinload
-from sqlalchemy import select, update, delete
-from src.core.models.user_models import UserModel, RoleModel
-from src.services.users.domain.repository import IUserRepository
+
+from src.core.models.user_models import RoleModel, UserModel
 from src.services.users.domain.entities.user import User
+from src.services.users.domain.repository import IUserRepository
 
 
 class UserRepository(IUserRepository):

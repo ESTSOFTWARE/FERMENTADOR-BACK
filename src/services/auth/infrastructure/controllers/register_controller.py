@@ -1,7 +1,7 @@
-from src.services.auth.application.usecase.register_use_case import RegisterUseCase
-from src.services.auth.infrastructure.adapters.MySQL import AuthRepository
-from src.services.auth.domain.dto.register_schema import RegisterRequest, RegisterResponse
 from src.core.database import AsyncSessionLocal
+from src.services.auth.application.usecase.register_use_case import RegisterUseCase
+from src.services.auth.domain.dto.register_schema import RegisterRequest, RegisterResponse
+from src.services.auth.infrastructure.adapters.MySQL import AuthRepository
 
 
 async def register(body: RegisterRequest) -> RegisterResponse:

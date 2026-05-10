@@ -1,6 +1,7 @@
 import logging
-from src.core.threads.base_sensor_thread import BaseSensorThread
+
 from src.core.config import settings
+from src.core.threads.base_sensor_thread import BaseSensorThread
 
 logger = logging.getLogger(__name__)
 

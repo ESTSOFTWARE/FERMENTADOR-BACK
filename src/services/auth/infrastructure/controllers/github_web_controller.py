@@ -1,10 +1,12 @@
 import urllib.parse
+
 from fastapi.responses import RedirectResponse
+
+from src.core.config import settings
+from src.core.database import AsyncSessionLocal
+from src.services.auth.application.usecase.github_web_auth_use_case import GitHubWebAuthUseCase
 from src.services.auth.infrastructure.adapters.MySQL import AuthRepository
 from src.services.auth.infrastructure.adapters.oauth_adapter import OAuthAdapter
-from src.services.auth.application.usecase.github_web_auth_use_case import GitHubWebAuthUseCase
-from src.core.database import AsyncSessionLocal
-from src.core.config import settings
 
 
 async def github_redirect():

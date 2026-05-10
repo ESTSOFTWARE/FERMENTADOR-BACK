@@ -1,8 +1,9 @@
-from sqlalchemy.orm import selectinload
 from sqlalchemy import select, update
-from src.core.models.user_models import UserModel, RoleModel
-from src.services.auth.domain.entities.user import User
+from sqlalchemy.orm import selectinload
+
+from src.core.models.user_models import RoleModel, UserModel
 from src.services.auth.domain.entities.role import Role
+from src.services.auth.domain.entities.user import User
 from src.services.auth.domain.repository import IAuthRepository
 
 ADMIN_ROLE_ID = 1

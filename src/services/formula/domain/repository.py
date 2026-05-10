@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 from src.services.formula.domain.entities.efficiency_formula import EfficiencyFormula
 
 

@@ -1,7 +1,8 @@
 import asyncio
 import logging
+
 import aio_pika
-from aio_pika import Connection, Channel
+from aio_pika import Channel, Connection
 
 logger = logging.getLogger(__name__)
 

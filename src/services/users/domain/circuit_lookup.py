@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 from src.services.users.domain.entities.circuit_info import CircuitInfo
 
 

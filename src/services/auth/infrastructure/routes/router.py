@@ -1,14 +1,24 @@
 from fastapi import APIRouter
+
 from src.services.auth.domain.dto.login_schema import LoginRequest, TokenResponse
-from src.services.auth.domain.dto.register_schema import RegisterRequest, RegisterResponse
-from src.services.auth.domain.dto.refresh_token_schema import RefreshTokenRequest, AccessTokenResponse
 from src.services.auth.domain.dto.oauth_schema import GoogleMobileRequest
-from src.services.auth.infrastructure.controllers.login_controller import login
-from src.services.auth.infrastructure.controllers.register_controller import register
-from src.services.auth.infrastructure.controllers.refresh_token_controller import refresh_token
-from src.services.auth.infrastructure.controllers.google_web_controller import google_redirect, google_callback
-from src.services.auth.infrastructure.controllers.github_web_controller import github_redirect, github_callback
+from src.services.auth.domain.dto.refresh_token_schema import (
+    AccessTokenResponse,
+    RefreshTokenRequest,
+)
+from src.services.auth.domain.dto.register_schema import RegisterRequest, RegisterResponse
+from src.services.auth.infrastructure.controllers.github_web_controller import (
+    github_callback,
+    github_redirect,
+)
 from src.services.auth.infrastructure.controllers.google_mobile_controller import google_mobile
+from src.services.auth.infrastructure.controllers.google_web_controller import (
+    google_callback,
+    google_redirect,
+)
+from src.services.auth.infrastructure.controllers.login_controller import login
+from src.services.auth.infrastructure.controllers.refresh_token_controller import refresh_token
+from src.services.auth.infrastructure.controllers.register_controller import register
 
 router = APIRouter()
 

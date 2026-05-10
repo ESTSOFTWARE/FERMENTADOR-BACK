@@ -1,15 +1,21 @@
 from fastapi import APIRouter, Depends
-from src.services.users.domain.dto.user_schema import UserResponse
+
+from src.core.dependencies import require_admin, require_admin_or_profesor, require_any_role
+from src.services.users.domain.dto.activate_circuit_schema import (
+    ActivateCircuitRequest,
+    ActivateCircuitResponse,
+)
 from src.services.users.domain.dto.create_user_schema import CreateUserRequest
 from src.services.users.domain.dto.update_user_schema import UpdateUserRequest
-from src.services.users.domain.dto.activate_circuit_schema import ActivateCircuitRequest, ActivateCircuitResponse
+from src.services.users.domain.dto.user_schema import UserResponse
+from src.services.users.infrastructure.controllers.activate_circuit_controller import (
+    activate_my_circuit,
+)
+from src.services.users.infrastructure.controllers.create_user_controller import create
+from src.services.users.infrastructure.controllers.delete_user_controller import delete
 from src.services.users.infrastructure.controllers.get_all_users_controller import get_all
 from src.services.users.infrastructure.controllers.get_user_by_id_controller import get_by_id
-from src.services.users.infrastructure.controllers.create_user_controller import create
 from src.services.users.infrastructure.controllers.update_user_controller import update
-from src.services.users.infrastructure.controllers.delete_user_controller import delete
-from src.services.users.infrastructure.controllers.activate_circuit_controller import activate_my_circuit
-from src.core.dependencies import require_admin, require_admin_or_profesor, require_any_role
 
 router = APIRouter()
 

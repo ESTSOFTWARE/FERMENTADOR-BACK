@@ -1,9 +1,11 @@
 import asyncio
 import json
 import logging
+
 from aio_pika import IncomingMessage
-from src.core.rabbitmq.connection import rabbitmq
+
 from src.core.config import settings
+from src.core.rabbitmq.connection import rabbitmq
 
 logger = logging.getLogger(__name__)
 

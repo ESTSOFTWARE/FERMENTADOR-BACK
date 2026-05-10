@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 from src.services.auth.domain.entities.user import User
 
 
