@@ -1,7 +1,7 @@
-from src.services.notifications.application.usecase.mark_read_use_case import MarkReadUseCase
-from src.services.notifications.infrastructure.adapters.MySQL import NotificationRepository
-from src.services.notifications.domain.dto.notification_schema import NotificationResponse
 from src.core.database import AsyncSessionLocal
+from src.services.notifications.application.usecase.mark_read_use_case import MarkReadUseCase
+from src.services.notifications.domain.dto.notification_schema import NotificationResponse
+from src.services.notifications.infrastructure.adapters.MySQL import NotificationRepository
 
 
 async def mark_one_as_read(notification_id: int) -> NotificationResponse | None:

@@ -1,5 +1,6 @@
 import logging
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -29,14 +30,20 @@ async def lifespan(app: FastAPI):
         from src.core.rabbitmq.exchanges import exchange_manager
         await exchange_manager.setup()
 
-        from src.core.rabbitmq.consumer import consumer
-        from src.services.sensors.application.usecase.save_reading_use_case import SaveReadingUseCase
-        from src.services.sensors.infrastructure.adapters.MySQL import SensorRepository
-        from src.services.notifications.application.usecase.send_notification_use_case import SendNotificationUseCase
-        from src.services.notifications.infrastructure.adapters.MySQL import NotificationRepository
-        from src.services.fermentation.infrastructure.adapters.MySQL import FermentationRepository
-        from src.services.fermentation.infrastructure.event_consumer import fermentation_event_consumer
         from src.core.database import AsyncSessionLocal
+        from src.core.rabbitmq.consumer import consumer
+        from src.services.fermentation.infrastructure.adapters.MySQL import FermentationRepository
+        from src.services.fermentation.infrastructure.event_consumer import (
+            fermentation_event_consumer,
+        )
+        from src.services.notifications.application.usecase.send_notification_use_case import (
+            SendNotificationUseCase,
+        )
+        from src.services.notifications.infrastructure.adapters.MySQL import NotificationRepository
+        from src.services.sensors.application.usecase.save_reading_use_case import (
+            SaveReadingUseCase,
+        )
+        from src.services.sensors.infrastructure.adapters.MySQL import SensorRepository
 
         fermentation_repo = FermentationRepository(AsyncSessionLocal)
 
@@ -78,10 +85,12 @@ async def lifespan(app: FastAPI):
     logger.info("Cerrando aplicación...")
 
     if rabbitmq_available:
-        from src.core.rabbitmq.consumer import consumer
         from src.core.rabbitmq.connection import rabbitmq
+        from src.core.rabbitmq.consumer import consumer
         from src.core.threads.sensor_thread_manager import thread_manager
-        from src.services.fermentation.infrastructure.event_consumer import fermentation_event_consumer
+        from src.services.fermentation.infrastructure.event_consumer import (
+            fermentation_event_consumer,
+        )
 
         await consumer.stop()
         await fermentation_event_consumer.stop()
@@ -109,16 +118,18 @@ app.add_middleware(
 )
 
 # ── Routers ───────────────────────────────────────────────────────────────────
-from src.services.auth.infrastructure.routes.router             import router as auth_router
-from src.services.users.infrastructure.routes.router            import router as users_router
-from src.services.circuits.infrastructure.routes.router         import router as circuits_router
-from src.services.circuits.infrastructure.routes.websocket      import router as circuits_ws_router
-from src.services.sensors.infrastructure.routes.router          import router as sensors_router
-from src.services.sensors.infrastructure.routes.websocket       import router as sensors_ws_router
-from src.services.fermentation.infrastructure.routes.router     import router as fermentation_router
-from src.services.notifications.infrastructure.routes.router    import router as notifications_router
-from src.services.notifications.infrastructure.routes.websocket import router as notifications_ws_router
-from src.services.formula.infrastructure.routes.router          import router as formula_router
+from src.services.auth.infrastructure.routes.router import router as auth_router
+from src.services.circuits.infrastructure.routes.router import router as circuits_router
+from src.services.circuits.infrastructure.routes.websocket import router as circuits_ws_router
+from src.services.fermentation.infrastructure.routes.router import router as fermentation_router
+from src.services.formula.infrastructure.routes.router import router as formula_router
+from src.services.notifications.infrastructure.routes.router import router as notifications_router
+from src.services.notifications.infrastructure.routes.websocket import (
+    router as notifications_ws_router,
+)
+from src.services.sensors.infrastructure.routes.router import router as sensors_router
+from src.services.sensors.infrastructure.routes.websocket import router as sensors_ws_router
+from src.services.users.infrastructure.routes.router import router as users_router
 
 app.include_router(auth_router,             prefix="/api/auth",          tags=["Auth"])
 app.include_router(users_router,            prefix="/api/users",         tags=["Users"])

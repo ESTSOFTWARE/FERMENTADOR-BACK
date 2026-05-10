@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+
 from src.services.sensors.domain.dto.sensor_reading_schema import SensorReadingResponse
 
 

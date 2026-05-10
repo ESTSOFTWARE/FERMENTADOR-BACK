@@ -1,17 +1,32 @@
 from fastapi import APIRouter, Depends
-from src.services.fermentation.domain.dto.schedule_fermentation_schema import ScheduleFermentationRequest
-from src.services.fermentation.domain.dto.stop_fermentation_schema import StopFermentationRequest
-from src.services.fermentation.domain.dto.fermentation_session_schema import FermentationSessionResponse
-from src.services.fermentation.domain.dto.fermentation_report_schema import FermentationReportResponse
+
+from src.core.dependencies import require_admin_or_profesor, require_any_role
+from src.services.fermentation.domain.dto.fermentation_report_schema import (
+    FermentationReportResponse,
+)
+from src.services.fermentation.domain.dto.fermentation_session_schema import (
+    FermentationSessionResponse,
+)
 from src.services.fermentation.domain.dto.report_history_schema import ReportHistoryResponse
-from src.services.fermentation.infrastructure.controllers.schedule_fermentation_controller import schedule
+from src.services.fermentation.domain.dto.schedule_fermentation_schema import (
+    ScheduleFermentationRequest,
+)
+from src.services.fermentation.domain.dto.stop_fermentation_schema import StopFermentationRequest
+from src.services.fermentation.infrastructure.controllers.get_active_session_controller import (
+    get_active,
+)
+from src.services.fermentation.infrastructure.controllers.get_report_controller import get_report
+from src.services.fermentation.infrastructure.controllers.get_report_history_controller import (
+    get_report_history,
+)
+from src.services.fermentation.infrastructure.controllers.get_sessions_history_controller import (
+    get_sessions_history,
+)
+from src.services.fermentation.infrastructure.controllers.schedule_fermentation_controller import (
+    schedule,
+)
 from src.services.fermentation.infrastructure.controllers.start_fermentation_controller import start
 from src.services.fermentation.infrastructure.controllers.stop_fermentation_controller import stop
-from src.services.fermentation.infrastructure.controllers.get_report_controller import get_report
-from src.services.fermentation.infrastructure.controllers.get_report_history_controller import get_report_history
-from src.services.fermentation.infrastructure.controllers.get_sessions_history_controller import get_sessions_history
-from src.services.fermentation.infrastructure.controllers.get_active_session_controller import get_active
-from src.core.dependencies import require_admin_or_profesor, require_any_role
 
 router = APIRouter()
 

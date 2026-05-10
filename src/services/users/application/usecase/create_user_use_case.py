@@ -1,14 +1,15 @@
-from datetime import datetime, timezone, timedelta
-from src.services.users.domain.entities.user import User
-from src.services.users.domain.repository import IUserRepository
-from src.services.users.domain.circuit_lookup import ICircuitLookup
-from src.core.security import hash_password
+from datetime import datetime, timedelta, timezone
+
 from src.core.exceptions import (
-    UserAlreadyExistsException,
-    InvalidActivationCodeException,
     ActivationCodeExpiredException,
     ForbiddenException,
+    InvalidActivationCodeException,
+    UserAlreadyExistsException,
 )
+from src.core.security import hash_password
+from src.services.users.domain.circuit_lookup import ICircuitLookup
+from src.services.users.domain.entities.user import User
+from src.services.users.domain.repository import IUserRepository
 
 ROLE_IDS = {"admin": 1, "profesor": 2, "estudiante": 3}
 

@@ -1,5 +1,7 @@
 import logging
+
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+
 from src.core.websocket.websocket_manager import ws_manager
 
 logger = logging.getLogger(__name__)

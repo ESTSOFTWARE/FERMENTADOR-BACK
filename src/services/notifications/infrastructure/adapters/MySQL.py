@@ -1,5 +1,18 @@
 import enum
-from sqlalchemy import BigInteger, Column, DateTime, Enum, ForeignKey, Integer, Text, text, update, select
+
+from sqlalchemy import (
+    BigInteger,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    Text,
+    select,
+    text,
+    update,
+)
+
 from src.core.database import Base
 from src.services.notifications.domain.entities.notification import Notification
 from src.services.notifications.domain.repository import INotificationRepository

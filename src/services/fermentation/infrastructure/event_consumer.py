@@ -2,7 +2,9 @@ import asyncio
 import json
 import logging
 from datetime import datetime
+
 from aio_pika import IncomingMessage
+
 from src.core.rabbitmq.connection import rabbitmq
 
 logger = logging.getLogger(__name__)

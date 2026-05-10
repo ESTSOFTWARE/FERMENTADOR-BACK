@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 from src.services.auth.domain.entities.role import Role
 
 

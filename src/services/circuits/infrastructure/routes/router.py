@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Depends
+
+from src.core.dependencies import require_admin_or_profesor, require_any_role
 from src.services.circuits.domain.dto.circuit_schema import CircuitResponse
 from src.services.circuits.domain.dto.create_circuit_schema import CreateCircuitResponse
 from src.services.circuits.infrastructure.controllers.create_circuit_controller import create
-from src.services.circuits.infrastructure.controllers.get_my_circuit_controller import get_my_circuit
 from src.services.circuits.infrastructure.controllers.get_circuit_by_id_controller import get_by_id
-from src.core.dependencies import require_any_role, require_admin_or_profesor
+from src.services.circuits.infrastructure.controllers.get_my_circuit_controller import (
+    get_my_circuit,
+)
 
 router = APIRouter()
 

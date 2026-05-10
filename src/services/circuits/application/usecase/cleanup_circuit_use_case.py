@@ -1,4 +1,5 @@
 import logging
+
 from src.services.circuits.domain.repository import ICircuitRepository
 
 logger = logging.getLogger(__name__)

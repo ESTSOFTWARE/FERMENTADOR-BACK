@@ -1,6 +1,8 @@
 import logging
-from src.core.rabbitmq.connection import rabbitmq
+
 import aio_pika
+
+from src.core.rabbitmq.connection import rabbitmq
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
-from pydantic import BaseModel
-from typing import Any, Literal
 from datetime import datetime
+from typing import Any, Literal
 
+from pydantic import BaseModel
 
 # ── Tipos de mensajes ─────────────────────────────────────────────────────────
 SensorMessageType    = Literal["sensor_data", "sensor_deactivated"]

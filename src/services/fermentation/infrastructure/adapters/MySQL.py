@@ -1,17 +1,31 @@
 import enum
 from datetime import datetime
+
 from sqlalchemy import (
-    Column, DateTime, Enum, Float, ForeignKey,
-    Integer, String, Text, text, update, select
+    Column,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    select,
+    text,
+    update,
 )
 from sqlalchemy.orm import relationship
+
 from src.core.database import Base
-from src.services.fermentation.domain.entities.fermentation_session import FermentationSession
 from src.services.fermentation.domain.entities.fermentation_report import FermentationReport
+from src.services.fermentation.domain.entities.fermentation_session import FermentationSession
 from src.services.fermentation.domain.entities.fermentation_status import FermentationStatus
 from src.services.fermentation.domain.entities.report_history import ReportHistory
 from src.services.fermentation.domain.repository import IFermentationRepository
-from src.services.fermentation.infrastructure.mappers.sensor_mappings import SENSOR_TABLE_MAP, SENSOR_REPORT_MAP
+from src.services.fermentation.infrastructure.mappers.sensor_mappings import (
+    SENSOR_REPORT_MAP,
+    SENSOR_TABLE_MAP,
+)
 
 
 class FermentationSessionModel(Base):

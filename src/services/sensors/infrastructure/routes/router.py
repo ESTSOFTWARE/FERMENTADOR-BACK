@@ -1,10 +1,14 @@
 from datetime import datetime
+
 from fastapi import APIRouter, Depends, Query
-from src.services.sensors.domain.dto.sensor_reading_schema import SensorReadingResponse
-from src.services.sensors.domain.dto.sensor_history_schema import SensorHistoryResponse
-from src.services.sensors.infrastructure.controllers.get_sensor_history_controller import get_history
-from src.services.sensors.infrastructure.controllers.get_latest_reading_controller import get_latest
+
 from src.core.dependencies import require_any_role
+from src.services.sensors.domain.dto.sensor_history_schema import SensorHistoryResponse
+from src.services.sensors.domain.dto.sensor_reading_schema import SensorReadingResponse
+from src.services.sensors.infrastructure.controllers.get_latest_reading_controller import get_latest
+from src.services.sensors.infrastructure.controllers.get_sensor_history_controller import (
+    get_history,
+)
 
 router = APIRouter()
 

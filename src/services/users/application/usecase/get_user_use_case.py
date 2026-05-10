@@ -1,6 +1,6 @@
+from src.core.exceptions import UserNotFoundException
 from src.services.users.domain.entities.user import User
 from src.services.users.domain.repository import IUserRepository
-from src.core.exceptions import UserNotFoundException
 
 
 class GetUserUseCase:

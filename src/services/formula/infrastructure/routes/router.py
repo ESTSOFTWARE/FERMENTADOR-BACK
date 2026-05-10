@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends
+
+from src.core.dependencies import get_current_user, require_admin_or_profesor
 from src.services.formula.domain.dto.formula_schema import FormulaResponse
 from src.services.formula.domain.dto.update_formula_schema import UpdateFormulaRequest
+from src.services.formula.infrastructure.controllers.activate_formula_controller import activate
 from src.services.formula.infrastructure.controllers.get_active_formula_controller import get_active
 from src.services.formula.infrastructure.controllers.get_all_formulas_controller import get_all
 from src.services.formula.infrastructure.controllers.get_formula_by_id_controller import get_by_id
 from src.services.formula.infrastructure.controllers.update_formula_controller import update
-from src.services.formula.infrastructure.controllers.activate_formula_controller import activate
-from src.core.dependencies import get_current_user, require_admin_or_profesor
 
 router = APIRouter()
 

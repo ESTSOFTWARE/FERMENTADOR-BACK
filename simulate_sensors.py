@@ -15,14 +15,14 @@ Uso:
     python simulate_sensors.py --activate ABC123 --email u@x.com --password 1234
 """
 
+import argparse
 import asyncio
 import json
 import random
-import argparse
-import aio_pika
-import httpx
 from datetime import datetime, timezone
 
+import aio_pika
+import httpx
 
 # ── Configuración ─────────────────────────────────────────────────────────────
 RABBITMQ_URL = "amqp://fabricio:Fabricio.2312@98.95.129.245:5672/"
@@ -158,7 +158,7 @@ async def simulate_continuous(
     channel    = await connection.channel()
     exchange   = await _get_exchange(channel)
 
-    print(f"  ✅ Conectado")
+    print("  ✅ Conectado")
     print(f"  Circuit ID : {circuit_id}")
     print(f"  Session ID : {session_id or 'Sin sesión'}")
     print(f"  Sensores   : {', '.join(sensors)}")

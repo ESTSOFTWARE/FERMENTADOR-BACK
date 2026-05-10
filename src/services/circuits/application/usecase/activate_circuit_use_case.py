@@ -1,6 +1,6 @@
+from src.core.exceptions import CircuitAlreadyActivatedException, CircuitNotFoundException
 from src.services.circuits.domain.entities.circuit import Circuit
 from src.services.circuits.domain.repository import ICircuitRepository
-from src.core.exceptions import CircuitNotFoundException, CircuitAlreadyActivatedException
 
 
 class ActivateCircuitUseCase:

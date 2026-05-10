@@ -1,6 +1,8 @@
 import json
 import logging
+
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+
 from src.core.rabbitmq.publisher import publisher
 
 logger = logging.getLogger(__name__)

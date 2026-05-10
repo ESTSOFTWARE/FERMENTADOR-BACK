@@ -21,11 +21,18 @@ class Circuit:
 
     def get_active_sensors(self) -> list[str]:
         sensors = []
-        if self.sensor_alcohol_on:      sensors.append("alcohol")
-        if self.sensor_density_on:      sensors.append("density")
-        if self.sensor_conductivity_on: sensors.append("conductivity")
-        if self.sensor_ph_on:           sensors.append("ph")
-        if self.sensor_temperature_on:  sensors.append("temperature")
-        if self.sensor_turbidity_on:    sensors.append("turbidity")
-        if self.sensor_rpm_on:          sensors.append("rpm")
+        if self.sensor_alcohol_on:
+            sensors.append("alcohol")
+        if self.sensor_density_on:
+            sensors.append("density")
+        if self.sensor_conductivity_on:
+            sensors.append("conductivity")
+        if self.sensor_ph_on:
+            sensors.append("ph")
+        if self.sensor_temperature_on:
+            sensors.append("temperature")
+        if self.sensor_turbidity_on:
+            sensors.append("turbidity")
+        if self.sensor_rpm_on:
+            sensors.append("rpm")
         return sensors

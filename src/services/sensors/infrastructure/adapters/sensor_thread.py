@@ -1,7 +1,8 @@
 import asyncio
 import logging
-from src.core.threads.base_sensor_thread import BaseSensorThread
+
 from src.core.rabbitmq.connection import rabbitmq
+from src.core.threads.base_sensor_thread import BaseSensorThread
 from src.core.websocket.schemas import ESP32SensorPayload
 
 logger = logging.getLogger(__name__)
@@ -23,9 +24,9 @@ class SensorThread(BaseSensorThread):
         self._queue_name = f"sensor.{sensor_type}.{circuit_id}"
 
     async def process_reading(self, payload: ESP32SensorPayload) -> None:
+        from src.core.database import AsyncSessionLocal
         from src.services.sensors.application.usecase.get_history_use_case import SaveReadingUseCase
         from src.services.sensors.infrastructure.adapters.MySQL import SensorRepository
-        from src.core.database import AsyncSessionLocal
 
         repo = SensorRepository(AsyncSessionLocal)
         uc   = SaveReadingUseCase(repo)

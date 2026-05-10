@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+
 from src.services.auth.domain.dto.user_schema import UserResponse
 
 

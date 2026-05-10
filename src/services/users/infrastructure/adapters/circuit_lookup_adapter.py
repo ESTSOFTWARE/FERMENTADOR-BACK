@@ -1,4 +1,5 @@
 from sqlalchemy import text
+
 from src.services.users.domain.circuit_lookup import ICircuitLookup
 from src.services.users.domain.entities.circuit_info import CircuitInfo
 

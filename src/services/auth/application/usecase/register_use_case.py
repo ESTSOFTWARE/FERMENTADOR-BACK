@@ -1,6 +1,6 @@
-from src.services.auth.domain.repository import IAuthRepository
-from src.core.security import hash_password
 from src.core.exceptions import EmailAlreadyExistsException
+from src.core.security import hash_password
+from src.services.auth.domain.repository import IAuthRepository
 
 ADMIN_ROLE_ID = 1
 

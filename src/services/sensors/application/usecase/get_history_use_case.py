@@ -1,7 +1,8 @@
 from datetime import datetime
+
+from src.core.exceptions import BadRequestException
 from src.services.sensors.domain.entities.sensor_reading import SensorReading
 from src.services.sensors.domain.repository import ISensorRepository
-from src.core.exceptions import BadRequestException
 
 VALID_SENSOR_TYPES = {
     "alcohol", "density", "conductivity",

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 from src.services.notifications.domain.entities.notification import Notification
 
 

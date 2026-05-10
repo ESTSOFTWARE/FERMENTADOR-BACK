@@ -1,9 +1,16 @@
 from fastapi import APIRouter, Depends, Query
-from src.services.notifications.domain.dto.notification_schema import NotificationResponse
-from src.services.notifications.infrastructure.controllers.get_notifications_controller import get_all
-from src.services.notifications.infrastructure.controllers.mark_one_as_read_controller import mark_one_as_read
-from src.services.notifications.infrastructure.controllers.mark_all_as_read_controller import mark_all_as_read
+
 from src.core.dependencies import get_current_user
+from src.services.notifications.domain.dto.notification_schema import NotificationResponse
+from src.services.notifications.infrastructure.controllers.get_notifications_controller import (
+    get_all,
+)
+from src.services.notifications.infrastructure.controllers.mark_all_as_read_controller import (
+    mark_all_as_read,
+)
+from src.services.notifications.infrastructure.controllers.mark_one_as_read_controller import (
+    mark_one_as_read,
+)
 
 router = APIRouter()
 
