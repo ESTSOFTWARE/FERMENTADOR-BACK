@@ -19,3 +19,11 @@ class CreateAnnouncementRequest(BaseModel):
     date:        str | None = None  # si no se envía, el backend usa el mes actual
     title:       str
     description: str
+
+
+class UpdateAnnouncementRequest(BaseModel):
+    label:       str | None = None
+    version:     str | None = None
+    date:        str | None = None
+    title:       str | None = None
+    description: str | None = None

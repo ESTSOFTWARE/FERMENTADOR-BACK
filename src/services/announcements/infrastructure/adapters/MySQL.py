@@ -1,4 +1,4 @@
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update
 
 from src.core.models.announcement_model import AnnouncementModel
 from src.services.announcements.domain.entities.announcement import Announcement
@@ -37,6 +37,38 @@ class AnnouncementRepository(IAnnouncementRepository):
             await session.commit()
             await session.refresh(model)
             return self._to_entity(model)
+
+    async def get_by_id(self, announcement_id: int) -> Announcement | None:
+        async with self._session_factory() as session:
+            result = await session.execute(
+                select(AnnouncementModel).where(AnnouncementModel.id == announcement_id)
+            )
+            model = result.scalar_one_or_none()
+            return self._to_entity(model) if model else None
+
+    async def update(
+        self,
+        announcement_id: int,
+        label:           str,
+        version:         str,
+        date:            str,
+        title:           str,
+        description:     str,
+    ) -> Announcement:
+        async with self._session_factory() as session:
+            await session.execute(
+                update(AnnouncementModel)
+                .where(AnnouncementModel.id == announcement_id)
+                .values(
+                    label=label,
+                    version=version,
+                    date=date,
+                    title=title,
+                    description=description,
+                )
+            )
+            await session.commit()
+        return await self.get_by_id(announcement_id)
 
     async def delete(self, announcement_id: int) -> None:
         async with self._session_factory() as session:
