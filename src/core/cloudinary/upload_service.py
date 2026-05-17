@@ -1,10 +1,10 @@
 import asyncio
 
 import cloudinary.uploader
+from fastapi import status
 
 import src.core.cloudinary.config  # noqa: F401 — inicializa credenciales
-from src.core.exceptions import BadRequestException, AppException
-from fastapi import status
+from src.core.exceptions import AppException, BadRequestException
 
 _ALLOWED_TYPES = {"image/jpeg", "image/jpg", "image/png", "image/webp", "image/svg+xml"}
 _MAX_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB
