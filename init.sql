@@ -231,10 +231,21 @@ CREATE TABLE notifications (
     CONSTRAINT fk_notif_session FOREIGN KEY (session_id) REFERENCES fermentation_sessions(id)  ON DELETE SET NULL
 );
 
+CREATE TABLE IF NOT EXISTS announcements (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    label       VARCHAR(50)  NOT NULL,
+    version     VARCHAR(20)  NOT NULL,
+    date        VARCHAR(20)  NOT NULL,
+    title       VARCHAR(150) NOT NULL,
+    description TEXT         NOT NULL,
+    created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Índices
 CREATE INDEX idx_users_circuit            ON users(circuit_id);
 CREATE INDEX idx_users_created_by         ON users(created_by);
 CREATE INDEX idx_users_oauth_google       ON users(oauth_google_id);
+CREATE INDEX idx_announcements_created_at ON announcements(created_at);
 CREATE INDEX idx_users_oauth_github       ON users(oauth_github_id);
 CREATE INDEX idx_alcohol_session_time      ON alcohol_sensor(session_id, timestamp);
 CREATE INDEX idx_density_session_time      ON density_sensor(session_id, timestamp);
