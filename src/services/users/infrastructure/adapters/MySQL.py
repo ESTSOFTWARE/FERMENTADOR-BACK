@@ -99,6 +99,15 @@ class UserRepository(IUserRepository):
             )
             await session.commit()
 
+    async def update_password(self, user_id: int, hashed_password: str) -> None:
+        async with self._session_factory() as session:
+            await session.execute(
+                update(UserModel)
+                .where(UserModel.id == user_id)
+                .values(password=hashed_password)
+            )
+            await session.commit()
+
     async def assign_circuit(self, user_id: int, circuit_id: int) -> None:
         """Asigna circuit_id al usuario. Se usa cuando el admin activa su circuito."""
         async with self._session_factory() as session:

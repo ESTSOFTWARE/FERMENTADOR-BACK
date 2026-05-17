@@ -5,11 +5,15 @@ from src.services.users.domain.dto.activate_circuit_schema import (
     ActivateCircuitRequest,
     ActivateCircuitResponse,
 )
+from src.services.users.domain.dto.change_password_schema import ChangePasswordRequest
 from src.services.users.domain.dto.create_user_schema import CreateUserRequest
 from src.services.users.domain.dto.update_user_schema import UpdateUserRequest
 from src.services.users.domain.dto.user_schema import UserResponse
 from src.services.users.infrastructure.controllers.activate_circuit_controller import (
     activate_my_circuit,
+)
+from src.services.users.infrastructure.controllers.change_password_controller import (
+    change_password,
 )
 from src.services.users.infrastructure.controllers.create_user_controller import create
 from src.services.users.infrastructure.controllers.delete_user_controller import delete
@@ -21,6 +25,17 @@ from src.services.users.infrastructure.controllers.upload_profile_image_controll
 )
 
 router = APIRouter()
+
+
+@router.post(
+    "/me/change-password",
+    summary="Cambiar contraseña del usuario autenticado",
+)
+async def change_password_route(
+    body: ChangePasswordRequest,
+    current_user: dict = Depends(require_any_role),
+):
+    return await change_password(user_id=current_user["user_id"], body=body)
 
 
 @router.post(

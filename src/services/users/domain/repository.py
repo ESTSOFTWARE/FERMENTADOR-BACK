@@ -38,3 +38,7 @@ class IUserRepository(ABC):
     async def assign_circuit(self, user_id: int, circuit_id: int) -> None:
         """Asigna un circuit_id al usuario."""
         ...
+
+    @abstractmethod
+    async def update_password(self, user_id: int, hashed_password: str) -> None:
+        ...
