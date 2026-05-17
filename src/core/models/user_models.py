@@ -20,7 +20,7 @@ class UserModel(Base):
     id            = Column(Integer, primary_key=True, autoincrement=True)
     name          = Column(String(100), nullable=False)
     last_name     = Column(String(100), nullable=False)
-    password      = Column(String(255), nullable=False)
+    password      = Column(String(255), nullable=True)
     email         = Column(String(150), nullable=False, unique=True)
     role_id       = Column(Integer, ForeignKey("roles.id"), nullable=False, default=3)
     circuit_id    = Column(Integer, ForeignKey("circuits.id"), nullable=True)

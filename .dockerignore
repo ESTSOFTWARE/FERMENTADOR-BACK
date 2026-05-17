@@ -1,14 +1,11 @@
-# ── Entorno virtual ───────────────────────────────────────────────────────────
 .venv/
 venv/
 env/
 
-# ── Variables de entorno ──────────────────────────────────────────────────────
 .env
 .env.*
 !.env.example
 
-# ── Python cache ──────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *.pyo
@@ -19,42 +16,36 @@ __pycache__/
 dist/
 build/
 
-# ── Tests ─────────────────────────────────────────────────────────────────────
 .pytest_cache/
 .coverage
 htmlcov/
 tests/
 
-# ── Linters / type checkers ───────────────────────────────────────────────────
 .mypy_cache/
 .ruff_cache/
 
-# ── IDEs ──────────────────────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# ── Git ───────────────────────────────────────────────────────────────────────
 .git/
 .gitignore
 
-# ── Docker ────────────────────────────────────────────────────────────────────
 docker-compose*.yml
 Dockerfile*
 .dockerignore
 
-# ── Documentación ────────────────────────────────────────────────────────────
 README.md
 README_API.docx
 docs/
 
-# ── Logs y base de datos local ────────────────────────────────────────────────
 logs/
 *.log
 *.sqlite3
 *.db
 
-# ── Sistema operativo ─────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+
+.claude

@@ -118,6 +118,7 @@ app.add_middleware(
 )
 
 # ── Routers ───────────────────────────────────────────────────────────────────
+from src.services.auth.infrastructure.routes.oauth_callbacks import router as oauth_callbacks_router
 from src.services.auth.infrastructure.routes.router import router as auth_router
 from src.services.circuits.infrastructure.routes.router import router as circuits_router
 from src.services.circuits.infrastructure.routes.websocket import router as circuits_ws_router
@@ -132,6 +133,7 @@ from src.services.sensors.infrastructure.routes.websocket import router as senso
 from src.services.users.infrastructure.routes.router import router as users_router
 
 app.include_router(auth_router,             prefix="/api/auth",          tags=["Auth"])
+app.include_router(oauth_callbacks_router,  prefix="/auth",              tags=["Auth OAuth"])
 app.include_router(users_router,            prefix="/api/users",         tags=["Users"])
 app.include_router(circuits_router,         prefix="/api/circuits",      tags=["Circuits"])
 app.include_router(circuits_ws_router,      prefix="",                   tags=["Circuits WS"])

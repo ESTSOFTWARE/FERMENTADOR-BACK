@@ -7,15 +7,9 @@ from src.services.auth.domain.dto.refresh_token_schema import (
     RefreshTokenRequest,
 )
 from src.services.auth.domain.dto.register_schema import RegisterRequest, RegisterResponse
-from src.services.auth.infrastructure.controllers.github_web_controller import (
-    github_callback,
-    github_redirect,
-)
+from src.services.auth.infrastructure.controllers.github_web_controller import github_redirect
 from src.services.auth.infrastructure.controllers.google_mobile_controller import google_mobile
-from src.services.auth.infrastructure.controllers.google_web_controller import (
-    google_callback,
-    google_redirect,
-)
+from src.services.auth.infrastructure.controllers.google_web_controller import google_redirect
 from src.services.auth.infrastructure.controllers.login_controller import login
 from src.services.auth.infrastructure.controllers.refresh_token_controller import refresh_token
 from src.services.auth.infrastructure.controllers.register_controller import register
@@ -48,19 +42,9 @@ async def google_redirect_route():
     return await google_redirect()
 
 
-@router.get("/callback/google", summary="Callback Google OAuth → redirige al frontend con tokens")
-async def google_callback_route(code: str):
-    return await google_callback(code)
-
-
 @router.get("/github", summary="Iniciar OAuth con GitHub (web admin)")
 async def github_redirect_route():
     return await github_redirect()
-
-
-@router.get("/callback/github", summary="Callback GitHub OAuth → redirige al frontend con tokens")
-async def github_callback_route(code: str):
-    return await github_callback(code)
 
 
 @router.post(

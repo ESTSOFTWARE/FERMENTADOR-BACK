@@ -10,7 +10,8 @@ CREATE TABLE roles (
 INSERT INTO roles (id, name, description) VALUES
 (1, 'admin',      'Acceso total, puede crear cualquier tipo de cuenta'),
 (2, 'profesor',   'Puede crear cuentas de estudiante y ver sus usuarios'),
-(3, 'estudiante', 'Solo puede ver gráficas, historial, cálculos y reportes');
+(3, 'estudiante', 'Solo puede ver gráficas, historial, cálculos y reportes'),
+(4, 'soporte',    'Soporte tecnico de nich-ká');
 
 CREATE TABLE circuits (
     id                      INT AUTO_INCREMENT PRIMARY KEY,
