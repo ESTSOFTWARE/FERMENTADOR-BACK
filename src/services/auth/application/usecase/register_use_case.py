@@ -12,10 +12,12 @@ class RegisterUseCase:
 
     async def execute(
         self,
-        name:      str,
-        last_name: str,
-        email:     str,
-        password:  str,
+        name:         str,
+        last_name:    str,
+        email:        str,
+        password:     str,
+        dial_code:    str | None = None,
+        phone_number: str | None = None,
     ) -> dict:
         existing = await self._repo.get_user_by_email(email)
         if existing:
@@ -32,6 +34,8 @@ class RegisterUseCase:
             password=hashed,
             role_id=ADMIN_ROLE_ID,
             circuit_id=None,
+            dial_code=dial_code,
+            phone_number=phone_number,
         )
 
         return {

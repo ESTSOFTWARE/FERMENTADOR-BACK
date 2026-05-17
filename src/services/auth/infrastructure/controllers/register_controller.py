@@ -11,4 +11,6 @@ async def register(body: RegisterRequest) -> RegisterResponse:
         last_name=body.last_name,
         email=body.email,
         password=body.password,
+        dial_code=body.dial_code,
+        phone_number=body.phone_number,
     )

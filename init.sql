@@ -41,6 +41,8 @@ CREATE TABLE users (
     circuit_id       INT           DEFAULT NULL,
     created_by       INT           DEFAULT NULL,
     created_at       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    dial_code        VARCHAR(10)   NULL DEFAULT NULL,
+    phone_number     VARCHAR(15)   NULL DEFAULT NULL,
     oauth_google_id  VARCHAR(100)  NULL DEFAULT NULL,
     oauth_github_id  VARCHAR(100)  NULL DEFAULT NULL,
     CONSTRAINT fk_user_role    FOREIGN KEY (role_id)    REFERENCES roles(id)    ON DELETE RESTRICT,

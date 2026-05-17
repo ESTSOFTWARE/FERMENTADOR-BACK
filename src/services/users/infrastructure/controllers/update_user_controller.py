@@ -15,5 +15,7 @@ async def update(user_id: int, body: UpdateUserRequest) -> UserResponse:
         password=body.password,
         role=body.role,
         profile_image=body.profile_image,
+        dial_code=body.dial_code,
+        phone_number=body.phone_number,
     )
     return UserResponse.from_entity(user)

@@ -14,12 +14,14 @@ class IAuthRepository(ABC):
     @abstractmethod
     async def create_user(
         self,
-        name:       str,
-        last_name:  str,
-        email:      str,
-        password:   str,
-        role_id:    int,
-        circuit_id: int | None = None,
+        name:         str,
+        last_name:    str,
+        email:        str,
+        password:     str,
+        role_id:      int,
+        circuit_id:   int | None = None,
+        dial_code:    str | None = None,
+        phone_number: str | None = None,
     ) -> User: ...
 
     @abstractmethod

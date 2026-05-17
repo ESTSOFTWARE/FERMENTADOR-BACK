@@ -15,5 +15,7 @@ class User:
     role:            Role | None = None
     created_by:      int | None = None
     profile_image:   str | None = None
+    dial_code:       str | None = None
+    phone_number:    str | None = None
     oauth_google_id: str | None = None
     oauth_github_id: str | None = None

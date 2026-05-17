@@ -37,12 +37,14 @@ class AuthRepository(IAuthRepository):
 
     async def create_user(
         self,
-        name:       str,
-        last_name:  str,
-        email:      str,
-        password:   str,
-        role_id:    int,
-        circuit_id: int | None = None,
+        name:         str,
+        last_name:    str,
+        email:        str,
+        password:     str,
+        role_id:      int,
+        circuit_id:   int | None = None,
+        dial_code:    str | None = None,
+        phone_number: str | None = None,
     ) -> User:
         async with self._session_factory() as session:
             model = UserModel(
@@ -52,6 +54,8 @@ class AuthRepository(IAuthRepository):
                 password=password,
                 role_id=role_id,
                 circuit_id=circuit_id,
+                dial_code=dial_code,
+                phone_number=phone_number,
             )
             session.add(model)
             await session.commit()
@@ -166,6 +170,8 @@ class AuthRepository(IAuthRepository):
             role=role,
             created_by=model.created_by,
             profile_image=model.profile_image,
+            dial_code=model.dial_code,
+            phone_number=model.phone_number,
             oauth_google_id=model.oauth_google_id,
             oauth_github_id=model.oauth_github_id,
         )

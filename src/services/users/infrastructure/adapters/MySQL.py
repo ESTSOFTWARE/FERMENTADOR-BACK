@@ -60,6 +60,8 @@ class UserRepository(IUserRepository):
                 role_id=user.role_id,
                 circuit_id=user.circuit_id,
                 created_by=user.created_by,
+                dial_code=user.dial_code,
+                phone_number=user.phone_number,
             )
             session.add(model)
             await session.commit()
@@ -83,6 +85,8 @@ class UserRepository(IUserRepository):
                     password=user.password,
                     role_id=user.role_id,
                     profile_image=user.profile_image,
+                    dial_code=user.dial_code,
+                    phone_number=user.phone_number,
                 )
             )
             await session.commit()
@@ -118,4 +122,6 @@ class UserRepository(IUserRepository):
             created_by=model.created_by,
             created_at=model.created_at,
             profile_image=model.profile_image,
+            dial_code=model.dial_code,
+            phone_number=model.phone_number,
         )

@@ -37,6 +37,8 @@ class CreateUserUseCase:
         created_by:      int,
         creator_role:    str,
         activation_code: str,
+        dial_code:       str | None = None,
+        phone_number:    str | None = None,
     ) -> User:
         # ── Validar permisos de rol ───────────────────────────────────────────
         # El profesor solo puede crear estudiantes
@@ -71,6 +73,8 @@ class CreateUserUseCase:
             role_id=ROLE_IDS.get(role, 3),
             circuit_id=circuit.id,
             created_by=created_by,
+            dial_code=dial_code,
+            phone_number=phone_number,
         )
 
         # Si el circuito no estaba activo todavía, activarlo ahora

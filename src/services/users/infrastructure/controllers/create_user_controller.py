@@ -18,5 +18,7 @@ async def create(body: CreateUserRequest, created_by: int, creator_role: str) ->
         created_by=created_by,
         creator_role=creator_role,
         activation_code=body.activation_code,
+        dial_code=body.dial_code,
+        phone_number=body.phone_number,
     )
     return UserResponse.from_entity(user)
