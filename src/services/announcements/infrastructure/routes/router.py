@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends
 
-from src.core.dependencies import require_admin, require_any_role
+from src.core.dependencies import require_soporte, require_any_role
 from src.services.announcements.domain.dto.announcement_schema import (
     AnnouncementResponse,
     CreateAnnouncementRequest,
+    PinAnnouncementRequest,
     UpdateAnnouncementRequest,
 )
 from src.services.announcements.infrastructure.controllers.create_announcement_controller import (
@@ -17,6 +18,12 @@ from src.services.announcements.infrastructure.controllers.get_announcement_by_i
 )
 from src.services.announcements.infrastructure.controllers.get_announcements_controller import (
     get_announcements,
+)
+from src.services.announcements.infrastructure.controllers.pin_announcement_controller import (
+    pin_announcement,
+)
+from src.services.announcements.infrastructure.controllers.unpin_announcement_controller import (
+    unpin_announcement,
 )
 from src.services.announcements.infrastructure.controllers.update_announcement_controller import (
     update_announcement,
@@ -54,7 +61,7 @@ async def get_announcement_by_id_route(
 )
 async def create_announcement_route(
     body: CreateAnnouncementRequest,
-    _: dict = Depends(require_admin),
+    _: dict = Depends(require_soporte),
 ):
     return await create_announcement(body)
 
@@ -67,7 +74,7 @@ async def create_announcement_route(
 async def update_announcement_route(
     announcement_id: int,
     body: UpdateAnnouncementRequest,
-    _: dict = Depends(require_admin),
+    _: dict = Depends(require_soporte),
 ):
     return await update_announcement(announcement_id, body)
 
@@ -79,6 +86,31 @@ async def update_announcement_route(
 )
 async def delete_announcement_route(
     announcement_id: int,
-    _: dict = Depends(require_admin),
+    _: dict = Depends(require_soporte),
 ):
     await delete_announcement(announcement_id)
+
+
+@router.post(
+    "/{announcement_id}/pin",
+    response_model=AnnouncementResponse,
+    summary="Fijar anuncio (solo soporte)",
+)
+async def pin_announcement_route(
+    announcement_id: int,
+    body: PinAnnouncementRequest,
+    _: dict = Depends(require_soporte),
+):
+    return await pin_announcement(announcement_id, body.duration_days)
+
+
+@router.delete(
+    "/{announcement_id}/pin",
+    response_model=AnnouncementResponse,
+    summary="Desfijar anuncio (solo soporte)",
+)
+async def unpin_announcement_route(
+    announcement_id: int,
+    _: dict = Depends(require_soporte),
+):
+    return await unpin_announcement(announcement_id)

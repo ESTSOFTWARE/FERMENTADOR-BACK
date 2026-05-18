@@ -4,13 +4,15 @@ from pydantic import BaseModel
 
 
 class AnnouncementResponse(BaseModel):
-    id:          int
-    label:       str
-    version:     str
-    date:        str
-    title:       str
-    description: str
-    created_at:  datetime | None = None
+    id:           int
+    label:        str
+    version:      str
+    date:         str
+    title:        str
+    description:  str
+    created_at:   datetime | None = None
+    is_pinned:    bool            = False
+    pinned_until: datetime | None = None
 
 
 class CreateAnnouncementRequest(BaseModel):
@@ -27,3 +29,7 @@ class UpdateAnnouncementRequest(BaseModel):
     date:        str | None = None
     title:       str | None = None
     description: str | None = None
+
+
+class PinAnnouncementRequest(BaseModel):
+    duration_days: int | None = None  # None = pin indefinitely
