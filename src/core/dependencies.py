@@ -58,10 +58,19 @@ async def require_admin_or_profesor(
     return current_user
 
 
+async def require_soporte(
+    current_user: dict = Depends(get_current_user),
+) -> dict:
+    """Solo soporte puede acceder."""
+    if current_user["role"] != "soporte":
+        raise ForbiddenException()
+    return current_user
+
+
 async def require_any_role(
     current_user: dict = Depends(get_current_user),
 ) -> dict:
     """Cualquier usuario autenticado puede acceder."""
-    if current_user["role"] not in ("admin", "profesor", "estudiante"):
+    if current_user["role"] not in ("admin", "profesor", "estudiante", "soporte"):
         raise ForbiddenException()
     return current_user

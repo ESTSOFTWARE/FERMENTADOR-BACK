@@ -34,3 +34,9 @@ class IAnnouncementRepository(ABC):
 
     @abstractmethod
     async def delete(self, announcement_id: int) -> None: ...
+
+    @abstractmethod
+    async def pin(self, announcement_id: int, duration_days: int | None) -> Announcement: ...
+
+    @abstractmethod
+    async def unpin(self, announcement_id: int) -> Announcement: ...

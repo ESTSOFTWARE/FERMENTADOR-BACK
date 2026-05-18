@@ -1,4 +1,6 @@
-from sqlalchemy import delete, select, update
+from datetime import datetime, timedelta
+
+from sqlalchemy import case, delete, select, update
 
 from src.core.models.announcement_model import AnnouncementModel
 from src.services.announcements.domain.entities.announcement import Announcement
@@ -12,8 +14,20 @@ class AnnouncementRepository(IAnnouncementRepository):
 
     async def get_all(self) -> list[Announcement]:
         async with self._session_factory() as session:
+            now = datetime.utcnow()
+            pinned_first = case(
+                (
+                    (AnnouncementModel.is_pinned == True) &
+                    (
+                        (AnnouncementModel.pinned_until == None) |
+                        (AnnouncementModel.pinned_until > now)
+                    ),
+                    0,
+                ),
+                else_=1,
+            )
             result = await session.execute(
-                select(AnnouncementModel).order_by(AnnouncementModel.created_at.desc())
+                select(AnnouncementModel).order_by(pinned_first, AnnouncementModel.created_at.desc())
             )
             return [self._to_entity(m) for m in result.scalars().all()]
 
@@ -77,6 +91,31 @@ class AnnouncementRepository(IAnnouncementRepository):
             )
             await session.commit()
 
+    async def pin(self, announcement_id: int, duration_days: int | None) -> Announcement:
+        pinned_until = (
+            datetime.utcnow() + timedelta(days=duration_days)
+            if duration_days is not None
+            else None
+        )
+        async with self._session_factory() as session:
+            await session.execute(
+                update(AnnouncementModel)
+                .where(AnnouncementModel.id == announcement_id)
+                .values(is_pinned=True, pinned_until=pinned_until)
+            )
+            await session.commit()
+        return await self.get_by_id(announcement_id)
+
+    async def unpin(self, announcement_id: int) -> Announcement:
+        async with self._session_factory() as session:
+            await session.execute(
+                update(AnnouncementModel)
+                .where(AnnouncementModel.id == announcement_id)
+                .values(is_pinned=False, pinned_until=None)
+            )
+            await session.commit()
+        return await self.get_by_id(announcement_id)
+
     def _to_entity(self, model: AnnouncementModel) -> Announcement:
         return Announcement(
             id=model.id,
@@ -86,4 +125,6 @@ class AnnouncementRepository(IAnnouncementRepository):
             title=model.title,
             description=model.description,
             created_at=model.created_at,
+            is_pinned=model.is_pinned or False,
+            pinned_until=model.pinned_until,
         )

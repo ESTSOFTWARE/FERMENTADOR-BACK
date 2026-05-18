@@ -232,13 +232,15 @@ CREATE TABLE notifications (
 );
 
 CREATE TABLE IF NOT EXISTS announcements (
-    id          INT AUTO_INCREMENT PRIMARY KEY,
-    label       VARCHAR(50)  NOT NULL,
-    version     VARCHAR(20)  NOT NULL,
-    date        VARCHAR(20)  NOT NULL,
-    title       VARCHAR(150) NOT NULL,
-    description TEXT         NOT NULL,
-    created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    label        VARCHAR(50)  NOT NULL,
+    version      VARCHAR(20)  NOT NULL,
+    date         VARCHAR(20)  NOT NULL,
+    title        VARCHAR(150) NOT NULL,
+    description  TEXT         NOT NULL,
+    created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_pinned    BOOLEAN      NOT NULL DEFAULT FALSE,
+    pinned_until DATETIME     NULL
 );
 
 -- Índices
