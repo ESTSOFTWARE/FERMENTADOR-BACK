@@ -42,3 +42,7 @@ class IUserRepository(ABC):
     @abstractmethod
     async def update_password(self, user_id: int, hashed_password: str) -> None:
         ...
+
+    @abstractmethod
+    async def mark_tour_completed(self, user_id: int) -> None:
+        ...
