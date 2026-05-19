@@ -118,6 +118,15 @@ class UserRepository(IUserRepository):
             )
             await session.commit()
 
+    async def mark_tour_completed(self, user_id: int) -> None:
+        async with self._session_factory() as session:
+            await session.execute(
+                update(UserModel)
+                .where(UserModel.id == user_id)
+                .values(tour_completed=True)
+            )
+            await session.commit()
+
     def _to_entity(self, model: UserModel) -> User:
         return User(
             id=model.id,
@@ -133,4 +142,5 @@ class UserRepository(IUserRepository):
             profile_image=model.profile_image,
             dial_code=model.dial_code,
             phone_number=model.phone_number,
+            tour_completed=model.tour_completed or False,
         )

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, text
 from sqlalchemy.orm import relationship
 
 from src.core.database import Base
@@ -35,7 +35,8 @@ class UserModel(Base):
     dial_code        = Column(String(10),  nullable=True)
     phone_number     = Column(String(15),  nullable=True)
     oauth_google_id  = Column(String(100), nullable=True)
-    oauth_github_id = Column(String(100), nullable=True)
+    oauth_github_id  = Column(String(100), nullable=True)
+    tour_completed   = Column(Boolean, nullable=False, server_default=text("0"), default=False)
 
     role    = relationship("RoleModel", back_populates="users")
     creator = relationship("UserModel", remote_side=[id])
