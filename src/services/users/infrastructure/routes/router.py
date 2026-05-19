@@ -19,10 +19,10 @@ from src.services.users.infrastructure.controllers.create_user_controller import
 from src.services.users.infrastructure.controllers.delete_user_controller import delete
 from src.services.users.infrastructure.controllers.get_all_users_controller import get_all
 from src.services.users.infrastructure.controllers.get_user_by_id_controller import get_by_id
-from src.services.users.infrastructure.controllers.update_user_controller import update
 from src.services.users.infrastructure.controllers.mark_tour_completed_controller import (
     mark_tour_completed,
 )
+from src.services.users.infrastructure.controllers.update_user_controller import update
 from src.services.users.infrastructure.controllers.upload_profile_image_controller import (
     upload_profile_image_controller,
 )
