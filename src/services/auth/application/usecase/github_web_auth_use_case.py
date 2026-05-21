@@ -42,6 +42,10 @@ class GitHubWebAuthUseCase:
                     github_id=github_id,
                 )
 
+        if not user.is_active:
+            await self._repo.reactivate_user(user.id)
+            user = await self._repo.get_user_by_id(user.id)
+
         role_name = user.role.name if user.role else "admin"
         jwt_data  = {"sub": str(user.id), "role": role_name, "circuit_id": user.circuit_id}
 

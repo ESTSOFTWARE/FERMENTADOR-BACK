@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -9,6 +10,26 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 logger = logging.getLogger(__name__)
+
+_CLEANUP_INTERVAL_SECONDS = 24 * 60 * 60  # cada 24 horas
+
+
+async def _run_user_cleanup_task() -> None:
+    await asyncio.sleep(5)  # breve espera para que la BD esté lista
+    while True:
+        try:
+            from src.core.database import AsyncSessionLocal
+            from src.services.users.application.usecase.deactivate_expired_users_use_case import (
+                DeactivateExpiredUsersUseCase,
+            )
+            from src.services.users.infrastructure.adapters.MySQL import UserRepository
+
+            count = await DeactivateExpiredUsersUseCase(UserRepository(AsyncSessionLocal)).execute()
+            if count:
+                logger.info(f"[Cleanup] {count} cuenta(s) desactivada(s) por no vincular circuito")
+        except Exception as e:
+            logger.error(f"[Cleanup] Error en tarea de desactivación: {e}")
+        await asyncio.sleep(_CLEANUP_INTERVAL_SECONDS)
 
 
 @asynccontextmanager
@@ -78,8 +99,18 @@ async def lifespan(app: FastAPI):
             "Los datos de sensores en tiempo real estarán deshabilitados."
         )
 
+    # 3. Tarea periódica de desactivación de cuentas sin circuito
+    cleanup_task = asyncio.create_task(_run_user_cleanup_task())
+    logger.info("Tarea de limpieza de cuentas iniciada")
+
     logger.info("Aplicación lista")
     yield
+
+    cleanup_task.cancel()
+    try:
+        await cleanup_task
+    except asyncio.CancelledError:
+        pass
 
     # ── Shutdown ──────────────────────────────────────────────────────────────
     logger.info("Cerrando aplicación...")

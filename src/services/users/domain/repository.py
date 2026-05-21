@@ -42,3 +42,17 @@ class IUserRepository(ABC):
     @abstractmethod
     async def update_password(self, user_id: int, hashed_password: str) -> None:
         ...
+
+    @abstractmethod
+    async def mark_tour_completed(self, user_id: int) -> None:
+        ...
+
+    @abstractmethod
+    async def deactivate_expired(self, days: int) -> int:
+        """Desactiva cuentas con circuit_id NULL y más de `days` días de antigüedad. Retorna el total desactivado."""
+        ...
+
+    @abstractmethod
+    async def reactivate(self, user_id: int) -> None:
+        """Reactiva una cuenta desactivada."""
+        ...

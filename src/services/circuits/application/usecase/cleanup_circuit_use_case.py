@@ -14,19 +14,9 @@ class CleanupExpiredCircuitsUseCase:
 
     async def execute(self) -> int:
         """
-        Elimina todos los circuitos que:
-        - No han sido activados (is_active = False, user_id = NULL)
-        - Fueron creados hace más de EXPIRATION_DAYS días
-
-        Retorna el número de registros eliminados.
+        Deshabilitado: los circuitos representan dispositivos físicos y no deben
+        eliminarse automáticamente. La limpieza ahora opera sobre cuentas de usuario
+        (DeactivateExpiredUsersUseCase).
         """
-        deleted = await self._repo.delete_expired_unactivated(
-            expiration_days=EXPIRATION_DAYS
-        )
-        if deleted:
-            logger.info(
-                f"[CleanupCircuits] {deleted} circuito(s) expirado(s) eliminado(s)"
-            )
-        else:
-            logger.debug("[CleanupCircuits] No hay circuitos expirados para eliminar")
-        return deleted
+        logger.debug("[CleanupCircuits] Deshabilitado — los circuitos son dispositivos físicos")
+        return 0

@@ -13,9 +13,10 @@ class UserResponse(BaseModel):
     circuit_id:    int | None
     created_by:    int | None
     created_at:    datetime | None
-    profile_image: str | None = None
-    dial_code:     str | None = None
-    phone_number:  str | None = None
+    profile_image:  str | None = None
+    dial_code:      str | None = None
+    phone_number:   str | None = None
+    tour_completed: bool = False
 
     @classmethod
     def from_entity(cls, user) -> "UserResponse":
@@ -32,4 +33,5 @@ class UserResponse(BaseModel):
             profile_image=user.profile_image,
             dial_code=user.dial_code,
             phone_number=user.phone_number,
+            tour_completed=user.tour_completed,
         )

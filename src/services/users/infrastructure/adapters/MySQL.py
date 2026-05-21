@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 from sqlalchemy import delete, select, update
 from sqlalchemy.orm import selectinload
 
@@ -118,6 +120,39 @@ class UserRepository(IUserRepository):
             )
             await session.commit()
 
+    async def mark_tour_completed(self, user_id: int) -> None:
+        async with self._session_factory() as session:
+            await session.execute(
+                update(UserModel)
+                .where(UserModel.id == user_id)
+                .values(tour_completed=True)
+            )
+            await session.commit()
+
+    async def deactivate_expired(self, days: int) -> int:
+        threshold = datetime.now(timezone.utc) - timedelta(days=days)
+        async with self._session_factory() as session:
+            result = await session.execute(
+                update(UserModel)
+                .where(
+                    UserModel.circuit_id == None,  # noqa: E711
+                    UserModel.is_active == True,   # noqa: E712
+                    UserModel.created_at <= threshold,
+                )
+                .values(is_active=False)
+            )
+            await session.commit()
+            return result.rowcount
+
+    async def reactivate(self, user_id: int) -> None:
+        async with self._session_factory() as session:
+            await session.execute(
+                update(UserModel)
+                .where(UserModel.id == user_id)
+                .values(is_active=True)
+            )
+            await session.commit()
+
     def _to_entity(self, model: UserModel) -> User:
         return User(
             id=model.id,
@@ -135,4 +170,6 @@ class UserRepository(IUserRepository):
             phone_number=model.phone_number,
             oauth_google_id=model.oauth_google_id,
             oauth_github_id=model.oauth_github_id,
+            tour_completed=model.tour_completed or False,
+            is_active=model.is_active if model.is_active is not None else True,
         )

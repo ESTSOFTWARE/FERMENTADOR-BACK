@@ -45,6 +45,8 @@ CREATE TABLE users (
     phone_number     VARCHAR(15)   NULL DEFAULT NULL,
     oauth_google_id  VARCHAR(100)  NULL DEFAULT NULL,
     oauth_github_id  VARCHAR(100)  NULL DEFAULT NULL,
+    tour_completed   TINYINT(1)    NOT NULL DEFAULT 0,
+    is_active        TINYINT(1)    NOT NULL DEFAULT 1,
     CONSTRAINT fk_user_role    FOREIGN KEY (role_id)    REFERENCES roles(id)    ON DELETE RESTRICT,
     CONSTRAINT fk_user_circuit FOREIGN KEY (circuit_id) REFERENCES circuits(id) ON DELETE SET NULL,
     CONSTRAINT fk_user_creator FOREIGN KEY (created_by) REFERENCES users(id)   ON DELETE SET NULL
