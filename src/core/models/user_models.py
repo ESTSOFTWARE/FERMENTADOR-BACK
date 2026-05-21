@@ -37,6 +37,7 @@ class UserModel(Base):
     oauth_google_id  = Column(String(100), nullable=True)
     oauth_github_id  = Column(String(100), nullable=True)
     tour_completed   = Column(Boolean, nullable=False, server_default=text("0"), default=False)
+    is_active        = Column(Boolean, nullable=False, server_default=text("1"), default=True)
 
     role    = relationship("RoleModel", back_populates="users")
     creator = relationship("UserModel", remote_side=[id])

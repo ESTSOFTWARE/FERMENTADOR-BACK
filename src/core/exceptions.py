@@ -57,6 +57,13 @@ class UserNotFoundException(AppException):
             detail="Usuario no encontrado"
         )
 
+class AccountDeactivatedException(AppException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tu cuenta está desactivada. Inicia sesión con OAuth para reactivarla."
+        )
+
 class UserAlreadyExistsException(AppException):
     def __init__(self):
         super().__init__(

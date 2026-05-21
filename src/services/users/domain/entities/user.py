@@ -18,3 +18,4 @@ class User:
     phone_number:   str | None = None
     profile_image:  str | None = None
     tour_completed: bool = False
+    is_active:      bool = True
