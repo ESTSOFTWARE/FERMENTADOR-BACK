@@ -4,7 +4,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_db
-from src.core.exceptions import AccountDeactivatedException, ForbiddenException, UnauthorizedException
+from src.core.exceptions import (
+    AccountDeactivatedException,
+    ForbiddenException,
+    UnauthorizedException,
+)
 from src.core.security import decode_token
 
 # ── Bearer token ──────────────────────────────────────────────────────────────
