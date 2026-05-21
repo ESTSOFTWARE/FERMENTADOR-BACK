@@ -162,6 +162,7 @@ from src.services.notifications.infrastructure.routes.websocket import (
 )
 from src.services.sensors.infrastructure.routes.router import router as sensors_router
 from src.services.sensors.infrastructure.routes.websocket import router as sensors_ws_router
+from src.services.support.infrastructure.routes.router import router as support_router
 from src.services.users.infrastructure.routes.router import router as users_router
 
 app.include_router(auth_router,             prefix="/api/auth",          tags=["Auth"])
@@ -176,6 +177,7 @@ app.include_router(notifications_router,    prefix="/api/notifications", tags=["
 app.include_router(notifications_ws_router, prefix="",                   tags=["Notifications WS"])
 app.include_router(formula_router,          prefix="/api/formula",       tags=["Formula"])
 app.include_router(announcements_router,    prefix="/api/announcements", tags=["Announcements"])
+app.include_router(support_router,          prefix="/support",           tags=["Support"])
 
 
 # ── Health ────────────────────────────────────────────────────────────────────
