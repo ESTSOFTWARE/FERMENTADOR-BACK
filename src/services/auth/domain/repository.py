@@ -45,3 +45,6 @@ class IAuthRepository(ABC):
 
     @abstractmethod
     async def link_github(self, user_id: int, github_id: str) -> None: ...
+
+    @abstractmethod
+    async def reactivate_user(self, user_id: int) -> None: ...

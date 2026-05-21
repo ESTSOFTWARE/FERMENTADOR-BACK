@@ -151,6 +151,15 @@ class AuthRepository(IAuthRepository):
             )
             await session.commit()
 
+    async def reactivate_user(self, user_id: int) -> None:
+        async with self._session_factory() as session:
+            await session.execute(
+                update(UserModel)
+                .where(UserModel.id == user_id)
+                .values(is_active=True)
+            )
+            await session.commit()
+
     def _to_entity(self, model: UserModel) -> User:
         role = None
         if model.role:
@@ -174,4 +183,5 @@ class AuthRepository(IAuthRepository):
             phone_number=model.phone_number,
             oauth_google_id=model.oauth_google_id,
             oauth_github_id=model.oauth_github_id,
+            is_active=model.is_active if model.is_active is not None else True,
         )

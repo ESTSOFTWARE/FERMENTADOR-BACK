@@ -1,9 +1,10 @@
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_db
-from src.core.exceptions import ForbiddenException, UnauthorizedException
+from src.core.exceptions import AccountDeactivatedException, ForbiddenException, UnauthorizedException
 from src.core.security import decode_token
 
 # ── Bearer token ──────────────────────────────────────────────────────────────
@@ -18,9 +19,11 @@ async def get_session(db: AsyncSession = Depends(get_db)) -> AsyncSession:
 # ── Usuario autenticado ───────────────────────────────────────────────────────
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
     Extrae y valida el token JWT del header Authorization.
+    Verifica que la cuenta esté activa en BD.
     Retorna el payload completo: { sub, role, circuit_id, exp, iat }
     """
     token = credentials.credentials
@@ -31,6 +34,14 @@ async def get_current_user(
 
     if not user_id or not role:
         raise UnauthorizedException()
+
+    from src.core.models.user_models import UserModel
+    result = await db.execute(
+        select(UserModel.is_active).where(UserModel.id == int(user_id))
+    )
+    is_active = result.scalar_one_or_none()
+    if is_active is False:
+        raise AccountDeactivatedException()
 
     return {
         "user_id":    int(user_id),
