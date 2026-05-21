@@ -133,4 +133,6 @@ class UserRepository(IUserRepository):
             profile_image=model.profile_image,
             dial_code=model.dial_code,
             phone_number=model.phone_number,
+            oauth_google_id=model.oauth_google_id,
+            oauth_github_id=model.oauth_github_id,
         )
