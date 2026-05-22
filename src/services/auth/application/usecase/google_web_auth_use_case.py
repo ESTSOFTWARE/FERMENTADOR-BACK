@@ -1,3 +1,4 @@
+from src.core.email.email_service import send_welcome_email
 from src.core.exceptions import InvalidCredentialsException
 from src.core.security import create_access_token, create_refresh_token
 from src.services.auth.domain.repository import IAuthRepository
@@ -25,6 +26,7 @@ class GoogleWebAuthUseCase:
         if not google_id or not email:
             raise InvalidCredentialsException()
 
+        is_new = False
         user = await self._repo.get_user_by_google_id(google_id)
         if not user:
             user = await self._repo.get_user_by_email(email)
@@ -38,10 +40,14 @@ class GoogleWebAuthUseCase:
                     email=email,
                     google_id=google_id,
                 )
+                is_new = True
 
         if not user.is_active:
             await self._repo.reactivate_user(user.id)
             user = await self._repo.get_user_by_id(user.id)
+
+        if is_new:
+            await send_welcome_email(to_email=user.email, name=user.name)
 
         role_name  = user.role.name if user.role else "admin"
         jwt_data   = {"sub": str(user.id), "role": role_name, "circuit_id": user.circuit_id}

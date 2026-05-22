@@ -60,6 +60,11 @@ class Settings(BaseSettings):
     CLOUDINARY_API_KEY:    str = ""
     CLOUDINARY_API_SECRET: str = ""
 
+    # ── Resend (email) ────────────────────────────────
+    RESEND_API_KEY:  str = ""
+    MAIL_FROM:       str = ""
+    MAIL_FROM_NAME:  str = "Nich-ká"
+
     # ── Sensores ──────────────────────────────────
     SENSOR_TYPES: list[str] = [
         "alcohol",

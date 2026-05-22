@@ -45,3 +45,4 @@ yarl==1.23.0
 email-validator==2.0.0
 httpx==0.27.0
 cloudinary==1.41.0
+resend==2.30.1
