@@ -150,6 +150,7 @@ app.add_middleware(
 
 # ── Routers ───────────────────────────────────────────────────────────────────
 from src.services.announcements.infrastructure.routes.router import router as announcements_router
+from src.services.groups.infrastructure.routes.router import router as groups_router
 from src.services.auth.infrastructure.routes.oauth_callbacks import router as oauth_callbacks_router
 from src.services.auth.infrastructure.routes.router import router as auth_router
 from src.services.circuits.infrastructure.routes.router import router as circuits_router
@@ -177,6 +178,7 @@ app.include_router(notifications_router,    prefix="/api/notifications", tags=["
 app.include_router(notifications_ws_router, prefix="",                   tags=["Notifications WS"])
 app.include_router(formula_router,          prefix="/api/formula",       tags=["Formula"])
 app.include_router(announcements_router,    prefix="/api/announcements", tags=["Announcements"])
+app.include_router(groups_router,           prefix="/api/groups",        tags=["Groups"])
 app.include_router(support_router,          prefix="/support",           tags=["Support"])
 
 

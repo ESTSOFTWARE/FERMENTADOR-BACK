@@ -245,6 +245,25 @@ CREATE TABLE IF NOT EXISTS announcements (
     pinned_until DATETIME     NULL
 );
 
+CREATE TABLE classrooms (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    name         VARCHAR(100) NOT NULL,
+    professor_id INT          NOT NULL,
+    code         VARCHAR(20)  NOT NULL UNIQUE,
+    created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_classroom_professor FOREIGN KEY (professor_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE group_members (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    group_id   INT      NOT NULL,
+    student_id INT      NOT NULL,
+    joined_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_student_one_group  UNIQUE (student_id),
+    CONSTRAINT fk_member_group   FOREIGN KEY (group_id)   REFERENCES classrooms(id) ON DELETE CASCADE,
+    CONSTRAINT fk_member_student FOREIGN KEY (student_id) REFERENCES users(id)       ON DELETE CASCADE
+);
+
 -- Índices
 CREATE INDEX idx_users_circuit            ON users(circuit_id);
 CREATE INDEX idx_users_created_by         ON users(created_by);
