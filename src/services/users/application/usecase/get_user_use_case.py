@@ -8,6 +8,9 @@ class GetUserUseCase:
     def __init__(self, repository: IUserRepository):
         self._repo = repository
 
+    async def get_all_students(self) -> list[User]:
+        return await self._repo.get_all_students()
+
     async def get_all(self, requester_id: int, requester_role: str) -> list[User]:
         """
         - admin: ve todos los usuarios que él creó (created_by = requester_id)
