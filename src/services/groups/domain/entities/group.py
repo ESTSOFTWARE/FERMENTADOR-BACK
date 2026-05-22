@@ -4,12 +4,13 @@ from datetime import datetime
 
 @dataclass
 class GroupMember:
-    id:         int
-    student_id: int
-    name:       str
-    last_name:  str
-    email:      str
-    joined_at:  datetime | None = None
+    id:             int
+    student_id:     int
+    name:           str
+    last_name:      str
+    email:          str
+    joined_at:      datetime | None = None
+    oauth_provider: str = 'email'
 
 
 @dataclass

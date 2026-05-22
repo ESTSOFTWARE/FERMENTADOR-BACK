@@ -80,6 +80,14 @@ class GroupRepository(IGroupRepository):
             model = result.scalar_one_or_none()
             return self._to_entity(model) if model else None
 
+    @staticmethod
+    def _derive_provider(student) -> str:
+        if student.oauth_google_id:
+            return 'google'
+        if student.oauth_github_id:
+            return 'github'
+        return 'email'
+
     def _to_entity(self, model: GroupModel) -> Group:
         return Group(
             id=model.id,
@@ -95,6 +103,7 @@ class GroupRepository(IGroupRepository):
                     last_name=m.student.last_name,
                     email=m.student.email,
                     joined_at=m.joined_at,
+                    oauth_provider=self._derive_provider(m.student),
                 )
                 for m in model.members
             ],

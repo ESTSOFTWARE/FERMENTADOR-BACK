@@ -17,7 +17,7 @@ from src.services.users.infrastructure.controllers.change_password_controller im
 )
 from src.services.users.infrastructure.controllers.create_user_controller import create
 from src.services.users.infrastructure.controllers.delete_user_controller import delete
-from src.services.users.infrastructure.controllers.get_all_users_controller import get_all
+from src.services.users.infrastructure.controllers.get_all_users_controller import get_all, get_all_students
 from src.services.users.infrastructure.controllers.get_user_by_id_controller import get_by_id
 from src.services.users.infrastructure.controllers.mark_tour_completed_controller import (
     mark_tour_completed,
@@ -72,6 +72,11 @@ async def mark_tour_route(
     current_user: dict = Depends(require_any_role),
 ):
     return await mark_tour_completed(user_id=current_user["user_id"])
+
+
+@router.get("/students", response_model=list[UserResponse], summary="Listar todos los alumnos (para agregar a grupos)")
+async def get_all_students_route(current_user: dict = Depends(require_admin_or_profesor)):
+    return await get_all_students()
 
 
 @router.get("/", response_model=list[UserResponse], summary="Ver usuarios que yo creé")

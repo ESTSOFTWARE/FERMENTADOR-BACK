@@ -23,6 +23,11 @@ class IUserRepository(ABC):
         ...
 
     @abstractmethod
+    async def get_all_students(self) -> list[User]:
+        """Retorna todos los usuarios con rol estudiante."""
+        ...
+
+    @abstractmethod
     async def create(self, user: User) -> User:
         ...
 
