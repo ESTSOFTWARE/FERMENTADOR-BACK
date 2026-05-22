@@ -1,3 +1,4 @@
+from src.core.email.email_service import send_welcome_email
 from src.core.exceptions import EmailAlreadyExistsException
 from src.core.security import hash_password
 from src.services.auth.domain.repository import IAuthRepository
@@ -37,6 +38,8 @@ class RegisterUseCase:
             dial_code=dial_code,
             phone_number=phone_number,
         )
+
+        await send_welcome_email(to_email=user.email, name=user.name)
 
         return {
             "id":        user.id,
