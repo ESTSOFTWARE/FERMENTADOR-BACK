@@ -17,7 +17,10 @@ from src.services.users.infrastructure.controllers.change_password_controller im
 )
 from src.services.users.infrastructure.controllers.create_user_controller import create
 from src.services.users.infrastructure.controllers.delete_user_controller import delete
-from src.services.users.infrastructure.controllers.get_all_users_controller import get_all, get_all_students
+from src.services.users.infrastructure.controllers.get_all_users_controller import (
+    get_all,
+    get_all_students,
+)
 from src.services.users.infrastructure.controllers.get_user_by_id_controller import get_by_id
 from src.services.users.infrastructure.controllers.mark_tour_completed_controller import (
     mark_tour_completed,
