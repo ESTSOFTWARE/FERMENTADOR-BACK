@@ -156,6 +156,7 @@ from src.services.circuits.infrastructure.routes.router import router as circuit
 from src.services.circuits.infrastructure.routes.websocket import router as circuits_ws_router
 from src.services.fermentation.infrastructure.routes.router import router as fermentation_router
 from src.services.formula.infrastructure.routes.router import router as formula_router
+from src.services.groups.infrastructure.routes.router import router as groups_router
 from src.services.notifications.infrastructure.routes.router import router as notifications_router
 from src.services.notifications.infrastructure.routes.websocket import (
     router as notifications_ws_router,
@@ -177,6 +178,7 @@ app.include_router(notifications_router,    prefix="/api/notifications", tags=["
 app.include_router(notifications_ws_router, prefix="",                   tags=["Notifications WS"])
 app.include_router(formula_router,          prefix="/api/formula",       tags=["Formula"])
 app.include_router(announcements_router,    prefix="/api/announcements", tags=["Announcements"])
+app.include_router(groups_router,           prefix="/api/groups",        tags=["Groups"])
 app.include_router(support_router,          prefix="/support",           tags=["Support"])
 
 

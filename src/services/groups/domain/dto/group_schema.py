@@ -1,0 +1,52 @@
+from datetime import datetime
+
+from pydantic import BaseModel
+
+from src.services.groups.domain.entities.group import Group
+
+
+class CreateGroupRequest(BaseModel):
+    name: str
+
+
+class AddMemberRequest(BaseModel):
+    student_id: int
+
+
+class GroupMemberResponse(BaseModel):
+    id:         int
+    student_id: int
+    name:       str
+    last_name:  str
+    email:      str
+    joined_at:  datetime | None
+
+
+class GroupResponse(BaseModel):
+    id:           int
+    name:         str
+    professor_id: int
+    code:         str
+    created_at:   datetime | None
+    members:      list[GroupMemberResponse] = []
+
+    @classmethod
+    def from_entity(cls, group: Group) -> "GroupResponse":
+        return cls(
+            id=group.id,
+            name=group.name,
+            professor_id=group.professor_id,
+            code=group.code,
+            created_at=group.created_at,
+            members=[
+                GroupMemberResponse(
+                    id=m.id,
+                    student_id=m.student_id,
+                    name=m.name,
+                    last_name=m.last_name,
+                    email=m.email,
+                    joined_at=m.joined_at,
+                )
+                for m in group.members
+            ],
+        )
