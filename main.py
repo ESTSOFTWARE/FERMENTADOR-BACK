@@ -150,13 +150,13 @@ app.add_middleware(
 
 # ── Routers ───────────────────────────────────────────────────────────────────
 from src.services.announcements.infrastructure.routes.router import router as announcements_router
-from src.services.groups.infrastructure.routes.router import router as groups_router
 from src.services.auth.infrastructure.routes.oauth_callbacks import router as oauth_callbacks_router
 from src.services.auth.infrastructure.routes.router import router as auth_router
 from src.services.circuits.infrastructure.routes.router import router as circuits_router
 from src.services.circuits.infrastructure.routes.websocket import router as circuits_ws_router
 from src.services.fermentation.infrastructure.routes.router import router as fermentation_router
 from src.services.formula.infrastructure.routes.router import router as formula_router
+from src.services.groups.infrastructure.routes.router import router as groups_router
 from src.services.notifications.infrastructure.routes.router import router as notifications_router
 from src.services.notifications.infrastructure.routes.websocket import (
     router as notifications_ws_router,
