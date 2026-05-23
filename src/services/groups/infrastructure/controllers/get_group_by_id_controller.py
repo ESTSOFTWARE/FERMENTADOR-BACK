@@ -4,7 +4,7 @@ from src.services.groups.domain.dto.group_schema import GroupResponse
 from src.services.groups.infrastructure.adapters.MySQL import GroupRepository
 
 
-async def get_group_by_id(group_id: int, professor_id: int) -> GroupResponse:
+async def get_group_by_id(group_id: int, professor_id: int, role: str = 'profesor') -> GroupResponse:
     repo  = GroupRepository(AsyncSessionLocal)
-    group = await GetGroupByIdUseCase(repo).execute(group_id, professor_id)
+    group = await GetGroupByIdUseCase(repo).execute(group_id, professor_id, role)
     return GroupResponse.from_entity(group)

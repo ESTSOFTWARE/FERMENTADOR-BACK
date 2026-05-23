@@ -164,6 +164,13 @@ class UserRepository(IUserRepository):
             )
             await session.commit()
 
+    async def get_all_active_ids(self) -> list[int]:
+        async with self._session_factory() as session:
+            result = await session.execute(
+                select(UserModel.id).where(UserModel.is_active == True)  # noqa: E712
+            )
+            return list(result.scalars().all())
+
     def _to_entity(self, model: UserModel) -> User:
         return User(
             id=model.id,

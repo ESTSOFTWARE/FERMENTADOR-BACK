@@ -10,7 +10,12 @@ NotificationMsgType  = Literal[
     "fermentation_interrupted",
     "high_temperature",
     "sensor_failure",
-    "general"
+    "new_announcement",
+    "member_added",
+    "member_removed",
+    "user_registered",
+    "experiment_complete",
+    "general",
 ]
 CommandMessageType   = Literal[
     "sensor_on",

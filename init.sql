@@ -225,7 +225,7 @@ CREATE TABLE notifications (
     id          BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id     INT     NOT NULL,
     session_id  INT     DEFAULT NULL,
-    type        ENUM('fermentation_complete','fermentation_interrupted','high_temperature','sensor_failure','general') NOT NULL DEFAULT 'general',
+    type        ENUM('fermentation_complete','fermentation_interrupted','high_temperature','sensor_failure','new_announcement','member_added','member_removed','user_registered','experiment_complete','general') NOT NULL DEFAULT 'general',
     message     TEXT    NOT NULL,
     status      ENUM('unread','read') NOT NULL DEFAULT 'unread',
     created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -248,6 +248,8 @@ CREATE TABLE IF NOT EXISTS announcements (
 CREATE TABLE classrooms (
     id           INT AUTO_INCREMENT PRIMARY KEY,
     name         VARCHAR(100) NOT NULL,
+    subject      VARCHAR(100) NOT NULL,
+    cover_image  LONGTEXT     NULL DEFAULT NULL,
     professor_id INT          NOT NULL,
     code         VARCHAR(20)  NOT NULL UNIQUE,
     created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -6,7 +6,8 @@ from src.services.groups.domain.entities.group import Group
 
 
 class CreateGroupRequest(BaseModel):
-    name: str
+    name:    str
+    subject: str
 
 
 class AddMemberRequest(BaseModel):
@@ -26,6 +27,8 @@ class GroupMemberResponse(BaseModel):
 class GroupResponse(BaseModel):
     id:           int
     name:         str
+    subject:      str
+    cover_image:  str | None
     professor_id: int
     code:         str
     created_at:   datetime | None
@@ -36,6 +39,8 @@ class GroupResponse(BaseModel):
         return cls(
             id=group.id,
             name=group.name,
+            subject=group.subject,
+            cover_image=group.cover_image,
             professor_id=group.professor_id,
             code=group.code,
             created_at=group.created_at,
