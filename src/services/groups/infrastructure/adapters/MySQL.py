@@ -2,6 +2,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import selectinload
 
 from src.core.models.group_models import GroupMemberModel, GroupModel
+from src.core.models.user_models import UserModel
 from src.services.groups.domain.entities.group import Group, GroupMember
 from src.services.groups.domain.repository import IGroupRepository
 
@@ -11,13 +12,42 @@ class GroupRepository(IGroupRepository):
     def __init__(self, session_factory):
         self._session_factory = session_factory
 
-    async def create(self, name: str, professor_id: int, code: str) -> Group:
+    async def create(self, name: str, subject: str, professor_id: int, code: str) -> Group:
         async with self._session_factory() as session:
-            model = GroupModel(name=name, professor_id=professor_id, code=code)
+            model = GroupModel(name=name, subject=subject, professor_id=professor_id, code=code)
             session.add(model)
             await session.commit()
             await session.refresh(model)
             return await self.get_by_id(model.id)
+
+    async def update_cover(self, group_id: int, cover_image: str) -> Group:
+        async with self._session_factory() as session:
+            result = await session.execute(select(GroupModel).where(GroupModel.id == group_id))
+            model = result.scalar_one_or_none()
+            if model:
+                model.cover_image = cover_image
+                await session.commit()
+        return await self.get_by_id(group_id)
+
+    async def get_all(self) -> list[Group]:
+        async with self._session_factory() as session:
+            result = await session.execute(
+                select(GroupModel)
+                .options(selectinload(GroupModel.members).selectinload(GroupMemberModel.student))
+                .order_by(GroupModel.created_at.desc())
+            )
+            return [self._to_entity(m) for m in result.scalars().all()]
+
+    async def get_all_by_admin(self, admin_id: int) -> list[Group]:
+        async with self._session_factory() as session:
+            result = await session.execute(
+                select(GroupModel)
+                .join(UserModel, GroupModel.professor_id == UserModel.id)
+                .options(selectinload(GroupModel.members).selectinload(GroupMemberModel.student))
+                .where(UserModel.created_by == admin_id)
+                .order_by(GroupModel.created_at.desc())
+            )
+            return [self._to_entity(m) for m in result.scalars().all()]
 
     async def get_all_by_professor(self, professor_id: int) -> list[Group]:
         async with self._session_factory() as session:
@@ -92,6 +122,8 @@ class GroupRepository(IGroupRepository):
         return Group(
             id=model.id,
             name=model.name,
+            subject=model.subject,
+            cover_image=model.cover_image,
             professor_id=model.professor_id,
             code=model.code,
             created_at=model.created_at,

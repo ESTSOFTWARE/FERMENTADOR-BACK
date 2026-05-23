@@ -2,6 +2,10 @@ from src.core.database import AsyncSessionLocal
 from src.services.groups.application.usecase.add_member_use_case import AddMemberUseCase
 from src.services.groups.domain.dto.group_schema import AddMemberRequest, GroupResponse
 from src.services.groups.infrastructure.adapters.MySQL import GroupRepository
+from src.services.notifications.application.usecase.send_notification_use_case import (
+    SendNotificationUseCase,
+)
+from src.services.notifications.infrastructure.adapters.MySQL import NotificationRepository
 from src.services.users.infrastructure.adapters.MySQL import UserRepository
 
 
@@ -13,4 +17,12 @@ async def add_member(group_id: int, body: AddMemberRequest, professor_id: int) -
         student_id=body.student_id,
         professor_id=professor_id,
     )
+
+    notif_repo = NotificationRepository(AsyncSessionLocal)
+    await SendNotificationUseCase(notif_repo).execute(
+        user_id=body.student_id,
+        message=f"Fuiste agregado al grupo \"{group.name}\" ({group.subject}).",
+        notification_type="member_added",
+    )
+
     return GroupResponse.from_entity(group)

@@ -8,6 +8,7 @@ async def create_group(body: CreateGroupRequest, professor_id: int) -> GroupResp
     repo  = GroupRepository(AsyncSessionLocal)
     group = await CreateGroupUseCase(repo).execute(
         name=body.name,
+        subject=body.subject,
         professor_id=professor_id,
     )
     return GroupResponse.from_entity(group)

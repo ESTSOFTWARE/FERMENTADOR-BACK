@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, UploadFile
 
-from src.core.dependencies import require_admin_or_profesor
+from src.core.dependencies import require_admin, require_admin_or_profesor
 from src.services.groups.domain.dto.group_schema import (
     AddMemberRequest,
     CreateGroupRequest,
@@ -12,8 +12,14 @@ from src.services.groups.infrastructure.controllers.delete_group_controller impo
 from src.services.groups.infrastructure.controllers.get_group_by_id_controller import (
     get_group_by_id,
 )
-from src.services.groups.infrastructure.controllers.get_groups_controller import get_groups
+from src.services.groups.infrastructure.controllers.get_groups_controller import (
+    get_all_groups,
+    get_groups,
+)
 from src.services.groups.infrastructure.controllers.remove_member_controller import remove_member
+from src.services.groups.infrastructure.controllers.upload_cover_controller import (
+    upload_group_cover,
+)
 
 router = APIRouter()
 
@@ -26,6 +32,11 @@ async def create_group_route(
     return await create_group(body=body, professor_id=current_user["user_id"])
 
 
+@router.get("/all", response_model=list[GroupResponse], summary="Listar grupos de mis docentes (solo admin)")
+async def get_all_groups_route(current_user: dict = Depends(require_admin)):
+    return await get_all_groups(admin_id=current_user["user_id"])
+
+
 @router.get("/", response_model=list[GroupResponse], summary="Listar mis grupos")
 async def get_groups_route(current_user: dict = Depends(require_admin_or_profesor)):
     return await get_groups(professor_id=current_user["user_id"])
@@ -36,7 +47,11 @@ async def get_group_route(
     group_id: int,
     current_user: dict = Depends(require_admin_or_profesor),
 ):
-    return await get_group_by_id(group_id=group_id, professor_id=current_user["user_id"])
+    return await get_group_by_id(
+        group_id=group_id,
+        professor_id=current_user["user_id"],
+        role=current_user["role"],
+    )
 
 
 @router.delete("/{group_id}", status_code=204, summary="Eliminar grupo")
@@ -58,6 +73,19 @@ async def add_member_route(
     current_user: dict = Depends(require_admin_or_profesor),
 ):
     return await add_member(group_id=group_id, body=body, professor_id=current_user["user_id"])
+
+
+@router.post(
+    "/{group_id}/cover",
+    response_model=GroupResponse,
+    summary="Subir imagen de portada del grupo a Cloudinary",
+)
+async def upload_cover_route(
+    group_id: int,
+    file: UploadFile = File(...),
+    current_user: dict = Depends(require_admin_or_profesor),
+):
+    return await upload_group_cover(file=file, group_id=group_id)
 
 
 @router.delete(

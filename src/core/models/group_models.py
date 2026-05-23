@@ -9,6 +9,8 @@ class GroupModel(Base):
 
     id           = Column(Integer, primary_key=True, autoincrement=True)
     name         = Column(String(100), nullable=False)
+    subject      = Column(String(100), nullable=False)
+    cover_image  = Column(String(2048), nullable=True)
     professor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     code         = Column(String(20), nullable=False, unique=True)
     created_at   = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
