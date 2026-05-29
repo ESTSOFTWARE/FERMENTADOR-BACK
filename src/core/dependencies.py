@@ -1,4 +1,4 @@
-from fastapi import Depends
+from fastapi import Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,8 +11,8 @@ from src.core.exceptions import (
 )
 from src.core.security import decode_token
 
-# ── Bearer token ──────────────────────────────────────────────────────────────
-bearer_scheme = HTTPBearer()
+# auto_error=False para que no falle cuando no hay header (usamos cookie)
+bearer_scheme = HTTPBearer(auto_error=False)
 
 
 # ── Sesión de base de datos ───────────────────────────────────────────────────
@@ -22,17 +22,18 @@ async def get_session(db: AsyncSession = Depends(get_db)) -> AsyncSession:
 
 # ── Usuario autenticado ───────────────────────────────────────────────────────
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    request: Request,
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """
-    Extrae y valida el token JWT del header Authorization.
-    Verifica que la cuenta esté activa en BD.
-    Retorna el payload completo: { sub, role, circuit_id, exp, iat }
-    """
-    token = credentials.credentials
-    payload = decode_token(token)
+    # Cookie primero (web), Authorization header como fallback (mobile/API)
+    token = request.cookies.get("access_token")
+    if not token and credentials:
+        token = credentials.credentials
+    if not token:
+        raise UnauthorizedException()
 
+    payload = decode_token(token)
     user_id = payload.get("sub")
     role    = payload.get("role")
 
@@ -50,7 +51,7 @@ async def get_current_user(
     return {
         "user_id":    int(user_id),
         "role":       role,
-        "circuit_id": payload.get("circuit_id"),  # None si no tiene circuito asignado
+        "circuit_id": payload.get("circuit_id"),
     }
 
 
@@ -58,7 +59,6 @@ async def get_current_user(
 async def require_admin(
     current_user: dict = Depends(get_current_user),
 ) -> dict:
-    """Solo admin puede acceder."""
     if current_user["role"] != "admin":
         raise ForbiddenException()
     return current_user
@@ -67,7 +67,6 @@ async def require_admin(
 async def require_admin_or_profesor(
     current_user: dict = Depends(get_current_user),
 ) -> dict:
-    """Admin y profesor pueden acceder."""
     if current_user["role"] not in ("admin", "profesor"):
         raise ForbiddenException()
     return current_user
@@ -76,7 +75,6 @@ async def require_admin_or_profesor(
 async def require_soporte(
     current_user: dict = Depends(get_current_user),
 ) -> dict:
-    """Solo soporte puede acceder."""
     if current_user["role"] != "soporte":
         raise ForbiddenException()
     return current_user
@@ -85,7 +83,6 @@ async def require_soporte(
 async def require_any_role(
     current_user: dict = Depends(get_current_user),
 ) -> dict:
-    """Cualquier usuario autenticado puede acceder."""
     if current_user["role"] not in ("admin", "profesor", "estudiante", "soporte"):
         raise ForbiddenException()
     return current_user
