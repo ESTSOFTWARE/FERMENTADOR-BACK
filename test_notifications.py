@@ -12,19 +12,19 @@ Coloca este archivo en la raíz del proyecto (junto a src/).
 """
 
 import asyncio
-import sys
 import os
+import sys
 from datetime import datetime, timedelta, timezone
 
 # ── Asegurar que src/ esté en el path ─────────────────────────────────────────
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # ── Cargar todos los modelos para que SQLAlchemy resuelva las FK ──────────────
-import src.core.models.user_models  # noqa: F401
 import src.core.models.announcement_model  # noqa: F401
 import src.core.models.group_models  # noqa: F401
-import src.services.fermentation.infrastructure.adapters.MySQL  # noqa: F401
+import src.core.models.user_models  # noqa: F401
 import src.services.circuits.infrastructure.adapters.MySQL  # noqa: F401
+import src.services.fermentation.infrastructure.adapters.MySQL  # noqa: F401
 
 # ── Colores para la consola ───────────────────────────────────────────────────
 GREEN  = "\033[92m"
@@ -47,11 +47,14 @@ def title(msg): print(f"\n{BOLD}{msg}{RESET}\n{'─' * 50}")
 async def test_warning_email():
     title("PRUEBA 1: Correo de advertencia (vencimiento en 2 días)")
 
+    from sqlalchemy import delete, insert, select
+
     from src.core.database import AsyncSessionLocal
     from src.core.models.user_models import UserModel
-    from src.services.users.application.usecase.send_warning_email_use_case import SendWarningEmailUseCase
+    from src.services.users.application.usecase.send_warning_email_use_case import (
+        SendWarningEmailUseCase,
+    )
     from src.services.users.infrastructure.adapters.MySQL import UserRepository
-    from sqlalchemy import insert, delete, select
 
     email_prueba = input(f"  {CYAN}Email real donde recibirás el correo: {RESET}").strip()
     if not email_prueba:
@@ -86,7 +89,7 @@ async def test_warning_email():
             user_id = model.id
 
             # Actualizar created_at directamente (server_default no acepta valores pasados)
-            from sqlalchemy import update, text
+            from sqlalchemy import text, update
             await session.execute(
                 update(UserModel)
                 .where(UserModel.id == user_id)
@@ -148,11 +151,14 @@ async def test_warning_email():
 async def test_reactivation_email():
     title("PRUEBA 2: Correo de reactivación (cuenta desactivada → OAuth login)")
 
+    from sqlalchemy import delete, insert, select, update
+
     from src.core.database import AsyncSessionLocal
     from src.core.models.user_models import UserModel
-    from src.services.users.application.usecase.send_reactivation_email_use_case import SendReactivationEmailUseCase
+    from src.services.users.application.usecase.send_reactivation_email_use_case import (
+        SendReactivationEmailUseCase,
+    )
     from src.services.users.infrastructure.adapters.MySQL import UserRepository
-    from sqlalchemy import insert, delete, select, update
 
     email_prueba = input(f"  {CYAN}Email real donde recibirás el correo: {RESET}").strip()
     if not email_prueba:
@@ -227,7 +233,7 @@ async def test_reactivation_email():
             user = result.scalar_one()
 
             if user.is_active:
-                ok(f"is_active = True ✓")
+                ok("is_active = True ✓")
             else:
                 err("is_active sigue en False")
 
@@ -263,11 +269,14 @@ async def test_reactivation_email():
 async def test_deactivate_expired():
     title("PRUEBA 3: Desactivación de cuentas expiradas (30 días sin circuito)")
 
+    from sqlalchemy import delete, select, update
+
     from src.core.database import AsyncSessionLocal
     from src.core.models.user_models import UserModel
-    from src.services.users.application.usecase.deactivate_expired_users_use_case import DeactivateExpiredUsersUseCase
+    from src.services.users.application.usecase.deactivate_expired_users_use_case import (
+        DeactivateExpiredUsersUseCase,
+    )
     from src.services.users.infrastructure.adapters.MySQL import UserRepository
-    from sqlalchemy import delete, select, update
 
     user_ids = []
     try:
@@ -433,7 +442,7 @@ async def main():
             return
 
     print(f"\n{BOLD}{'─' * 50}")
-    print(f"  Pruebas finalizadas")
+    print("  Pruebas finalizadas")
     print(f"{'─' * 50}{RESET}\n")
 
 

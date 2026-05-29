@@ -165,6 +165,7 @@ class AuthRepository(IAuthRepository):
     ) -> bool:
         """Reactiva el usuario y envía correo de reactivación."""
         from datetime import datetime
+
         from src.core.email.email_service import send_reactivation_email
 
         try:
