@@ -1,7 +1,9 @@
+from datetime import datetime
+
 from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 
-from src.core.models.user_models import RoleModel, UserModel
+from src.core.models.user_models import PasswordResetCodeModel, RoleModel, UserModel
 from src.services.auth.domain.entities.role import Role
 from src.services.auth.domain.entities.user import User
 from src.services.auth.domain.repository import IAuthRepository
@@ -222,3 +224,50 @@ class AuthRepository(IAuthRepository):
             reactivated_at=str(model.reactivated_at) if model.reactivated_at else None,
             last_oauth_login_at=str(model.last_oauth_login_at) if model.last_oauth_login_at else None,
         )
+
+    async def save_reset_code(
+        self, user_id: int, code: str, expires_at: datetime
+    ) -> None:
+        async with self._session_factory() as session:
+            await session.execute(
+                update(PasswordResetCodeModel)
+                .where(PasswordResetCodeModel.user_id == user_id)
+                .values(used=True)
+            )
+            session.add(PasswordResetCodeModel(
+                user_id=user_id,
+                code=code,
+                expires_at=expires_at,
+            ))
+            await session.commit()
+
+    async def get_valid_reset_code(self, user_id: int, code: str) -> bool:
+        now = datetime.utcnow()
+        async with self._session_factory() as session:
+            result = await session.execute(
+                select(PasswordResetCodeModel).where(
+                    PasswordResetCodeModel.user_id == user_id,
+                    PasswordResetCodeModel.code == code,
+                    PasswordResetCodeModel.used == False,  # noqa: E712
+                    PasswordResetCodeModel.expires_at > now,
+                )
+            )
+            return result.scalar_one_or_none() is not None
+
+    async def invalidate_reset_codes(self, user_id: int) -> None:
+        async with self._session_factory() as session:
+            await session.execute(
+                update(PasswordResetCodeModel)
+                .where(PasswordResetCodeModel.user_id == user_id)
+                .values(used=True)
+            )
+            await session.commit()
+
+    async def update_password(self, user_id: int, hashed_password: str) -> None:
+        async with self._session_factory() as session:
+            await session.execute(
+                update(UserModel)
+                .where(UserModel.id == user_id)
+                .values(password=hashed_password)
+            )
+            await session.commit()

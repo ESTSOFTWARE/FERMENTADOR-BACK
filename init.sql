@@ -289,3 +289,12 @@ CREATE INDEX idx_sensor_events_session     ON sensor_events(session_id, sensor_t
 CREATE INDEX idx_sensor_events_circuit     ON sensor_events(circuit_id, occurred_at);
 CREATE INDEX idx_report_history_report     ON report_history(report_id, occurred_at);
 CREATE INDEX idx_report_history_user       ON report_history(user_id, occurred_at);
+CREATE TABLE IF NOT EXISTS password_reset_codes (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    user_id    INT         NOT NULL,
+    code       VARCHAR(6)  NOT NULL,
+    expires_at DATETIME    NOT NULL,
+    used       TINYINT(1)  NOT NULL DEFAULT 0,
+    created_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_reset_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
