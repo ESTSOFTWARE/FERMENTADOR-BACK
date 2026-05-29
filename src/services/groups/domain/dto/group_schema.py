@@ -14,12 +14,13 @@ class AddMemberRequest(BaseModel):
 
 
 class GroupMemberResponse(BaseModel):
-    id:         int
-    student_id: int
-    name:       str
-    last_name:  str
-    email:      str
-    joined_at:  datetime | None
+    id:             int
+    student_id:     int
+    name:           str
+    last_name:      str
+    email:          str
+    joined_at:      datetime | None
+    oauth_provider: str
 
 
 class GroupResponse(BaseModel):
@@ -46,6 +47,7 @@ class GroupResponse(BaseModel):
                     last_name=m.last_name,
                     email=m.email,
                     joined_at=m.joined_at,
+                    oauth_provider=m.oauth_provider,
                 )
                 for m in group.members
             ],

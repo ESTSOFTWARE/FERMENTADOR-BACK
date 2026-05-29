@@ -25,17 +25,25 @@ class LoginUseCase:
             "circuit_id": user.circuit_id,  # None para admins sin circuito aún
         }
 
+        if user.oauth_google_id:
+            provider = 'google'
+        elif user.oauth_github_id:
+            provider = 'github'
+        else:
+            provider = 'email'
+
         return {
             "access_token":  create_access_token(token_data),
             "refresh_token": create_refresh_token({"sub": str(user.id)}),
             "token_type":    "bearer",
             "user": {
-                "id":            user.id,
-                "name":          user.name,
-                "last_name":     user.last_name,
-                "email":         user.email,
-                "role":          role_name,
-                "circuit_id":    user.circuit_id,
-                "profile_image": user.profile_image,
+                "id":             user.id,
+                "name":           user.name,
+                "last_name":      user.last_name,
+                "email":          user.email,
+                "role":           role_name,
+                "circuit_id":     user.circuit_id,
+                "profile_image":  user.profile_image,
+                "oauth_provider": provider,
             },
         }

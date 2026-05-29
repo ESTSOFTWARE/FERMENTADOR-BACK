@@ -11,3 +11,9 @@ async def get_all(requester_id: int, requester_role: str) -> list[UserResponse]:
         requester_role=requester_role,
     )
     return [UserResponse.from_entity(u) for u in users]
+
+
+async def get_all_students() -> list[UserResponse]:
+    repo  = UserRepository(AsyncSessionLocal)
+    users = await GetUserUseCase(repo).get_all_students()
+    return [UserResponse.from_entity(u) for u in users]

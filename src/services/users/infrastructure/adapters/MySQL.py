@@ -42,6 +42,17 @@ class UserRepository(IUserRepository):
             model = result.scalar_one_or_none()
             return self._to_entity(model) if model else None
 
+    async def get_all_students(self) -> list[User]:
+        async with self._session_factory() as session:
+            result = await session.execute(
+                select(UserModel)
+                .options(selectinload(UserModel.role))
+                .join(RoleModel, UserModel.role_id == RoleModel.id)
+                .where(RoleModel.name == 'estudiante')
+                .order_by(UserModel.name)
+            )
+            return [self._to_entity(m) for m in result.scalars().all()]
+
     async def get_created_by(self, creator_id: int) -> list[User]:
         async with self._session_factory() as session:
             result = await session.execute(

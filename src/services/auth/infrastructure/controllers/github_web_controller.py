@@ -22,12 +22,18 @@ async def github_redirect():
 
 
 async def github_callback(code: str):
-    repo   = AuthRepository(AsyncSessionLocal)
-    result = await GitHubWebAuthUseCase(repo, OAuthAdapter()).execute(code)
-    user_b64 = base64.urlsafe_b64encode(json.dumps(result["user"]).encode()).decode()
-    params = urllib.parse.urlencode({
-        "access_token":  result["access_token"],
-        "refresh_token": result["refresh_token"],
-        "user_data":     user_b64,
-    })
-    return RedirectResponse(f"{settings.FRONTEND_URL}/auth/callback?{params}")
+    try:
+        repo   = AuthRepository(AsyncSessionLocal)
+        result = await GitHubWebAuthUseCase(repo, OAuthAdapter()).execute(code)
+        user_b64 = base64.urlsafe_b64encode(json.dumps(result["user"]).encode()).decode()
+        params = urllib.parse.urlencode({
+            "access_token":  result["access_token"],
+            "refresh_token": result["refresh_token"],
+            "user_data":     user_b64,
+        })
+        return RedirectResponse(f"{settings.FRONTEND_URL}/auth/callback?{params}")
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"[GitHub OAuth] Callback error: {e}")
+        error_msg = urllib.parse.quote(str(e))
+        return RedirectResponse(f"{settings.FRONTEND_URL}/login?oauth_error={error_msg}", status_code=302)
