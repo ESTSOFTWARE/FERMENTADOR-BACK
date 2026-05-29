@@ -55,6 +55,14 @@ class Settings(BaseSettings):
     # ── Frontend ──────────────────────────────────────
     FRONTEND_URL: str = "http://localhost:3000"
 
+    # ── CORS ──────────────────────────────────────────
+    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173"]
+
+    # ── Cookies ───────────────────────────────────────
+    COOKIE_SECURE:   bool = False   # True en producción (HTTPS)
+    COOKIE_SAMESITE: str  = "lax"
+    COOKIE_DOMAIN:   str  = ""      # vacío = sin dominio explícito
+
     # ── Cloudinary ────────────────────────────────────
     CLOUDINARY_CLOUD_NAME: str = ""
     CLOUDINARY_API_KEY:    str = ""
