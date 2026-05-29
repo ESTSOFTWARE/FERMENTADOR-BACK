@@ -10,13 +10,16 @@ class User:
     last_name:  str
     email:      str
     role_id:    int
-    password:        str | None = None
-    circuit_id:      int | None = None
-    role:            Role | None = None
-    created_by:      int | None = None
-    profile_image:   str | None = None
-    dial_code:       str | None = None
-    phone_number:    str | None = None
-    oauth_google_id: str | None = None
-    oauth_github_id: str | None = None
-    is_active:       bool = True
+    password:              str | None = None
+    circuit_id:            int | None = None
+    role:                  Role | None = None
+    created_by:            int | None = None
+    profile_image:         str | None = None
+    dial_code:             str | None = None
+    phone_number:          str | None = None
+    oauth_google_id:       str | None = None
+    oauth_github_id:       str | None = None
+    is_active:             bool = True
+    warning_email_sent_at: str | None = None
+    reactivated_at:        str | None = None
+    last_oauth_login_at:   str | None = None
