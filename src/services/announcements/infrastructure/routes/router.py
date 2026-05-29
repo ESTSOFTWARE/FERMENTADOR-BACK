@@ -61,9 +61,9 @@ async def get_announcement_by_id_route(
 )
 async def create_announcement_route(
     body: CreateAnnouncementRequest,
-    _: dict = Depends(require_soporte),
+    current_user: dict = Depends(require_soporte),
 ):
-    return await create_announcement(body)
+    return await create_announcement(body, creator_id=current_user["user_id"])
 
 
 @router.put(

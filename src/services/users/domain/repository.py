@@ -61,3 +61,8 @@ class IUserRepository(ABC):
     async def reactivate(self, user_id: int) -> None:
         """Reactiva una cuenta desactivada."""
         ...
+
+    @abstractmethod
+    async def get_all_active_ids(self) -> list[int]:
+        """Retorna los IDs de todos los usuarios activos."""
+        ...

@@ -7,6 +7,7 @@ from sqlalchemy import (
     Enum,
     ForeignKey,
     Integer,
+    String,
     Text,
     select,
     text,
@@ -24,6 +25,11 @@ class NotificationTypeEnum(str, enum.Enum):
     FERMENTATION_INTERRUPTED = "fermentation_interrupted"
     HIGH_TEMPERATURE         = "high_temperature"
     SENSOR_FAILURE           = "sensor_failure"
+    NEW_ANNOUNCEMENT         = "new_announcement"
+    MEMBER_ADDED             = "member_added"
+    MEMBER_REMOVED           = "member_removed"
+    USER_REGISTERED          = "user_registered"
+    EXPERIMENT_COMPLETE      = "experiment_complete"
     GENERAL                  = "general"
 
 
@@ -40,17 +46,9 @@ class NotificationModel(Base):
     id         = Column(BigInteger, primary_key=True, autoincrement=True)
     user_id    = Column(Integer, ForeignKey("users.id"), nullable=False)
     session_id = Column(Integer, ForeignKey("fermentation_sessions.id"), nullable=True)
-    type       = Column(
-        Enum(NotificationTypeEnum),
-        nullable=False,
-        default=NotificationTypeEnum.GENERAL,
-    )
+    type       = Column(String(50), nullable=False, default="general")
     message    = Column(Text, nullable=False)
-    status     = Column(
-        Enum(NotificationStatusEnum),
-        nullable=False,
-        default=NotificationStatusEnum.UNREAD,
-    )
+    status     = Column(String(10), nullable=False, default="unread")
     created_at = Column(
         DateTime,
         server_default=text("CURRENT_TIMESTAMP"),
