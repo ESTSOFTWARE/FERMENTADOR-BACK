@@ -9,6 +9,20 @@ class AppException(HTTPException):
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
+class InvalidResetCodeException(AppException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Código de verificación inválido o expirado"
+        )
+
+class TooManyRequestsException(AppException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Demasiadas solicitudes. Intenta de nuevo más tarde"
+        )
+
 class InvalidCredentialsException(AppException):
     def __init__(self):
         super().__init__(

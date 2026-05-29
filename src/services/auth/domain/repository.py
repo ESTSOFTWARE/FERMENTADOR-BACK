@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 
 from src.services.auth.domain.entities.user import User
 
@@ -53,3 +54,17 @@ class IAuthRepository(ABC):
     async def reactivate_user_with_notification(
         self, user_id: int, user_name: str, user_email: str
     ) -> bool: ...
+
+    @abstractmethod
+    async def save_reset_code(
+        self, user_id: int, code: str, expires_at: datetime
+    ) -> None: ...
+
+    @abstractmethod
+    async def get_valid_reset_code(self, user_id: int, code: str) -> bool: ...
+
+    @abstractmethod
+    async def invalidate_reset_codes(self, user_id: int) -> None: ...
+
+    @abstractmethod
+    async def update_password(self, user_id: int, hashed_password: str) -> None: ...
