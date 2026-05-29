@@ -12,6 +12,26 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 _CLEANUP_INTERVAL_SECONDS = 24 * 60 * 60  # cada 24 horas
+_WARNING_EMAIL_INTERVAL_SECONDS = 12 * 60 * 60  # cada 12 horas
+
+
+async def _run_warning_email_task() -> None:
+    """Envía correos de advertencia a usuarios cuyas cuentas vencen en 2 días."""
+    await asyncio.sleep(10)  # breve espera para que la BD esté lista
+    while True:
+        try:
+            from src.core.database import AsyncSessionLocal
+            from src.services.users.application.usecase.send_warning_email_use_case import (
+                SendWarningEmailUseCase,
+            )
+            from src.services.users.infrastructure.adapters.MySQL import UserRepository
+
+            count = await SendWarningEmailUseCase(UserRepository(AsyncSessionLocal)).execute()
+            if count:
+                logger.info(f"[Warning Email] {count} correo(s) de advertencia enviado(s)")
+        except Exception as e:
+            logger.error(f"[Warning Email] Error en tarea de advertencia: {e}")
+        await asyncio.sleep(_WARNING_EMAIL_INTERVAL_SECONDS)
 
 
 async def _run_user_cleanup_task() -> None:
@@ -99,14 +119,23 @@ async def lifespan(app: FastAPI):
             "Los datos de sensores en tiempo real estarán deshabilitados."
         )
 
-    # 3. Tarea periódica de desactivación de cuentas sin circuito
+    # 3. Tarea periódica de envío de correos de advertencia
+    warning_email_task = asyncio.create_task(_run_warning_email_task())
+    logger.info("Tarea de correos de advertencia iniciada")
+
+    # 4. Tarea periódica de desactivación de cuentas sin circuito
     cleanup_task = asyncio.create_task(_run_user_cleanup_task())
     logger.info("Tarea de limpieza de cuentas iniciada")
 
     logger.info("Aplicación lista")
     yield
 
+    warning_email_task.cancel()
     cleanup_task.cancel()
+    try:
+        await warning_email_task
+    except asyncio.CancelledError:
+        pass
     try:
         await cleanup_task
     except asyncio.CancelledError:

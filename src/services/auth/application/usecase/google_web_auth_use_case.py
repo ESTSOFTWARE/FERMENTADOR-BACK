@@ -43,7 +43,11 @@ class GoogleWebAuthUseCase:
                 is_new = True
 
         if not user.is_active:
-            await self._repo.reactivate_user(user.id)
+            await self._repo.reactivate_user_with_notification(
+                user_id=user.id,
+                user_name=user.name,
+                user_email=user.email,
+            )
             user = await self._repo.get_user_by_id(user.id)
 
         if is_new:

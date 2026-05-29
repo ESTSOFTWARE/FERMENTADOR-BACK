@@ -48,3 +48,8 @@ class IAuthRepository(ABC):
 
     @abstractmethod
     async def reactivate_user(self, user_id: int) -> None: ...
+
+    @abstractmethod
+    async def reactivate_user_with_notification(
+        self, user_id: int, user_name: str, user_email: str
+    ) -> bool: ...

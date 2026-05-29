@@ -153,6 +153,58 @@ class UserRepository(IUserRepository):
             )
             await session.commit()
 
+    async def get_users_for_warning_email(self, created_before: datetime) -> list[User]:
+        """
+        Obtiene usuarios que deben recibir el correo de advertencia.
+        
+        Condiciones:
+        - is_active = TRUE
+        - circuit_id = NULL
+        - created_at <= created_before (hace 28 días, 2 días antes del vencimiento)
+        - warning_email_sent_at = NULL (no se ha enviado aún)
+        """
+        async with self._session_factory() as session:
+            result = await session.execute(
+                select(UserModel)
+                .options(selectinload(UserModel.role))
+                .where(
+                    UserModel.is_active == True,  # noqa: E712
+                    UserModel.circuit_id == None,  # noqa: E711
+                    UserModel.created_at <= created_before,
+                    UserModel.warning_email_sent_at == None,  # noqa: E711
+                )
+                .order_by(UserModel.id)
+            )
+            return [self._to_entity(m) for m in result.scalars().all()]
+
+    async def update_warning_email_sent(self, user_id: int) -> None:
+        """Registra que se envió el correo de advertencia."""
+        async with self._session_factory() as session:
+            await session.execute(
+                update(UserModel)
+                .where(UserModel.id == user_id)
+                .values(warning_email_sent_at=datetime.utcnow())
+            )
+            await session.commit()
+
+    async def update_reactivation_timestamps(
+        self,
+        user_id: int,
+        reactivated_at: datetime,
+        last_oauth_login_at: datetime,
+    ) -> None:
+        """Registra los timestamps de reactivación y último login OAuth."""
+        async with self._session_factory() as session:
+            await session.execute(
+                update(UserModel)
+                .where(UserModel.id == user_id)
+                .values(
+                    reactivated_at=reactivated_at,
+                    last_oauth_login_at=last_oauth_login_at,
+                )
+            )
+            await session.commit()
+
     def _to_entity(self, model: UserModel) -> User:
         return User(
             id=model.id,
@@ -172,4 +224,7 @@ class UserRepository(IUserRepository):
             oauth_github_id=model.oauth_github_id,
             tour_completed=model.tour_completed or False,
             is_active=model.is_active if model.is_active is not None else True,
+            warning_email_sent_at=model.warning_email_sent_at,
+            reactivated_at=model.reactivated_at,
+            last_oauth_login_at=model.last_oauth_login_at,
         )

@@ -160,6 +160,39 @@ class AuthRepository(IAuthRepository):
             )
             await session.commit()
 
+    async def reactivate_user_with_notification(
+        self, user_id: int, user_name: str, user_email: str
+    ) -> bool:
+        """Reactiva el usuario y envía correo de reactivación."""
+        from datetime import datetime
+        from src.core.email.email_service import send_reactivation_email
+
+        try:
+            # Enviar correo
+            await send_reactivation_email(user_email, user_name)
+
+            # Registrar timestamps de reactivación
+            now = datetime.utcnow()
+            async with self._session_factory() as session:
+                await session.execute(
+                    update(UserModel)
+                    .where(UserModel.id == user_id)
+                    .values(
+                        is_active=True,
+                        reactivated_at=now,
+                        last_oauth_login_at=now,
+                    )
+                )
+                await session.commit()
+
+            return True
+
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"[Reactivation] Error al reactivar usuario {user_id}: {e}")
+            return False
+
     def _to_entity(self, model: UserModel) -> User:
         role = None
         if model.role:
@@ -184,4 +217,7 @@ class AuthRepository(IAuthRepository):
             oauth_google_id=model.oauth_google_id,
             oauth_github_id=model.oauth_github_id,
             is_active=model.is_active if model.is_active is not None else True,
+            warning_email_sent_at=str(model.warning_email_sent_at) if model.warning_email_sent_at else None,
+            reactivated_at=str(model.reactivated_at) if model.reactivated_at else None,
+            last_oauth_login_at=str(model.last_oauth_login_at) if model.last_oauth_login_at else None,
         )

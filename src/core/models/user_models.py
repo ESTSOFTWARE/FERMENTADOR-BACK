@@ -32,12 +32,15 @@ class UserModel(Base):
         nullable=False,
     )
 
-    dial_code        = Column(String(10),  nullable=True)
-    phone_number     = Column(String(15),  nullable=True)
-    oauth_google_id  = Column(String(100), nullable=True)
-    oauth_github_id  = Column(String(100), nullable=True)
-    tour_completed   = Column(Boolean, nullable=False, server_default=text("0"), default=False)
-    is_active        = Column(Boolean, nullable=False, server_default=text("1"), default=True)
+    dial_code               = Column(String(10),  nullable=True)
+    phone_number            = Column(String(15),  nullable=True)
+    oauth_google_id         = Column(String(100), nullable=True)
+    oauth_github_id         = Column(String(100), nullable=True)
+    tour_completed          = Column(Boolean, nullable=False, server_default=text("0"), default=False)
+    is_active               = Column(Boolean, nullable=False, server_default=text("1"), default=True)
+    warning_email_sent_at   = Column(DateTime, nullable=True)
+    reactivated_at          = Column(DateTime, nullable=True)
+    last_oauth_login_at     = Column(DateTime, nullable=True)
 
     role    = relationship("RoleModel", back_populates="users")
     creator = relationship("UserModel", remote_side=[id])
