@@ -1,6 +1,25 @@
+"""
+Flujo de login con migración automática bcrypt → Argon2:
+1. Buscar usuario por email.
+2. Detectar tipo de hash (bcrypt / Argon2).
+3. Validar contraseña con el verificador correspondiente.
+4. Si el hash es bcrypt (o Argon2 desactualizado): rehashear con Argon2 y persistir.
+5. Retornar tokens JWT.
+"""
+
+import logging
+
 from src.core.exceptions import InvalidCredentialsException
-from src.core.security import create_access_token, create_refresh_token, verify_password
+from src.core.security import (
+    create_access_token,
+    create_refresh_token,
+    hash_password,
+    needs_rehash,
+    verify_password,
+)
 from src.services.auth.domain.repository import IAuthRepository
+
+logger = logging.getLogger(__name__)
 
 
 class LoginUseCase:
@@ -17,20 +36,39 @@ class LoginUseCase:
         if not user.password or not verify_password(password, user.password):
             raise InvalidCredentialsException()
 
+        # ── Migración progresiva bcrypt → Argon2 ──────────────────────────────
+        # Se ejecuta de forma transparente tras un login exitoso.
+        # El usuario no percibe ningún cambio; la contraseña en BD se actualiza silenciosamente al formato Argon2.
+        if needs_rehash(user.password):
+            try:
+                new_hash = hash_password(password)
+                await self._repo.update_password(user.id, new_hash)
+                logger.info(
+                    "[Auth] Hash migrado a Argon2 para usuario id=%s", user.id
+                )
+            except Exception:
+                # No bloquear el login si la migración falla.
+                # El usuario seguirá con bcrypt y se reintentará en el próximo login.
+                logger.warning(
+                    "[Auth] No se pudo migrar el hash de usuario id=%s", user.id,
+                    exc_info=True,
+                )
+
+        # ── Construir tokens ──────────────────────────────────────────────────
         role_name = user.role.name if user.role else "estudiante"
 
         token_data = {
             "sub":        str(user.id),
             "role":       role_name,
-            "circuit_id": user.circuit_id,  # None para admins sin circuito aún
+            "circuit_id": user.circuit_id,
         }
 
         if user.oauth_google_id:
-            provider = 'google'
+            provider = "google"
         elif user.oauth_github_id:
-            provider = 'github'
+            provider = "github"
         else:
-            provider = 'email'
+            provider = "email"
 
         return {
             "access_token":  create_access_token(token_data),

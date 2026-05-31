@@ -1,8 +1,13 @@
+"""
+Reset de contraseña. Siempre escribe el nuevo hash en Argon2,
+independientemente del hash anterior del usuario.
+"""
+
 import logging
 
 from src.core.email.email_service import send_password_changed_email
 from src.core.exceptions import InvalidResetCodeException, UserNotFoundException
-from src.core.security import hash_password
+from src.core.security import hash_password          # ahora es Argon2
 from src.services.auth.domain.repository import IAuthRepository
 
 logger = logging.getLogger(__name__)
@@ -22,8 +27,8 @@ class ResetPasswordUseCase:
         if not is_valid:
             raise InvalidResetCodeException()
 
-        hashed = hash_password(new_password)
+        hashed = hash_password(new_password)         # Argon2id
         await self._repo.update_password(user.id, hashed)
         await self._repo.invalidate_reset_codes(user.id)
         await send_password_changed_email(to_email=user.email, name=user.name)
-        logger.info(f"[ResetPassword] Contraseña actualizada para usuario {user.id}")
+        logger.info("[ResetPassword] Contraseña actualizada para usuario id=%s", user.id)

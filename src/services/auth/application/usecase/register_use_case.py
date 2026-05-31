@@ -1,3 +1,7 @@
+"""
+Registro de nuevos usuarios. Siempre usa Argon2 para el hash inicial.
+"""
+
 from src.core.email.email_service import send_welcome_email
 from src.core.exceptions import EmailAlreadyExistsException
 from src.core.security import hash_password
@@ -24,10 +28,8 @@ class RegisterUseCase:
         if existing:
             raise EmailAlreadyExistsException()
 
-        hashed = hash_password(password)
+        hashed = hash_password(password)          # Argon2id
 
-        # El admin se registra sin circuito asignado todavía.
-        # Su circuit_id se asigna cuando crea un usuario con un activation_code.
         user = await self._repo.create_user(
             name=name,
             last_name=last_name,
