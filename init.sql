@@ -303,8 +303,10 @@ CREATE TABLE IF NOT EXISTS password_reset_codes (
 CREATE TABLE IF NOT EXISTS subscriptions (
     id                      INT AUTO_INCREMENT PRIMARY KEY,
     user_id                 INT          NOT NULL UNIQUE,
-    stripe_customer_id      VARCHAR(100) NOT NULL UNIQUE,
+    stripe_customer_id      VARCHAR(100) NULL UNIQUE,
     stripe_subscription_id  VARCHAR(100) NULL UNIQUE,
+    paypal_subscription_id  VARCHAR(100) NULL UNIQUE,
+    payment_provider        ENUM('stripe','paypal') NOT NULL DEFAULT 'stripe',
     plan                    ENUM('starter','academic','enterprise') NOT NULL,
     billing_cycle           ENUM('monthly','annual') NOT NULL DEFAULT 'monthly',
     status                  ENUM('active','past_due','canceled','incomplete') NOT NULL DEFAULT 'incomplete',

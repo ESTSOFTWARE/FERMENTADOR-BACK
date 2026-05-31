@@ -10,8 +10,10 @@ class SubscriptionModel(Base):
     id                     = Column(Integer, primary_key=True, autoincrement=True)
     user_id                = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"),
                                     nullable=False, unique=True)
-    stripe_customer_id     = Column(String(100), nullable=False, unique=True)
+    stripe_customer_id     = Column(String(100), nullable=True, unique=True)
     stripe_subscription_id = Column(String(100), nullable=True, unique=True)
+    paypal_subscription_id = Column(String(100), nullable=True, unique=True)
+    payment_provider       = Column(Enum("stripe", "paypal"), nullable=False, default="stripe")
     plan                   = Column(Enum("starter", "academic", "enterprise"), nullable=False)
     billing_cycle          = Column(Enum("monthly", "annual"), nullable=False, default="monthly")
     status                 = Column(

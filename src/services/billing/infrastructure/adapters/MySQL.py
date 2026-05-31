@@ -22,6 +22,8 @@ class BillingRepository(IBillingRepository):
             current_period_end=m.current_period_end,
             cancel_at_period_end=bool(m.cancel_at_period_end),
             created_at=m.created_at,
+            paypal_subscription_id=m.paypal_subscription_id,
+            payment_provider=m.payment_provider or "stripe",
         )
 
     async def get_by_user_id(self, user_id: int) -> Subscription | None:
@@ -52,6 +54,16 @@ class BillingRepository(IBillingRepository):
             model = result.scalar_one_or_none()
             return self._to_entity(model) if model else None
 
+    async def get_by_paypal_subscription_id(self, subscription_id: str) -> Subscription | None:
+        async with self._session_factory() as session:
+            result = await session.execute(
+                select(SubscriptionModel).where(
+                    SubscriptionModel.paypal_subscription_id == subscription_id
+                )
+            )
+            model = result.scalar_one_or_none()
+            return self._to_entity(model) if model else None
+
     async def create(
         self,
         user_id:            int,
@@ -72,6 +84,27 @@ class BillingRepository(IBillingRepository):
             await session.refresh(model)
             return self._to_entity(model)
 
+    async def create_paypal(
+        self,
+        user_id:                int,
+        paypal_subscription_id: str,
+        plan:                   str,
+        billing_cycle:          str,
+    ) -> Subscription:
+        async with self._session_factory() as session:
+            model = SubscriptionModel(
+                user_id=user_id,
+                paypal_subscription_id=paypal_subscription_id,
+                payment_provider="paypal",
+                plan=plan,
+                billing_cycle=billing_cycle,
+                status="incomplete",
+            )
+            session.add(model)
+            await session.commit()
+            await session.refresh(model)
+            return self._to_entity(model)
+
     async def update(
         self,
         user_id:                int,
@@ -81,6 +114,8 @@ class BillingRepository(IBillingRepository):
         status:                 str | None = None,
         current_period_end:     object     = None,
         cancel_at_period_end:   bool | None = None,
+        paypal_subscription_id: str | None = None,
+        payment_provider:       str | None = None,
     ) -> Subscription:
         values: dict = {}
         if stripe_subscription_id is not None:
@@ -95,6 +130,10 @@ class BillingRepository(IBillingRepository):
             values["current_period_end"] = current_period_end
         if cancel_at_period_end is not None:
             values["cancel_at_period_end"] = cancel_at_period_end
+        if paypal_subscription_id is not None:
+            values["paypal_subscription_id"] = paypal_subscription_id
+        if payment_provider is not None:
+            values["payment_provider"] = payment_provider
 
         async with self._session_factory() as session:
             await session.execute(

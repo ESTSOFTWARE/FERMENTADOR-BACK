@@ -63,6 +63,19 @@ class Settings(BaseSettings):
     COOKIE_SAMESITE: str  = "lax"
     COOKIE_DOMAIN:   str  = ""      # vacío = sin dominio explícito
 
+    # ── PayPal ────────────────────────────────────────
+    PAYPAL_CLIENT_ID:     str = ""
+    PAYPAL_CLIENT_SECRET: str = ""
+    PAYPAL_MODE:          str = "sandbox"   # sandbox | live
+
+    # PayPal Plan IDs (ejecutar scripts/setup_paypal_plans.py para generarlos)
+    PAYPAL_PLAN_STARTER_MONTHLY:    str = ""
+    PAYPAL_PLAN_STARTER_ANNUAL:     str = ""
+    PAYPAL_PLAN_ACADEMIC_MONTHLY:   str = ""
+    PAYPAL_PLAN_ACADEMIC_ANNUAL:    str = ""
+    PAYPAL_PLAN_ENTERPRISE_MONTHLY: str = ""
+    PAYPAL_PLAN_ENTERPRISE_ANNUAL:  str = ""
+
     # ── Stripe ────────────────────────────────────────
     STRIPE_SECRET_KEY:    str = ""
     STRIPE_PUBLIC_KEY:    str = ""

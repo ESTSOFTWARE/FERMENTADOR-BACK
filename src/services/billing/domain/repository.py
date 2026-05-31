@@ -15,12 +15,24 @@ class IBillingRepository(ABC):
     async def get_by_stripe_subscription_id(self, subscription_id: str) -> Subscription | None: ...
 
     @abstractmethod
+    async def get_by_paypal_subscription_id(self, subscription_id: str) -> Subscription | None: ...
+
+    @abstractmethod
     async def create(
         self,
         user_id:            int,
         stripe_customer_id: str,
         plan:               str,
         billing_cycle:      str,
+    ) -> Subscription: ...
+
+    @abstractmethod
+    async def create_paypal(
+        self,
+        user_id:               int,
+        paypal_subscription_id: str,
+        plan:                  str,
+        billing_cycle:         str,
     ) -> Subscription: ...
 
     @abstractmethod
@@ -33,6 +45,8 @@ class IBillingRepository(ABC):
         status:                 str | None = None,
         current_period_end:     object     = None,
         cancel_at_period_end:   bool | None = None,
+        paypal_subscription_id: str | None = None,
+        payment_provider:       str | None = None,
     ) -> Subscription: ...
 
     @abstractmethod

@@ -3,10 +3,19 @@ from fastapi import APIRouter, Depends, Query, Request
 from src.core.dependencies import get_current_user, require_any_role, require_soporte
 from src.services.billing.domain.dto.billing_schema import (
     CreateCheckoutRequest,
+    CreatePayPalOrderRequest,
+    CreatePayPalSubscriptionRequest,
     SubscriptionResponse,
     SupportSubscriptionResponse,
 )
 from src.services.billing.infrastructure.controllers.checkout_controller import create_checkout
+from src.services.billing.infrastructure.controllers.paypal_controller import (
+    capture_paypal_order,
+    create_paypal_order,
+    create_paypal_subscription,
+    get_paypal_client_token,
+    handle_paypal_webhook,
+)
 from src.services.billing.infrastructure.controllers.subscription_controller import (
     cancel_subscription,
     get_subscription,
@@ -71,3 +80,57 @@ async def support_subscriptions_route(
     _: dict = Depends(require_soporte),
 ):
     return await list_subscriptions(status=status, plan=plan, limit=limit, offset=offset)
+
+
+# ── PayPal ──────────────────────────────────────────────────────────────────
+
+@router.get(
+    "/paypal/client-token",
+    summary="Generar client token PayPal para Hosted Fields (tarjeta embebida)",
+)
+async def paypal_client_token_route(
+    current_user: dict = Depends(require_any_role),
+):
+    return await get_paypal_client_token(current_user)
+
+
+@router.post(
+    "/paypal/subscription",
+    summary="Iniciar suscripción PayPal — devuelve subscription_id para aprobación",
+)
+async def paypal_subscription_route(
+    body: CreatePayPalSubscriptionRequest,
+    current_user: dict = Depends(require_any_role),
+):
+    return await create_paypal_subscription(body, current_user)
+
+
+@router.post(
+    "/paypal/order",
+    summary="Crear orden PayPal para compra única",
+)
+async def paypal_order_route(
+    body: CreatePayPalOrderRequest,
+    current_user: dict = Depends(require_any_role),
+):
+    return await create_paypal_order(body, current_user)
+
+
+@router.post(
+    "/paypal/order/{order_id}/capture",
+    summary="Capturar pago de orden PayPal",
+)
+async def paypal_capture_route(
+    order_id: str,
+    current_user: dict = Depends(require_any_role),
+):
+    return await capture_paypal_order(order_id, current_user)
+
+
+@router.post(
+    "/paypal/webhook",
+    summary="Webhook de eventos de PayPal",
+    include_in_schema=False,
+)
+async def paypal_webhook_route(request: Request):
+    return await handle_paypal_webhook(request)
