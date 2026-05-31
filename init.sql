@@ -299,3 +299,20 @@ CREATE TABLE IF NOT EXISTS password_reset_codes (
     created_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_reset_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS subscriptions (
+    id                      INT AUTO_INCREMENT PRIMARY KEY,
+    user_id                 INT          NOT NULL UNIQUE,
+    stripe_customer_id      VARCHAR(100) NULL UNIQUE,
+    stripe_subscription_id  VARCHAR(100) NULL UNIQUE,
+    paypal_subscription_id  VARCHAR(100) NULL UNIQUE,
+    payment_provider        ENUM('stripe','paypal') NOT NULL DEFAULT 'stripe',
+    plan                    ENUM('starter','academic','enterprise') NOT NULL,
+    billing_cycle           ENUM('monthly','annual') NOT NULL DEFAULT 'monthly',
+    status                  ENUM('active','past_due','canceled','incomplete') NOT NULL DEFAULT 'incomplete',
+    current_period_end      DATETIME     NULL,
+    cancel_at_period_end    TINYINT(1)   NOT NULL DEFAULT 0,
+    created_at              DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at              DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_sub_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
