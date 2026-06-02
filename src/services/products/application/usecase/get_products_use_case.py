@@ -1,6 +1,7 @@
 from src.services.products.domain.entities.product import Product
 from src.services.products.domain.repository import IProductRepository
 
+
 class GetProductsUseCase:
     def __init__(self, product_repository: IProductRepository):
         self._product_repo = product_repository

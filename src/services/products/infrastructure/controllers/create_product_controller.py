@@ -3,6 +3,7 @@ from src.services.products.application.usecase.create_product_use_case import Cr
 from src.services.products.domain.dto.product_schema import CreateProductRequest, ProductResponse
 from src.services.products.infrastructure.adapters.MySQL import MySQLProductRepository
 
+
 async def create(body: CreateProductRequest) -> ProductResponse:
     repo = MySQLProductRepository(AsyncSessionLocal)
     use_case = CreateProductUseCase(repo)

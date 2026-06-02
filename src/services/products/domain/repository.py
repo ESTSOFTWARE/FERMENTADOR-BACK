@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+
 from src.services.products.domain.entities.product import Product
+
 
 class IProductRepository(ABC):
 

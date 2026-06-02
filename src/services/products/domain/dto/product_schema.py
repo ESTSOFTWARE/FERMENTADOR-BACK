@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
 from datetime import datetime
+
+from pydantic import BaseModel, Field
+
 
 class CreateProductRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=150)

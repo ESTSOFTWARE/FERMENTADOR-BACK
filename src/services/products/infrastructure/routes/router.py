@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Depends, Query
+
 from src.core.dependencies import require_admin
-from src.services.products.domain.dto.product_schema import CreateProductRequest, UpdateProductRequest, ProductResponse
+from src.services.products.domain.dto.product_schema import (
+    CreateProductRequest,
+    ProductResponse,
+    UpdateProductRequest,
+)
 from src.services.products.infrastructure.controllers.create_product_controller import create
-from src.services.products.infrastructure.controllers.get_products_controller import get_all
-from src.services.products.infrastructure.controllers.get_product_by_id_controller import get_by_id
-from src.services.products.infrastructure.controllers.update_product_controller import update
 from src.services.products.infrastructure.controllers.delete_product_controller import delete
+from src.services.products.infrastructure.controllers.get_product_by_id_controller import get_by_id
+from src.services.products.infrastructure.controllers.get_products_controller import get_all
+from src.services.products.infrastructure.controllers.update_product_controller import update
 
 router = APIRouter()
 

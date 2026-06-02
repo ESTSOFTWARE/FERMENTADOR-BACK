@@ -2,6 +2,7 @@ from src.core.exceptions import ProductAlreadyExistsException
 from src.services.products.domain.entities.product import Product
 from src.services.products.domain.repository import IProductRepository
 
+
 class CreateProductUseCase:
     def __init__(self, product_repository: IProductRepository):
         self._product_repo = product_repository

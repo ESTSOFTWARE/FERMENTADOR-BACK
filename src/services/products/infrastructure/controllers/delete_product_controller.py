@@ -2,6 +2,7 @@ from src.core.database import AsyncSessionLocal
 from src.services.products.application.usecase.delete_product_use_case import DeleteProductUseCase
 from src.services.products.infrastructure.adapters.MySQL import MySQLProductRepository
 
+
 async def delete(product_id: int) -> dict:
     repo = MySQLProductRepository(AsyncSessionLocal)
     use_case = DeleteProductUseCase(repo)

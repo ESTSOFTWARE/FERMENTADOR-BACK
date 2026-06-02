@@ -1,7 +1,9 @@
-from sqlalchemy import select, update, delete, func, or_
+from sqlalchemy import delete, func, or_, select, update
+
 from src.core.models.product_model import ProductModel
 from src.services.products.domain.entities.product import Product
 from src.services.products.domain.repository import IProductRepository
+
 
 class MySQLProductRepository(IProductRepository):
     def __init__(self, session_factory):

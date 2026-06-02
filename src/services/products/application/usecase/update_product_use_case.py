@@ -1,6 +1,7 @@
-from src.core.exceptions import ProductNotFoundException, ProductAlreadyExistsException
+from src.core.exceptions import ProductAlreadyExistsException, ProductNotFoundException
 from src.services.products.domain.entities.product import Product
 from src.services.products.domain.repository import IProductRepository
+
 
 class UpdateProductUseCase:
     def __init__(self, product_repository: IProductRepository):
