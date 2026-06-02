@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from datetime import datetime, timedelta, timezone
 
@@ -10,6 +11,7 @@ logger = logging.getLogger(__name__)
 PLAN_MAP: dict[str, dict[str, str]] = {}
 
 _token_cache: dict[str, object] = {"token": None, "expires_at": None}
+_token_lock = asyncio.Lock()
 
 
 def _base_url() -> str:
@@ -43,17 +45,22 @@ class PayPalAdapter:
         if _token_cache["token"] and _token_cache["expires_at"] > now:
             return _token_cache["token"]
 
-        async with httpx.AsyncClient() as client:
-            res = await client.post(
-                f"{_base_url()}/v1/oauth2/token",
-                auth=(settings.PAYPAL_CLIENT_ID, settings.PAYPAL_CLIENT_SECRET),
-                data={"grant_type": "client_credentials"},
-            )
-            res.raise_for_status()
-            data = res.json()
-            _token_cache["token"]      = data["access_token"]
-            _token_cache["expires_at"] = now + timedelta(seconds=data["expires_in"] - 60)
-            return _token_cache["token"]
+        async with _token_lock:
+            # Re-check inside the lock — another coroutine may have refreshed already
+            if _token_cache["token"] and _token_cache["expires_at"] > now:
+                return _token_cache["token"]
+
+            async with httpx.AsyncClient() as client:
+                res = await client.post(
+                    f"{_base_url()}/v1/oauth2/token",
+                    auth=(settings.PAYPAL_CLIENT_ID, settings.PAYPAL_CLIENT_SECRET),
+                    data={"grant_type": "client_credentials"},
+                )
+                res.raise_for_status()
+                data = res.json()
+                _token_cache["token"]      = data["access_token"]
+                _token_cache["expires_at"] = now + timedelta(seconds=data["expires_in"] - 60)
+                return _token_cache["token"]
 
     async def _headers(self) -> dict:
         token = await self._get_token()

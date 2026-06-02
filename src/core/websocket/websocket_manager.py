@@ -51,24 +51,21 @@ class WebSocketManager:
         Envía un mensaje a todos los clientes conectados al canal
         de sensores de un circuito específico.
         """
-        connections = self.sensor_connections.get(circuit_id, [])
+        async with self._lock:
+            connections = list(self.sensor_connections.get(circuit_id, []))
         if not connections:
             return
 
         payload = message.model_dump_json()
-        disconnected = []
 
-        for websocket in connections:
-            try:
-                await websocket.send_text(payload)
-            except Exception:
-                disconnected.append(websocket)
-                logger.warning(
-                    f"[WS] Conexión rota en sensor broadcast → circuit_id={circuit_id}"
-                )
+        results = await asyncio.gather(
+            *[ws.send_text(payload) for ws in connections],
+            return_exceptions=True,
+        )
 
-        # Limpiar conexiones muertas
+        disconnected = [ws for ws, r in zip(connections, results) if isinstance(r, Exception)]
         if disconnected:
+            logger.warning(f"[WS] {len(disconnected)} conexión(es) rota(s) en sensor broadcast → circuit_id={circuit_id}")
             async with self._lock:
                 for ws in disconnected:
                     if ws in self.sensor_connections.get(circuit_id, []):
@@ -99,24 +96,21 @@ class WebSocketManager:
         Envía una notificación a todos los clientes conectados
         al canal de notificaciones de un usuario específico.
         """
-        connections = self.notification_connections.get(user_id, [])
+        async with self._lock:
+            connections = list(self.notification_connections.get(user_id, []))
         if not connections:
             return
 
         payload = message.model_dump_json()
-        disconnected = []
 
-        for websocket in connections:
-            try:
-                await websocket.send_text(payload)
-            except Exception:
-                disconnected.append(websocket)
-                logger.warning(
-                    f"[WS] Conexión rota en notification broadcast → user_id={user_id}"
-                )
+        results = await asyncio.gather(
+            *[ws.send_text(payload) for ws in connections],
+            return_exceptions=True,
+        )
 
-        # Limpiar conexiones muertas
+        disconnected = [ws for ws, r in zip(connections, results) if isinstance(r, Exception)]
         if disconnected:
+            logger.warning(f"[WS] {len(disconnected)} conexión(es) rota(s) en notification broadcast → user_id={user_id}")
             async with self._lock:
                 for ws in disconnected:
                     if ws in self.notification_connections.get(user_id, []):

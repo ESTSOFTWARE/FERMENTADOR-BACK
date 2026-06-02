@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 
 import stripe
 
+from src.core.subscription_cache import subscription_cache
 from src.services.billing.domain.repository import IBillingRepository
 from src.services.billing.infrastructure.adapters.stripe_adapter import StripeAdapter
 
@@ -90,6 +91,7 @@ class HandleWebhookUseCase:
                 current_period_end=period_end,
                 cancel_at_period_end=False,
             )
+            subscription_cache.invalidate(subscription.user_id)
             logger.info(f"[Webhook] Suscripción activada para customer {customer_id} — {plan}/{cycle}")
 
     async def _on_subscription_updated(self, sub: dict) -> None:
@@ -116,6 +118,7 @@ class HandleWebhookUseCase:
                 current_period_end=period_end,
                 cancel_at_period_end=cancel_end,
             )
+            subscription_cache.invalidate(subscription.user_id)
 
     async def _on_subscription_deleted(self, sub: dict) -> None:
         customer_id = sub["customer"]
@@ -126,6 +129,7 @@ class HandleWebhookUseCase:
                 status="canceled",
                 cancel_at_period_end=False,
             )
+            subscription_cache.invalidate(subscription.user_id)
             logger.info(f"[Webhook] Suscripción cancelada para customer {customer_id}")
 
     async def _on_payment_failed(self, invoice: dict) -> None:
@@ -133,6 +137,7 @@ class HandleWebhookUseCase:
         subscription = await self._repo.get_by_stripe_customer_id(customer_id)
         if subscription:
             await self._repo.update(user_id=subscription.user_id, status="past_due")
+            subscription_cache.invalidate(subscription.user_id)
             logger.warning(f"[Webhook] Pago fallido para customer {customer_id}")
 
     async def _on_invoice_paid(self, invoice: dict) -> None:
@@ -140,4 +145,5 @@ class HandleWebhookUseCase:
         subscription = await self._repo.get_by_stripe_customer_id(customer_id)
         if subscription and subscription.status == "past_due":
             await self._repo.update(user_id=subscription.user_id, status="active")
+            subscription_cache.invalidate(subscription.user_id)
             logger.info(f"[Webhook] Pago recuperado para customer {customer_id}")

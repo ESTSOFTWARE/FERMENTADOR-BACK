@@ -7,10 +7,11 @@ from src.core.config import settings
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=settings.DEBUG,      # Imprime SQL en consola solo en desarrollo
-    pool_size=10,             # Conexiones simultáneas en el pool
-    max_overflow=20,          # Conexiones extra permitidas si el pool está lleno
+    pool_size=20,             # Conexiones base por worker (4 workers × 20 = 80 conexiones)
+    max_overflow=40,          # Picos: hasta 60 conexiones por worker si es necesario
     pool_pre_ping=True,       # Verifica que la conexión siga viva antes de usarla
-    pool_recycle=3600,        # Recicla conexiones cada hora para evitar timeouts de MySQL
+    pool_recycle=1800,        # Recicla conexiones cada 30 min (MySQL cierra idle a los 8h)
+    pool_timeout=30,          # Tiempo máximo esperando una conexión libre del pool
 )
 
 # ── Fábrica de sesiones ───────────────────────────────────────────────────────
