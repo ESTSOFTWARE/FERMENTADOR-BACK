@@ -1,5 +1,6 @@
 import logging
 
+from src.core.subscription_cache import subscription_cache
 from src.services.billing.domain.repository import IBillingRepository
 
 logger = logging.getLogger(__name__)
@@ -35,6 +36,7 @@ class HandlePayPalWebhookUseCase:
                 user_id=subscription.user_id,
                 status="active",
             )
+            subscription_cache.invalidate(subscription.user_id)
             logger.info(f"[PayPal Webhook] Suscripción activada: {sub_id}")
 
     async def _on_cancelled(self, resource: dict) -> None:
@@ -47,6 +49,7 @@ class HandlePayPalWebhookUseCase:
                 user_id=subscription.user_id,
                 status="canceled",
             )
+            subscription_cache.invalidate(subscription.user_id)
             logger.info(f"[PayPal Webhook] Suscripción cancelada: {sub_id}")
 
     async def _on_payment_failed(self, resource: dict) -> None:
@@ -59,6 +62,7 @@ class HandlePayPalWebhookUseCase:
                 user_id=subscription.user_id,
                 status="past_due",
             )
+            subscription_cache.invalidate(subscription.user_id)
             logger.warning(f"[PayPal Webhook] Pago fallido: {sub_id}")
 
     async def _on_payment_completed(self, resource: dict) -> None:
@@ -71,4 +75,5 @@ class HandlePayPalWebhookUseCase:
                 user_id=subscription.user_id,
                 status="active",
             )
+            subscription_cache.invalidate(subscription.user_id)
             logger.info(f"[PayPal Webhook] Pago recuperado: {billing_agreement}")
