@@ -178,6 +178,22 @@ class FormulaNotFoundException(AppException):
         )
 
 
+# ── Productos ─────────────────────────────────────────────────────────────────
+class ProductNotFoundException(AppException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Producto no encontrado"
+        )
+
+class ProductAlreadyExistsException(AppException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ya existe un producto con ese SKU"
+        )
+
+
 # ── RabbitMQ ──────────────────────────────────────────────────────────────────
 class BrokerConnectionException(AppException):
     def __init__(self):

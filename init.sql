@@ -300,6 +300,20 @@ CREATE TABLE IF NOT EXISTS password_reset_codes (
     CONSTRAINT fk_reset_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS products (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(150)    NOT NULL,
+    description TEXT            NOT NULL,
+    price       DOUBLE          NOT NULL,
+    sku         VARCHAR(50)     NOT NULL UNIQUE,
+    stock       INT             NOT NULL DEFAULT 0,
+    rating      INT             NOT NULL DEFAULT 1,
+    created_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_product_price  CHECK (price > 0),
+    CONSTRAINT chk_product_stock  CHECK (stock >= 0),
+    CONSTRAINT chk_product_rating CHECK (rating >= 1 AND rating <= 5)
+);
+
 CREATE TABLE IF NOT EXISTS subscriptions (
     id                      INT AUTO_INCREMENT PRIMARY KEY,
     user_id                 INT          NOT NULL UNIQUE,
@@ -316,3 +330,4 @@ CREATE TABLE IF NOT EXISTS subscriptions (
     updated_at              DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_sub_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+

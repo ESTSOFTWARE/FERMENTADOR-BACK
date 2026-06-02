@@ -193,6 +193,7 @@ from src.services.notifications.infrastructure.routes.router import router as no
 from src.services.notifications.infrastructure.routes.websocket import (
     router as notifications_ws_router,
 )
+from src.services.products.infrastructure.routes.router import router as products_router
 from src.services.sensors.infrastructure.routes.router import router as sensors_router
 from src.services.sensors.infrastructure.routes.websocket import router as sensors_ws_router
 from src.services.support.infrastructure.routes.router import router as support_router
@@ -201,6 +202,7 @@ from src.services.users.infrastructure.routes.router import router as users_rout
 app.include_router(auth_router,             prefix="/api/auth",          tags=["Auth"])
 app.include_router(oauth_callbacks_router,  prefix="/auth",              tags=["Auth OAuth"])
 app.include_router(users_router,            prefix="/api/users",         tags=["Users"])
+app.include_router(products_router,         prefix="/api/products",      tags=["Products"])
 app.include_router(circuits_router,         prefix="/api/circuits",      tags=["Circuits"])
 app.include_router(circuits_ws_router,      prefix="",                   tags=["Circuits WS"])
 app.include_router(sensors_router,          prefix="/api/sensors",       tags=["Sensors"])
