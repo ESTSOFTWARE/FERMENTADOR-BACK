@@ -184,6 +184,8 @@ from src.services.announcements.infrastructure.routes.router import router as an
 from src.services.auth.infrastructure.routes.oauth_callbacks import router as oauth_callbacks_router
 from src.services.auth.infrastructure.routes.router import router as auth_router
 from src.services.billing.infrastructure.routes.router import router as billing_router
+from src.services.chat.infrastructure.routes.router import router as chat_router
+from src.services.chat.infrastructure.routes.websocket import router as chat_ws_router
 from src.services.circuits.infrastructure.routes.router import router as circuits_router
 from src.services.circuits.infrastructure.routes.websocket import router as circuits_ws_router
 from src.services.fermentation.infrastructure.routes.router import router as fermentation_router
@@ -213,6 +215,8 @@ app.include_router(announcements_router,    prefix="/api/announcements", tags=["
 app.include_router(groups_router,           prefix="/api/groups",        tags=["Groups"])
 app.include_router(support_router,          prefix="/support",           tags=["Support"])
 app.include_router(billing_router,          prefix="/api/billing",       tags=["Billing"])
+app.include_router(chat_router,             prefix="/api/chat",          tags=["Chat"])
+app.include_router(chat_ws_router,          prefix="",                   tags=["Chat WS"])
 
 
 # ── Health ────────────────────────────────────────────────────────────────────

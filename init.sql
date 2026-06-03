@@ -316,3 +316,67 @@ CREATE TABLE IF NOT EXISTS subscriptions (
     updated_at              DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_sub_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- ── Chat ──────────────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS chat_conversations (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    type        ENUM('personal','group') NOT NULL,
+    name        VARCHAR(150)  NULL,
+    description VARCHAR(500)  NULL,
+    avatar      VARCHAR(2048) NULL,
+    created_by  INT           NOT NULL,
+    created_at  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_chat_conv_creator FOREIGN KEY (created_by) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS chat_conversation_members (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    conversation_id INT       NOT NULL,
+    user_id         INT       NOT NULL,
+    joined_at       DATETIME  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_read_at    DATETIME  NULL,
+    CONSTRAINT uq_conversation_member UNIQUE (conversation_id, user_id),
+    CONSTRAINT fk_chat_member_conv FOREIGN KEY (conversation_id) REFERENCES chat_conversations(id) ON DELETE CASCADE,
+    CONSTRAINT fk_chat_member_user FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS chat_messages (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    conversation_id INT       NOT NULL,
+    sender_id       INT       NOT NULL,
+    content         TEXT      NULL,
+    reply_to_id     INT       NULL,
+    priority        ENUM('normal','important','urgent') NOT NULL DEFAULT 'normal',
+    pinned          TINYINT(1) NOT NULL DEFAULT 0,
+    edited          TINYINT(1) NOT NULL DEFAULT 0,
+    edited_at       DATETIME  NULL,
+    deleted         TINYINT(1) NOT NULL DEFAULT 0,
+    created_at      DATETIME  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_chat_msg_conv_created (conversation_id, created_at),
+    CONSTRAINT fk_chat_msg_conv   FOREIGN KEY (conversation_id) REFERENCES chat_conversations(id) ON DELETE CASCADE,
+    CONSTRAINT fk_chat_msg_sender FOREIGN KEY (sender_id)       REFERENCES users(id),
+    CONSTRAINT fk_chat_msg_reply  FOREIGN KEY (reply_to_id)     REFERENCES chat_messages(id)
+);
+
+CREATE TABLE IF NOT EXISTS chat_message_attachments (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    message_id INT          NOT NULL,
+    type       ENUM('image','video','document','file') NOT NULL,
+    name       VARCHAR(255) NOT NULL,
+    url        VARCHAR(2048) NOT NULL,
+    size       INT          NOT NULL DEFAULT 0,
+    CONSTRAINT fk_chat_att_msg FOREIGN KEY (message_id) REFERENCES chat_messages(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS chat_message_reactions (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    message_id INT         NOT NULL,
+    user_id    INT         NOT NULL,
+    emoji      VARCHAR(16) NOT NULL,
+    created_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_message_user_emoji UNIQUE (message_id, user_id, emoji),
+    CONSTRAINT fk_chat_react_msg  FOREIGN KEY (message_id) REFERENCES chat_messages(id) ON DELETE CASCADE,
+    CONSTRAINT fk_chat_react_user FOREIGN KEY (user_id)    REFERENCES users(id)
+);
