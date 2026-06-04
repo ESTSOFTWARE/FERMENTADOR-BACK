@@ -60,8 +60,8 @@ async def refresh_route(request: Request, response: Response):
     response_model=MessageResponse,
     summary="Cerrar sesión y limpiar cookies",
 )
-async def logout_route(response: Response):
-    return await logout(response)
+async def logout_route(request: Request, response: Response):
+    return await logout(request, response)
 
 
 @router.get("/google", summary="Iniciar OAuth con Google (web admin)")

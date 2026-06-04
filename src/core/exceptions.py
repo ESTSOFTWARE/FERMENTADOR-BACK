@@ -51,6 +51,15 @@ class UnauthorizedException(AppException):
             detail="No autorizado"
         )
 
+class SessionReplacedException(AppException):
+    """401 cuando la sesión fue reemplazada por un login más reciente (sesión única)."""
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="SESSION_REPLACED",
+        )
+
+
 class ForbiddenException(AppException):
     def __init__(self, detail: str = "No tienes permisos para realizar esta acción"):
         super().__init__(

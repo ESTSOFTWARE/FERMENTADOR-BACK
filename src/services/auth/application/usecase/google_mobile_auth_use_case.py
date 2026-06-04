@@ -1,6 +1,7 @@
 from src.core.config import settings
 from src.core.exceptions import InvalidCredentialsException
 from src.core.security import create_access_token, create_refresh_token
+from src.core.session import rotate_and_revoke
 from src.services.auth.domain.repository import IAuthRepository
 from src.services.auth.infrastructure.adapters.oauth_adapter import OAuthAdapter
 
@@ -43,11 +44,12 @@ class GoogleMobileAuthUseCase:
             user = await self._repo.get_user_by_id(user.id)
 
         role_name = user.role.name if user.role else "estudiante"
-        jwt_data  = {"sub": str(user.id), "role": role_name, "circuit_id": user.circuit_id}
+        sid = await rotate_and_revoke(self._repo, user.id)
+        jwt_data  = {"sub": str(user.id), "role": role_name, "circuit_id": user.circuit_id, "sid": sid}
 
         return {
             "access_token":  create_access_token(jwt_data),
-            "refresh_token": create_refresh_token({"sub": str(user.id)}),
+            "refresh_token": create_refresh_token({"sub": str(user.id), "sid": sid}),
             "token_type":    "bearer",
             "user": {
                 "id":             user.id,

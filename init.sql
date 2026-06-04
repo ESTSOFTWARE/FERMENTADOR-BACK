@@ -50,6 +50,7 @@ CREATE TABLE users (
     warning_email_sent_at   DATETIME      NULL DEFAULT NULL,
     reactivated_at          DATETIME      NULL DEFAULT NULL,
     last_oauth_login_at     DATETIME      NULL DEFAULT NULL,
+    active_session_id       VARCHAR(64)   NULL DEFAULT NULL,
     CONSTRAINT fk_user_role    FOREIGN KEY (role_id)    REFERENCES roles(id)    ON DELETE RESTRICT,
     CONSTRAINT fk_user_circuit FOREIGN KEY (circuit_id) REFERENCES circuits(id) ON DELETE SET NULL,
     CONSTRAINT fk_user_creator FOREIGN KEY (created_by) REFERENCES users(id)   ON DELETE SET NULL

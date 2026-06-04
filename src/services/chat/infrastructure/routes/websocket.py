@@ -4,8 +4,9 @@ import logging
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from src.core.database import AsyncSessionLocal
-from src.core.security import get_user_id_from_token
+from src.core.security import decode_token
 from src.core.websocket.chat_ws_manager import chat_ws_manager
+from src.services.auth.infrastructure.adapters.MySQL import AuthRepository
 from src.services.chat.infrastructure.adapters.MySQL import ChatRepository
 from src.services.users.infrastructure.adapters.MySQL import UserRepository
 
@@ -28,8 +29,16 @@ async def chat_ws(websocket: WebSocket):
         await websocket.close(code=4401)
         return
     try:
-        user_id = get_user_id_from_token(token)
+        payload   = decode_token(token)
+        user_id   = int(payload["sub"])
+        token_sid = payload.get("sid")
     except Exception:
+        await websocket.close(code=4401)
+        return
+
+    # Sesión única: el token debe corresponder a la sesión activa del usuario.
+    active_sid = await AuthRepository(AsyncSessionLocal).get_active_session_id(user_id)
+    if not token_sid or token_sid != active_sid:
         await websocket.close(code=4401)
         return
 

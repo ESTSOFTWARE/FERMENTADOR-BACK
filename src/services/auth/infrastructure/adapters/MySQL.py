@@ -271,3 +271,28 @@ class AuthRepository(IAuthRepository):
                 .values(password=hashed_password)
             )
             await session.commit()
+
+    # ── Sesión única ──────────────────────────────────────────────────────────
+    async def set_active_session(self, user_id: int, session_id: str) -> None:
+        async with self._session_factory() as session:
+            await session.execute(
+                update(UserModel)
+                .where(UserModel.id == user_id)
+                .values(active_session_id=session_id)
+            )
+            await session.commit()
+
+    async def clear_active_session(self, user_id: int) -> None:
+        async with self._session_factory() as session:
+            await session.execute(
+                update(UserModel)
+                .where(UserModel.id == user_id)
+                .values(active_session_id=None)
+            )
+            await session.commit()
+
+    async def get_active_session_id(self, user_id: int) -> str | None:
+        async with self._session_factory() as session:
+            return (await session.execute(
+                select(UserModel.active_session_id).where(UserModel.id == user_id)
+            )).scalar_one_or_none()
