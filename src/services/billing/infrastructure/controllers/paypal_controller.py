@@ -17,8 +17,8 @@ from src.services.billing.domain.dto.billing_schema import (
     CreatePayPalOrderRequest,
     CreatePayPalSubscriptionRequest,
 )
-from src.services.billing.infrastructure.adapters.MySQL import BillingRepository
 from src.services.billing.infrastructure.adapters.paypal_adapter import PayPalAdapter
+from src.services.billing.infrastructure.adapters.postgres import BillingRepository
 
 logger = logging.getLogger(__name__)
 

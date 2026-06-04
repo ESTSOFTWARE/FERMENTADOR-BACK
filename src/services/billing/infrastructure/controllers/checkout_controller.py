@@ -6,7 +6,7 @@ from src.services.billing.application.usecase.create_checkout_session_use_case i
     CreateCheckoutSessionUseCase,
 )
 from src.services.billing.domain.dto.billing_schema import CreateCheckoutRequest
-from src.services.billing.infrastructure.adapters.MySQL import BillingRepository
+from src.services.billing.infrastructure.adapters.postgres import BillingRepository
 from src.services.billing.infrastructure.adapters.stripe_adapter import StripeAdapter
 
 

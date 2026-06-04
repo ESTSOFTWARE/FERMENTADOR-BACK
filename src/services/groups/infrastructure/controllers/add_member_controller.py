@@ -1,12 +1,12 @@
 from src.core.database import AsyncSessionLocal
 from src.services.groups.application.usecase.add_member_use_case import AddMemberUseCase
 from src.services.groups.domain.dto.group_schema import AddMemberRequest, GroupResponse
-from src.services.groups.infrastructure.adapters.MySQL import GroupRepository
+from src.services.groups.infrastructure.adapters.postgres import GroupRepository
 from src.services.notifications.application.usecase.send_notification_use_case import (
     SendNotificationUseCase,
 )
-from src.services.notifications.infrastructure.adapters.MySQL import NotificationRepository
-from src.services.users.infrastructure.adapters.MySQL import UserRepository
+from src.services.notifications.infrastructure.adapters.postgres import NotificationRepository
+from src.services.users.infrastructure.adapters.postgres import UserRepository
 
 
 async def add_member(group_id: int, body: AddMemberRequest, professor_id: int) -> GroupResponse:

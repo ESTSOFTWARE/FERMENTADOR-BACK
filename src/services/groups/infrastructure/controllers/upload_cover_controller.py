@@ -7,7 +7,7 @@ import src.core.cloudinary.config  # noqa: F401
 from src.core.database import AsyncSessionLocal
 from src.core.exceptions import AppException, BadRequestException
 from src.services.groups.domain.dto.group_schema import GroupResponse
-from src.services.groups.infrastructure.adapters.MySQL import GroupRepository
+from src.services.groups.infrastructure.adapters.postgres import GroupRepository
 
 _ALLOWED_TYPES = {"image/jpeg", "image/jpg", "image/png", "image/webp"}
 _MAX_SIZE_BYTES = 5 * 1024 * 1024

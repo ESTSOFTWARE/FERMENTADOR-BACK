@@ -5,7 +5,7 @@ from src.core.models.user_models import UserModel
 from src.services.support.domain.repository.support_repository import SupportRepository
 
 
-class SupportRepositoryMySQL(SupportRepository):
+class SupportRepositoryPostgres(SupportRepository):
     def __init__(self, session):
         self.session = session
 

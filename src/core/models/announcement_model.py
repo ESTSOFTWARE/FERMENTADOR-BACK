@@ -17,5 +17,5 @@ class AnnouncementModel(Base):
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
-    is_pinned    = Column(Boolean,  nullable=False, default=False, server_default=text("0"))
+    is_pinned    = Column(Boolean,  nullable=False, default=False, server_default=text("false"))
     pinned_until = Column(DateTime, nullable=True)

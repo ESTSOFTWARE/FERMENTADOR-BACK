@@ -1,10 +1,10 @@
 from src.core.database import AsyncSessionLocal
 from src.services.groups.application.usecase.remove_member_use_case import RemoveMemberUseCase
-from src.services.groups.infrastructure.adapters.MySQL import GroupRepository
+from src.services.groups.infrastructure.adapters.postgres import GroupRepository
 from src.services.notifications.application.usecase.send_notification_use_case import (
     SendNotificationUseCase,
 )
-from src.services.notifications.infrastructure.adapters.MySQL import NotificationRepository
+from src.services.notifications.infrastructure.adapters.postgres import NotificationRepository
 
 
 async def remove_member(group_id: int, student_id: int, professor_id: int) -> None:

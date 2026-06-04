@@ -6,7 +6,7 @@ from src.services.fermentation.domain.dto.fermentation_session_schema import (
     FermentationSessionResponse,
 )
 from src.services.fermentation.domain.dto.stop_fermentation_schema import StopFermentationRequest
-from src.services.fermentation.infrastructure.adapters.MySQL import FermentationRepository
+from src.services.fermentation.infrastructure.adapters.postgres import FermentationRepository
 
 
 async def stop(session_id: int, body: StopFermentationRequest, user_id: int) -> FermentationSessionResponse:

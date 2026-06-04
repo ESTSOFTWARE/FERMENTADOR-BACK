@@ -3,7 +3,7 @@ from fastapi import UploadFile
 from src.core.cloudinary.upload_service import upload_profile_image
 from src.core.database import AsyncSessionLocal
 from src.services.users.application.usecase.update_user_use_case import UpdateUserUseCase
-from src.services.users.infrastructure.adapters.MySQL import UserRepository
+from src.services.users.infrastructure.adapters.postgres import UserRepository
 
 
 async def upload_profile_image_controller(file: UploadFile, user_id: int) -> dict:

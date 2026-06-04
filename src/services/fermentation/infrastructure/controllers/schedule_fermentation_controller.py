@@ -8,7 +8,7 @@ from src.services.fermentation.domain.dto.fermentation_session_schema import (
 from src.services.fermentation.domain.dto.schedule_fermentation_schema import (
     ScheduleFermentationRequest,
 )
-from src.services.fermentation.infrastructure.adapters.MySQL import FermentationRepository
+from src.services.fermentation.infrastructure.adapters.postgres import FermentationRepository
 
 
 async def schedule(body: ScheduleFermentationRequest, user_id: int) -> FermentationSessionResponse:

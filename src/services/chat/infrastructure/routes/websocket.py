@@ -6,9 +6,9 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from src.core.database import AsyncSessionLocal
 from src.core.security import decode_token
 from src.core.websocket.chat_ws_manager import chat_ws_manager
-from src.services.auth.infrastructure.adapters.MySQL import AuthRepository
-from src.services.chat.infrastructure.adapters.MySQL import ChatRepository
-from src.services.users.infrastructure.adapters.MySQL import UserRepository
+from src.services.auth.infrastructure.adapters.postgres import AuthRepository
+from src.services.chat.infrastructure.adapters.postgres import ChatRepository
+from src.services.users.infrastructure.adapters.postgres import UserRepository
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

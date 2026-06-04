@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 from src.core.email.email_service import send_reactivation_email
-from src.services.users.infrastructure.adapters.MySQL import UserRepository
+from src.services.users.infrastructure.adapters.postgres import UserRepository
 
 logger = logging.getLogger(__name__)
 

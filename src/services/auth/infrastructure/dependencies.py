@@ -1,5 +1,5 @@
 from src.core.database import AsyncSessionLocal
-from src.services.auth.infrastructure.adapters.MySQL import AuthRepository
+from src.services.auth.infrastructure.adapters.postgres import AuthRepository
 
 
 def get_auth_repository() -> AuthRepository:

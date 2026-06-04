@@ -26,7 +26,7 @@ class SensorThread(BaseSensorThread):
     async def process_reading(self, payload: ESP32SensorPayload) -> None:
         from src.core.database import AsyncSessionLocal
         from src.services.sensors.application.usecase.get_history_use_case import SaveReadingUseCase
-        from src.services.sensors.infrastructure.adapters.MySQL import SensorRepository
+        from src.services.sensors.infrastructure.adapters.postgres import SensorRepository
 
         repo = SensorRepository(AsyncSessionLocal)
         uc   = SaveReadingUseCase(repo)

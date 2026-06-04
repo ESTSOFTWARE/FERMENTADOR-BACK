@@ -1,11 +1,11 @@
 from src.core.database import AsyncSessionLocal
 from src.services.products.application.usecase.create_product_use_case import CreateProductUseCase
 from src.services.products.domain.dto.product_schema import CreateProductRequest, ProductResponse
-from src.services.products.infrastructure.adapters.MySQL import MySQLProductRepository
+from src.services.products.infrastructure.adapters.postgres import PostgresProductRepository
 
 
 async def create(body: CreateProductRequest) -> ProductResponse:
-    repo = MySQLProductRepository(AsyncSessionLocal)
+    repo = PostgresProductRepository(AsyncSessionLocal)
     use_case = CreateProductUseCase(repo)
     product = await use_case.execute(
         name=body.name,

@@ -4,7 +4,7 @@ from src.core.cookie_manager import set_access_cookie
 from src.core.database import AsyncSessionLocal
 from src.core.exceptions import TokenInvalidException
 from src.services.auth.application.usecase.refresh_token_use_case import RefreshTokenUseCase
-from src.services.auth.infrastructure.adapters.MySQL import AuthRepository
+from src.services.auth.infrastructure.adapters.postgres import AuthRepository
 
 
 async def refresh_token(request: Request, response: Response) -> dict:

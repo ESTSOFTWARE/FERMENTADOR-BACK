@@ -26,7 +26,7 @@ async def _run_warning_email_task() -> None:
             from src.services.users.application.usecase.send_warning_email_use_case import (
                 SendWarningEmailUseCase,
             )
-            from src.services.users.infrastructure.adapters.MySQL import UserRepository
+            from src.services.users.infrastructure.adapters.postgres import UserRepository
 
             count = await SendWarningEmailUseCase(UserRepository(AsyncSessionLocal)).execute()
             if count:
@@ -44,7 +44,7 @@ async def _run_user_cleanup_task() -> None:
             from src.services.users.application.usecase.deactivate_expired_users_use_case import (
                 DeactivateExpiredUsersUseCase,
             )
-            from src.services.users.infrastructure.adapters.MySQL import UserRepository
+            from src.services.users.infrastructure.adapters.postgres import UserRepository
 
             count = await DeactivateExpiredUsersUseCase(UserRepository(AsyncSessionLocal)).execute()
             if count:
@@ -75,18 +75,22 @@ async def lifespan(app: FastAPI):
 
         from src.core.database import AsyncSessionLocal
         from src.core.rabbitmq.consumer import consumer
-        from src.services.fermentation.infrastructure.adapters.MySQL import FermentationRepository
+        from src.services.fermentation.infrastructure.adapters.postgres import (
+            FermentationRepository,
+        )
         from src.services.fermentation.infrastructure.event_consumer import (
             fermentation_event_consumer,
         )
         from src.services.notifications.application.usecase.send_notification_use_case import (
             SendNotificationUseCase,
         )
-        from src.services.notifications.infrastructure.adapters.MySQL import NotificationRepository
+        from src.services.notifications.infrastructure.adapters.postgres import (
+            NotificationRepository,
+        )
         from src.services.sensors.application.usecase.save_reading_use_case import (
             SaveReadingUseCase,
         )
-        from src.services.sensors.infrastructure.adapters.MySQL import SensorRepository
+        from src.services.sensors.infrastructure.adapters.postgres import SensorRepository
 
         fermentation_repo = FermentationRepository(AsyncSessionLocal)
 

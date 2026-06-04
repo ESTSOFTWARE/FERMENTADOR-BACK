@@ -10,7 +10,7 @@ engine = create_async_engine(
     pool_size=20,             # Conexiones base por worker (4 workers × 20 = 80 conexiones)
     max_overflow=40,          # Picos: hasta 60 conexiones por worker si es necesario
     pool_pre_ping=True,       # Verifica que la conexión siga viva antes de usarla
-    pool_recycle=1800,        # Recicla conexiones cada 30 min (MySQL cierra idle a los 8h)
+    pool_recycle=1800,        # Recicla conexiones cada 30 min para evitar conexiones obsoletas
     pool_timeout=30,          # Tiempo máximo esperando una conexión libre del pool
 )
 

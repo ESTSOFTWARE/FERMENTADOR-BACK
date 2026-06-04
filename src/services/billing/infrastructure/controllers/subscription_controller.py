@@ -6,7 +6,7 @@ from src.services.billing.application.usecase.cancel_subscription_use_case impor
 from src.services.billing.application.usecase.get_subscription_use_case import (
     GetSubscriptionUseCase,
 )
-from src.services.billing.infrastructure.adapters.MySQL import BillingRepository
+from src.services.billing.infrastructure.adapters.postgres import BillingRepository
 from src.services.billing.infrastructure.adapters.stripe_adapter import StripeAdapter
 
 

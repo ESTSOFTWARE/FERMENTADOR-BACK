@@ -3,7 +3,7 @@ from src.services.announcements.application.usecase.update_announcement_use_case
     UpdateAnnouncementUseCase,
 )
 from src.services.announcements.domain.dto.announcement_schema import UpdateAnnouncementRequest
-from src.services.announcements.infrastructure.adapters.MySQL import AnnouncementRepository
+from src.services.announcements.infrastructure.adapters.postgres import AnnouncementRepository
 
 
 async def update_announcement(announcement_id: int, body: UpdateAnnouncementRequest):

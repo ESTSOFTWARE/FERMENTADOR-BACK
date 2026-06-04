@@ -1,11 +1,11 @@
 from src.core.database import AsyncSessionLocal
 from src.services.products.application.usecase.update_product_use_case import UpdateProductUseCase
 from src.services.products.domain.dto.product_schema import ProductResponse, UpdateProductRequest
-from src.services.products.infrastructure.adapters.MySQL import MySQLProductRepository
+from src.services.products.infrastructure.adapters.postgres import PostgresProductRepository
 
 
 async def update(product_id: int, body: UpdateProductRequest) -> ProductResponse:
-    repo = MySQLProductRepository(AsyncSessionLocal)
+    repo = PostgresProductRepository(AsyncSessionLocal)
     use_case = UpdateProductUseCase(repo)
     product = await use_case.execute(product_id, **body.model_dump(exclude_unset=True))
     return ProductResponse.from_entity(product)

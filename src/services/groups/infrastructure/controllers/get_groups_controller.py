@@ -1,7 +1,7 @@
 from src.core.database import AsyncSessionLocal
 from src.services.groups.application.usecase.get_groups_use_case import GetGroupsUseCase
 from src.services.groups.domain.dto.group_schema import GroupResponse
-from src.services.groups.infrastructure.adapters.MySQL import GroupRepository
+from src.services.groups.infrastructure.adapters.postgres import GroupRepository
 
 
 async def get_groups(professor_id: int) -> list[GroupResponse]:

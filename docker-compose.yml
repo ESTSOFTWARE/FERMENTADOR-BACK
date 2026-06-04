@@ -11,32 +11,33 @@ services:
     env_file:
       - .env
     environment:
-      DB_HOST: mysql
+      DB_HOST: postgres
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     command: sh -c "sleep 15 && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
     networks:
       - sensor_network
 
-  mysql:
-    image: mysql:8.0
-    container_name: sensor_mysql
+  postgres:
+    image: postgres:16-alpine
+    container_name: sensor_postgres
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
-      - "3307:3306"
+      - "5433:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 40s
+      start_period: 30s
     networks:
       - sensor_network
 
@@ -47,13 +48,13 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     networks:
       - sensor_network
 
 volumes:
-  mysql_data:
+  postgres_data:
 
 networks:
   sensor_network:

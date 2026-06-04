@@ -2,14 +2,14 @@ from src.core.database import AsyncSessionLocal
 from src.services.notifications.application.usecase.send_notification_use_case import (
     SendNotificationUseCase,
 )
-from src.services.notifications.infrastructure.adapters.MySQL import (
+from src.services.notifications.infrastructure.adapters.postgres import (
     NotificationRepository,
 )
 from src.services.users.application.usecase.create_user_use_case import CreateUserUseCase
 from src.services.users.domain.dto.create_user_schema import CreateUserRequest
 from src.services.users.domain.dto.user_schema import UserResponse
 from src.services.users.infrastructure.adapters.circuit_lookup_adapter import CircuitLookupAdapter
-from src.services.users.infrastructure.adapters.MySQL import UserRepository
+from src.services.users.infrastructure.adapters.postgres import UserRepository
 
 _ROLE_LABEL = {"profesor": "profesor", "estudiante": "alumno"}
 

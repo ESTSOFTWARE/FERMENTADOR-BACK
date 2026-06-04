@@ -42,7 +42,7 @@ class FermentationSessionModel(Base):
     actual_start = Column(DateTime, nullable=True)
     actual_end = Column(DateTime, nullable=True)
     status = Column(
-        Enum("scheduled", "running", "completed", "interrupted"),
+        Enum("scheduled", "running", "completed", "interrupted", native_enum=False),
         nullable=False,
         default="scheduled",
     )
@@ -122,7 +122,7 @@ class ReportHistoryModel(Base):
         "fermentation_reports.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     action = Column(
-        Enum("generated", "downloaded", "viewed"),
+        Enum("generated", "downloaded", "viewed", native_enum=False),
         nullable=False,
         default="generated",
     )

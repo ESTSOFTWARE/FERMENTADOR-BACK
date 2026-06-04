@@ -17,7 +17,7 @@ from src.services.chat.domain.dto.chat_schema import (
 )
 from src.services.chat.domain.entities.chat import Attachment
 from src.services.chat.infrastructure import broadcaster
-from src.services.chat.infrastructure.adapters.MySQL import ChatRepository
+from src.services.chat.infrastructure.adapters.postgres import ChatRepository
 from src.services.chat.infrastructure.mappers import message_dto
 
 

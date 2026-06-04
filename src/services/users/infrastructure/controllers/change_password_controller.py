@@ -1,7 +1,7 @@
 from src.core.database import AsyncSessionLocal
 from src.services.users.application.usecase.change_password_use_case import ChangePasswordUseCase
 from src.services.users.domain.dto.change_password_schema import ChangePasswordRequest
-from src.services.users.infrastructure.adapters.MySQL import UserRepository
+from src.services.users.infrastructure.adapters.postgres import UserRepository
 
 
 async def change_password(user_id: int, body: ChangePasswordRequest) -> dict:

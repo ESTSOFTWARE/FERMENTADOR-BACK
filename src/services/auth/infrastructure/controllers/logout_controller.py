@@ -5,7 +5,7 @@ from fastapi import Request, Response
 from src.core.cookie_manager import clear_auth_cookies
 from src.core.database import AsyncSessionLocal
 from src.core.security import decode_token
-from src.services.auth.infrastructure.adapters.MySQL import AuthRepository
+from src.services.auth.infrastructure.adapters.postgres import AuthRepository
 
 logger = logging.getLogger(__name__)
 
