@@ -7,6 +7,7 @@ from src.core.database import get_db
 from src.core.exceptions import (
     AccountDeactivatedException,
     ForbiddenException,
+    SessionReplacedException,
     UnauthorizedException,
 )
 from src.core.security import decode_token
@@ -42,16 +43,26 @@ async def get_current_user(
 
     from src.core.models.user_models import UserModel
     result = await db.execute(
-        select(UserModel.is_active).where(UserModel.id == int(user_id))
+        select(UserModel.is_active, UserModel.active_session_id)
+        .where(UserModel.id == int(user_id))
     )
-    is_active = result.scalar_one_or_none()
+    row = result.first()
+    if row is None:
+        raise UnauthorizedException()
+    is_active, active_session_id = row
     if is_active is False:
         raise AccountDeactivatedException()
+
+    # ── Sesión única: el token debe corresponder a la sesión activa actual ────
+    token_sid = payload.get("sid")
+    if not token_sid or token_sid != active_session_id:
+        raise SessionReplacedException()
 
     return {
         "user_id":    int(user_id),
         "role":       role,
         "circuit_id": payload.get("circuit_id"),
+        "sid":        token_sid,
     }
 
 

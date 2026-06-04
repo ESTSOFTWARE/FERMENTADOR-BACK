@@ -1,6 +1,7 @@
 from src.core.email.email_service import send_welcome_email
 from src.core.exceptions import InvalidCredentialsException
 from src.core.security import create_access_token, create_refresh_token
+from src.core.session import rotate_and_revoke
 from src.services.auth.domain.repository import IAuthRepository
 from src.services.auth.infrastructure.adapters.oauth_adapter import OAuthAdapter
 
@@ -54,11 +55,12 @@ class GoogleWebAuthUseCase:
             await send_welcome_email(to_email=user.email, name=user.name)
 
         role_name  = user.role.name if user.role else "admin"
-        jwt_data   = {"sub": str(user.id), "role": role_name, "circuit_id": user.circuit_id}
+        sid = await rotate_and_revoke(self._repo, user.id)
+        jwt_data   = {"sub": str(user.id), "role": role_name, "circuit_id": user.circuit_id, "sid": sid}
 
         return {
             "access_token":  create_access_token(jwt_data),
-            "refresh_token": create_refresh_token({"sub": str(user.id)}),
+            "refresh_token": create_refresh_token({"sub": str(user.id), "sid": sid}),
             "token_type":    "bearer",
             "user": {
                 "id":             user.id,

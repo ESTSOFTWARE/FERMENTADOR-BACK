@@ -41,6 +41,7 @@ class UserModel(Base):
     warning_email_sent_at   = Column(DateTime, nullable=True)
     reactivated_at          = Column(DateTime, nullable=True)
     last_oauth_login_at     = Column(DateTime, nullable=True)
+    active_session_id       = Column(String(64), nullable=True)
 
     role    = relationship("RoleModel", back_populates="users")
     creator = relationship("UserModel", remote_side=[id])

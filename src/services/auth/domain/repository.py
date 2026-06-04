@@ -68,3 +68,13 @@ class IAuthRepository(ABC):
 
     @abstractmethod
     async def update_password(self, user_id: int, hashed_password: str) -> None: ...
+
+    # ── Sesión única ──────────────────────────────────────────────────────────
+    @abstractmethod
+    async def set_active_session(self, user_id: int, session_id: str) -> None: ...
+
+    @abstractmethod
+    async def clear_active_session(self, user_id: int) -> None: ...
+
+    @abstractmethod
+    async def get_active_session_id(self, user_id: int) -> str | None: ...

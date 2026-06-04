@@ -17,6 +17,7 @@ from src.core.security import (
     needs_rehash,
     verify_password,
 )
+from src.core.session import rotate_and_revoke
 from src.services.auth.domain.repository import IAuthRepository
 
 logger = logging.getLogger(__name__)
@@ -57,10 +58,14 @@ class LoginUseCase:
         # ── Construir tokens ──────────────────────────────────────────────────
         role_name = user.role.name if user.role else "estudiante"
 
+        # ── Sesión única: nueva sesión invalida + expulsa la anterior ─────────
+        sid = await rotate_and_revoke(self._repo, user.id)
+
         token_data = {
             "sub":        str(user.id),
             "role":       role_name,
             "circuit_id": user.circuit_id,
+            "sid":        sid,
         }
 
         if user.oauth_google_id:
@@ -72,7 +77,7 @@ class LoginUseCase:
 
         return {
             "access_token":  create_access_token(token_data),
-            "refresh_token": create_refresh_token({"sub": str(user.id)}),
+            "refresh_token": create_refresh_token({"sub": str(user.id), "sid": sid}),
             "token_type":    "bearer",
             "user": {
                 "id":             user.id,

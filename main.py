@@ -183,6 +183,7 @@ app.add_middleware(
 from src.services.announcements.infrastructure.routes.router import router as announcements_router
 from src.services.auth.infrastructure.routes.oauth_callbacks import router as oauth_callbacks_router
 from src.services.auth.infrastructure.routes.router import router as auth_router
+from src.services.auth.infrastructure.routes.session_websocket import router as session_ws_router
 from src.services.billing.infrastructure.routes.router import router as billing_router
 from src.services.chat.infrastructure.routes.router import router as chat_router
 from src.services.chat.infrastructure.routes.websocket import router as chat_ws_router
@@ -202,6 +203,7 @@ from src.services.support.infrastructure.routes.router import router as support_
 from src.services.users.infrastructure.routes.router import router as users_router
 
 app.include_router(auth_router,             prefix="/api/auth",          tags=["Auth"])
+app.include_router(session_ws_router,       prefix="",                   tags=["Session WS"])
 app.include_router(oauth_callbacks_router,  prefix="/auth",              tags=["Auth OAuth"])
 app.include_router(users_router,            prefix="/api/users",         tags=["Users"])
 app.include_router(products_router,         prefix="/api/products",      tags=["Products"])
