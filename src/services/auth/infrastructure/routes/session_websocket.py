@@ -5,7 +5,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from src.core.database import AsyncSessionLocal
 from src.core.security import decode_token
 from src.core.websocket.session_ws_manager import session_ws_manager
-from src.services.auth.infrastructure.adapters.MySQL import AuthRepository
+from src.services.auth.infrastructure.adapters.postgres import AuthRepository
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

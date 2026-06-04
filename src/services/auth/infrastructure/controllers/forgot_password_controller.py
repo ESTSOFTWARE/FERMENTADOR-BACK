@@ -3,7 +3,7 @@ from src.core.exceptions import TooManyRequestsException
 from src.core.rate_limit import check_rate_limit
 from src.services.auth.application.usecase.forgot_password_use_case import ForgotPasswordUseCase
 from src.services.auth.domain.dto.password_reset_schema import ForgotPasswordRequest
-from src.services.auth.infrastructure.adapters.MySQL import AuthRepository
+from src.services.auth.infrastructure.adapters.postgres import AuthRepository
 
 
 async def forgot_password(body: ForgotPasswordRequest) -> dict:

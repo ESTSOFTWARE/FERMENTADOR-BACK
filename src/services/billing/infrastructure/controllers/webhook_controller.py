@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 
 from src.core.database import AsyncSessionLocal
 from src.services.billing.application.usecase.handle_webhook_use_case import HandleWebhookUseCase
-from src.services.billing.infrastructure.adapters.MySQL import BillingRepository
+from src.services.billing.infrastructure.adapters.postgres import BillingRepository
 from src.services.billing.infrastructure.adapters.stripe_adapter import StripeAdapter
 
 logger = logging.getLogger(__name__)

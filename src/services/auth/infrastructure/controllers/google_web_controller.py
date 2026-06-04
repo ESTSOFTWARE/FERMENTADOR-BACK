@@ -8,8 +8,8 @@ from src.core.config import settings
 from src.core.cookie_manager import set_auth_cookies
 from src.core.database import AsyncSessionLocal
 from src.services.auth.application.usecase.google_web_auth_use_case import GoogleWebAuthUseCase
-from src.services.auth.infrastructure.adapters.MySQL import AuthRepository
 from src.services.auth.infrastructure.adapters.oauth_adapter import OAuthAdapter
+from src.services.auth.infrastructure.adapters.postgres import AuthRepository
 
 
 async def google_redirect():

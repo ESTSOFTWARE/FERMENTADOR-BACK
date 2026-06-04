@@ -3,7 +3,7 @@ from src.services.announcements.application.usecase.unpin_announcement_use_case 
     UnpinAnnouncementUseCase,
 )
 from src.services.announcements.domain.entities.announcement import Announcement
-from src.services.announcements.infrastructure.adapters.MySQL import AnnouncementRepository
+from src.services.announcements.infrastructure.adapters.postgres import AnnouncementRepository
 
 
 async def unpin_announcement(announcement_id: int) -> Announcement:

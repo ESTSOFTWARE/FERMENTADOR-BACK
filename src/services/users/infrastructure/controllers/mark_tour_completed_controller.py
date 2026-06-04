@@ -2,7 +2,7 @@ from src.core.database import AsyncSessionLocal
 from src.services.users.application.usecase.mark_tour_completed_use_case import (
     MarkTourCompletedUseCase,
 )
-from src.services.users.infrastructure.adapters.MySQL import UserRepository
+from src.services.users.infrastructure.adapters.postgres import UserRepository
 
 
 async def mark_tour_completed(user_id: int) -> dict:

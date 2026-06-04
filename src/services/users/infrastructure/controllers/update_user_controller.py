@@ -2,7 +2,7 @@ from src.core.database import AsyncSessionLocal
 from src.services.users.application.usecase.update_user_use_case import UpdateUserUseCase
 from src.services.users.domain.dto.update_user_schema import UpdateUserRequest
 from src.services.users.domain.dto.user_schema import UserResponse
-from src.services.users.infrastructure.adapters.MySQL import UserRepository
+from src.services.users.infrastructure.adapters.postgres import UserRepository
 
 
 async def update(user_id: int, body: UpdateUserRequest) -> UserResponse:

@@ -4,7 +4,7 @@ from src.core.database import AsyncSessionLocal
 from src.services.sensors.application.usecase.get_history_use_case import GetHistoryUseCase
 from src.services.sensors.domain.dto.sensor_history_schema import SensorHistoryResponse
 from src.services.sensors.domain.dto.sensor_reading_schema import SensorReadingResponse
-from src.services.sensors.infrastructure.adapters.MySQL import SensorRepository
+from src.services.sensors.infrastructure.adapters.postgres import SensorRepository
 
 
 async def get_history(

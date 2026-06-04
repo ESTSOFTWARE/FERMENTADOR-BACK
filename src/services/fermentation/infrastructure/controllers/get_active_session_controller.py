@@ -7,14 +7,14 @@ from src.services.fermentation.application.usecase.get_active_fermentation_use_c
 from src.services.fermentation.domain.dto.fermentation_session_schema import (
     FermentationSessionResponse,
 )
-from src.services.fermentation.infrastructure.adapters.MySQL import FermentationRepository
+from src.services.fermentation.infrastructure.adapters.postgres import FermentationRepository
 
 
 async def get_active(circuit_id, user_id=None):
     try:
         if not circuit_id and user_id is not None:
             try:
-                from src.services.auth.infrastructure.adapters.MySQL import AuthRepository
+                from src.services.auth.infrastructure.adapters.postgres import AuthRepository
                 user       = await AuthRepository(AsyncSessionLocal).get_user_by_id(user_id)
                 circuit_id = getattr(user, "circuit_id", None) if user else None
             except Exception as e:

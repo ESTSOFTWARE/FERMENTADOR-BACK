@@ -2,7 +2,7 @@ from src.core.database import AsyncSessionLocal
 from src.services.billing.application.usecase.list_subscriptions_use_case import (
     ListSubscriptionsUseCase,
 )
-from src.services.billing.infrastructure.adapters.MySQL import BillingRepository
+from src.services.billing.infrastructure.adapters.postgres import BillingRepository
 
 
 async def list_subscriptions(

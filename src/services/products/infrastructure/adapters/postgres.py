@@ -5,7 +5,7 @@ from src.services.products.domain.entities.product import Product
 from src.services.products.domain.repository import IProductRepository
 
 
-class MySQLProductRepository(IProductRepository):
+class PostgresProductRepository(IProductRepository):
     def __init__(self, session_factory):
         self._session_factory = session_factory
 

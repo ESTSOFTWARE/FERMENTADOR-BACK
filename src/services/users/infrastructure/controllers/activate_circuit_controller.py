@@ -7,7 +7,7 @@ from src.services.users.domain.dto.activate_circuit_schema import (
     ActivateCircuitResponse,
 )
 from src.services.users.infrastructure.adapters.circuit_lookup_adapter import CircuitLookupAdapter
-from src.services.users.infrastructure.adapters.MySQL import UserRepository
+from src.services.users.infrastructure.adapters.postgres import UserRepository
 
 
 async def activate_my_circuit(user_id: int, body: ActivateCircuitRequest) -> ActivateCircuitResponse:

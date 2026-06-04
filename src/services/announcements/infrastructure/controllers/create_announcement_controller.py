@@ -5,12 +5,12 @@ from src.services.announcements.application.usecase.create_announcement_use_case
     CreateAnnouncementUseCase,
 )
 from src.services.announcements.domain.dto.announcement_schema import CreateAnnouncementRequest
-from src.services.announcements.infrastructure.adapters.MySQL import AnnouncementRepository
+from src.services.announcements.infrastructure.adapters.postgres import AnnouncementRepository
 from src.services.notifications.application.usecase.send_notification_use_case import (
     SendNotificationUseCase,
 )
-from src.services.notifications.infrastructure.adapters.MySQL import NotificationRepository
-from src.services.users.infrastructure.adapters.MySQL import UserRepository
+from src.services.notifications.infrastructure.adapters.postgres import NotificationRepository
+from src.services.users.infrastructure.adapters.postgres import UserRepository
 
 
 async def create_announcement(body: CreateAnnouncementRequest, creator_id: int):

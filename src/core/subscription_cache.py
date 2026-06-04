@@ -33,5 +33,5 @@ class _TTLCache:
             self._data.pop(user_id, None)
 
 
-# TTL de 5 minutos — balance entre frescura y ahorro de queries a MySQL
+# TTL de 5 minutos — balance entre frescura y ahorro de queries a la BD
 subscription_cache = _TTLCache(ttl=300)

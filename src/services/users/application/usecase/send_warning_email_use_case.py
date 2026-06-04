@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from src.core.database import AsyncSessionLocal
 from src.core.email.email_service import send_warning_email
-from src.services.users.infrastructure.adapters.MySQL import UserRepository
+from src.services.users.infrastructure.adapters.postgres import UserRepository
 
 logger = logging.getLogger(__name__)
 
