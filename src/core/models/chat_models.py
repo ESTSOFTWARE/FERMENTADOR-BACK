@@ -7,6 +7,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    func,
     text,
 )
 from sqlalchemy.orm import relationship
@@ -18,7 +19,7 @@ class ChatConversationModel(Base):
     __tablename__ = "chat_conversations"
 
     id          = Column(Integer, primary_key=True, autoincrement=True)
-    type        = Column(Enum("personal", "group"), nullable=False)
+    type        = Column(Enum("personal", "group", native_enum=False), nullable=False)
     name        = Column(String(150), nullable=True)
     description = Column(String(500), nullable=True)
     avatar      = Column(String(2048), nullable=True)
@@ -27,7 +28,8 @@ class ChatConversationModel(Base):
     updated_at  = Column(
         DateTime,
         nullable=False,
-        server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
+        server_default=text("CURRENT_TIMESTAMP"),
+        onupdate=func.now(),
     )
 
     members = relationship(
@@ -62,7 +64,7 @@ class ChatMessageModel(Base):
     sender_id       = Column(Integer, ForeignKey("users.id"), nullable=False)
     content         = Column(Text, nullable=True)
     reply_to_id     = Column(Integer, ForeignKey("chat_messages.id"), nullable=True)
-    priority        = Column(Enum("normal", "important", "urgent"), nullable=False, server_default="normal")
+    priority        = Column(Enum("normal", "important", "urgent", native_enum=False), nullable=False, server_default="normal")
     pinned          = Column(Integer, nullable=False, server_default=text("0"))
     edited          = Column(Integer, nullable=False, server_default=text("0"))
     edited_at       = Column(DateTime, nullable=True)
@@ -88,7 +90,7 @@ class ChatMessageAttachmentModel(Base):
 
     id         = Column(Integer, primary_key=True, autoincrement=True)
     message_id = Column(Integer, ForeignKey("chat_messages.id", ondelete="CASCADE"), nullable=False)
-    type       = Column(Enum("image", "video", "document", "file"), nullable=False)
+    type       = Column(Enum("image", "video", "document", "file", native_enum=False), nullable=False)
     name       = Column(String(255), nullable=False)
     url        = Column(String(2048), nullable=False)
     size       = Column(Integer, nullable=False, server_default=text("0"))

@@ -7,6 +7,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    func,
     select,
     text,
     update,
@@ -32,7 +33,8 @@ class EfficiencyFormulaModel(Base):
     updated_by        = Column(Integer, ForeignKey("users.id"), nullable=True)
     updated_at        = Column(
         DateTime,
-        server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
+        server_default=text("CURRENT_TIMESTAMP"),
+        onupdate=func.now(),
         nullable=False,
     )
     created_at        = Column(
