@@ -204,6 +204,10 @@ from src.services.products.infrastructure.routes.router import router as product
 from src.services.sensors.infrastructure.routes.router import router as sensors_router
 from src.services.sensors.infrastructure.routes.websocket import router as sensors_ws_router
 from src.services.support.infrastructure.routes.router import router as support_router
+from src.services.support_chat.infrastructure.routes.router import router as support_chat_router
+from src.services.support_chat.infrastructure.routes.websocket import (
+    router as support_chat_ws_router,
+)
 from src.services.users.infrastructure.routes.router import router as users_router
 
 app.include_router(auth_router,             prefix="/api/auth",          tags=["Auth"])
@@ -225,6 +229,8 @@ app.include_router(support_router,          prefix="/support",           tags=["
 app.include_router(billing_router,          prefix="/api/billing",       tags=["Billing"])
 app.include_router(chat_router,             prefix="/api/chat",          tags=["Chat"])
 app.include_router(chat_ws_router,          prefix="",                   tags=["Chat WS"])
+app.include_router(support_chat_router,     prefix="/api/support-chat",  tags=["Support Chat"])
+app.include_router(support_chat_ws_router,  prefix="",                   tags=["Support Chat WS"])
 
 
 # ── Health ────────────────────────────────────────────────────────────────────

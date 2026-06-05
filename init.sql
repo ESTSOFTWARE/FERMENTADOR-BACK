@@ -406,7 +406,43 @@ CREATE TABLE chat_message_reactions (
     CONSTRAINT fk_chat_react_user FOREIGN KEY (user_id)    REFERENCES users(id)
 );
 
+-- ── Chat de soporte (admin ↔ soporte) ──────────────────────────────────────────
+
+CREATE TABLE support_conversations (
+    id                   SERIAL PRIMARY KEY,
+    admin_id             INT       NOT NULL UNIQUE,
+    created_at           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_read_admin_at   TIMESTAMP NULL,
+    last_read_support_at TIMESTAMP NULL,
+    CONSTRAINT fk_support_conv_admin FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TRIGGER trg_support_conv_updated BEFORE UPDATE ON support_conversations
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE TABLE support_messages (
+    id              SERIAL PRIMARY KEY,
+    conversation_id INT       NOT NULL,
+    sender_id       INT       NOT NULL,
+    sender_role     VARCHAR(20) NOT NULL CHECK (sender_role IN ('admin','soporte')),
+    content         TEXT      NULL,
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_support_msg_conv   FOREIGN KEY (conversation_id) REFERENCES support_conversations(id) ON DELETE CASCADE,
+    CONSTRAINT fk_support_msg_sender FOREIGN KEY (sender_id)       REFERENCES users(id)
+);
+
+CREATE TABLE support_message_attachments (
+    id         SERIAL PRIMARY KEY,
+    message_id INT          NOT NULL,
+    type       VARCHAR(20)  NOT NULL CHECK (type IN ('image','video','document','file')),
+    name       VARCHAR(255) NOT NULL,
+    url        VARCHAR(2048) NOT NULL,
+    size       INT          NOT NULL DEFAULT 0,
+    CONSTRAINT fk_support_att_msg FOREIGN KEY (message_id) REFERENCES support_messages(id) ON DELETE CASCADE
+);
+
 -- ── Índices ────────────────────────────────────────────────────────────────────
+CREATE INDEX idx_support_msg_conv_created  ON support_messages(conversation_id, created_at);
 CREATE INDEX idx_users_circuit             ON users(circuit_id);
 CREATE INDEX idx_users_created_by          ON users(created_by);
 CREATE INDEX idx_users_oauth_google        ON users(oauth_google_id);
