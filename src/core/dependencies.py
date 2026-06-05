@@ -91,6 +91,14 @@ async def require_soporte(
     return current_user
 
 
+async def require_admin_or_soporte(
+    current_user: dict = Depends(get_current_user),
+) -> dict:
+    if current_user["role"] not in ("admin", "soporte"):
+        raise ForbiddenException()
+    return current_user
+
+
 async def require_any_role(
     current_user: dict = Depends(get_current_user),
 ) -> dict:
