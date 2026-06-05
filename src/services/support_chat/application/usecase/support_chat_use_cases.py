@@ -12,7 +12,6 @@ def _not_found(detail: str = "Conversación no encontrada") -> AppException:
 
 
 async def _assert_access(repo: ISupportChatRepository, conversation_id: int, user_id: int, role: str) -> None:
-    """admin solo accede a su propia conversación; soporte accede a cualquiera."""
     if role == "soporte":
         if await repo.get_admin_id(conversation_id) is None:
             raise _not_found()
