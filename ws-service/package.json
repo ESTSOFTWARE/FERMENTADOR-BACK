@@ -1,0 +1,28 @@
+{
+  "name": "fermentador-ws",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Servicio de WebSocket en tiempo real (Nich-Ka) — entrega eventos publicados en RabbitMQ por el backend de negocio.",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.4",
+    "dotenv": "^16.4.5",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.12.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.5",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.11.6",
+    "@types/ws": "^8.5.12",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0"
+  }
+}
