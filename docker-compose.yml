@@ -1,61 +1,74 @@
 services:
 
+  # ── API Gateway (Nginx) — único punto de entrada ────────────────────────────
+  # network_mode: host → los contenedores comparten la red de tu máquina, así
+  # "localhost" dentro del contenedor ES tu máquina (alcanza tu postgres en
+  # localhost:5432 sin reconfigurar nada).
+  gateway:
+    image: nginx:alpine
+    container_name: sensor_gateway
+    restart: always
+    network_mode: host          # escucha en localhost:8000 (ver nginx.conf)
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+      - ws-service
+
+  # ── API de negocio + ML/NLP (Python / FastAPI) ──────────────────────────────
   api:
-    build: .
+    build: ./api
     container_name: sensor_api
     restart: always
-    ports:
-      - "8000:8000"
+    network_mode: host          # escucha en localhost:8001
     volumes:
-      - .:/app
+      - ./api:/app
     env_file:
-      - .env
+      - ./api/.env
     environment:
-      DB_HOST: postgres
+      DB_HOST: localhost        # tu postgres del host
+      RABBITMQ_HOST: localhost
     depends_on:
-      postgres:
+      rabbitmq:
         condition: service_healthy
-    command: sh -c "sleep 15 && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
-    networks:
-      - sensor_network
+    command: sh -c "uvicorn main:app --host 0.0.0.0 --port 8001 --reload"
 
-  postgres:
-    image: postgres:16-alpine
-    container_name: sensor_postgres
+  # ── Servicio WebSocket en tiempo real (Node / TypeScript) ───────────────────
+  ws-service:
+    build: ./ws-service
+    container_name: sensor_ws
     restart: always
+    network_mode: host          # escucha en localhost:8003
+    env_file:
+      - ./ws-service/.env
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      DB_HOST: localhost        # tu postgres del host
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@localhost:5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  # ── RabbitMQ (bus de eventos entre api y ws-service) ────────────────────────
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: sensor_rabbitmq
+    restart: always
+    network_mode: host          # localhost:5672 (broker) + localhost:15672 (panel)
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 30s
-    networks:
-      - sensor_network
+      start_period: 20s
 
+  # ── Adminer (UI para ver tu BD del host) ────────────────────────────────────
+  # Abre http://localhost:8080 → Servidor: localhost
   adminer:
     image: adminer
     container_name: sensor_adminer
     restart: always
-    ports:
-      - "8080:8080"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - sensor_network
-
-volumes:
-  postgres_data:
-
-networks:
-  sensor_network:
-    driver: bridge
+    network_mode: host          # localhost:8080
+    command: php -S 0.0.0.0:8080 -t /var/www/html
