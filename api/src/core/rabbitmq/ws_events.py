@@ -11,8 +11,10 @@ conectados. El contrato del sobre es:
       "data":    {"type": "...", ...}  # EXACTO lo que recibe el navegador
     }
 
-La entrega por WebSocket es best-effort: si RabbitMQ no está disponible, se
-registra el error pero NO se propaga (no debe romper el flujo de negocio).
+La entrega por WebSocket es best-effort y NO bloqueante: se publica en segundo
+plano (fire-and-forget). Si RabbitMQ no está disponible (ej. dev local sin
+broker), se registra el error pero el flujo de negocio (login, envío de mensaje,
+lecturas de sensor) sigue inmediato — sin esperas.
 """
 import asyncio
 import logging
@@ -23,14 +25,12 @@ logger = logging.getLogger(__name__)
 
 WS_EXCHANGE = "ws.events"
 
-# La entrega por WS es best-effort: si el broker tarda/está caído, fallamos
-# rápido para no bloquear el flujo de negocio (login, envío de mensaje, etc.).
+# Tope por si el broker tarda; la publicación va en background, así que esto solo
+# acota cuánto vive la tarea de fondo, no bloquea la request.
 _PUBLISH_TIMEOUT = 2.0
 
 
-async def publish_ws_event(channel: str, target: dict, data: dict) -> None:
-    """Publica un evento para que el ws-service lo entregue. Best-effort."""
-    envelope = {"channel": channel, "target": target, "data": data}
+async def _do_publish(channel: str, envelope: dict) -> None:
     try:
         await asyncio.wait_for(
             publisher.publish_raw(
@@ -44,11 +44,24 @@ async def publish_ws_event(channel: str, target: dict, data: dict) -> None:
         logger.warning(f"[ws_events] No se pudo publicar {channel}: {e}")
 
 
+def publish_ws_event(channel: str, target: dict, data: dict) -> None:
+    """
+    Programa la publicación de un evento para que el ws-service lo entregue.
+    Fire-and-forget: no espera al broker, nunca bloquea la request.
+    """
+    envelope = {"channel": channel, "target": target, "data": data}
+    try:
+        asyncio.get_running_loop().create_task(_do_publish(channel, envelope))
+    except RuntimeError:
+        # Sin loop corriendo (ej. script suelto): publica de forma síncrona.
+        asyncio.run(_do_publish(channel, envelope))
+
+
 async def to_users(channel: str, user_ids: list[int], data: dict) -> None:
-    """Atajo: entregar a una lista de usuarios."""
-    await publish_ws_event(channel, {"users": user_ids}, data)
+    """Atajo: entregar a una lista de usuarios (no bloqueante)."""
+    publish_ws_event(channel, {"users": user_ids}, data)
 
 
 async def to_room(channel: str, room: str, data: dict) -> None:
-    """Atajo: entregar a todos los sockets de una sala (ej. sensores)."""
-    await publish_ws_event(channel, {"room": room}, data)
+    """Atajo: entregar a todos los sockets de una sala, ej. sensores (no bloqueante)."""
+    publish_ws_event(channel, {"room": room}, data)
