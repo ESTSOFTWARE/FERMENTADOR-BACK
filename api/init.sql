@@ -463,3 +463,86 @@ CREATE INDEX idx_sensor_events_circuit     ON sensor_events(circuit_id, occurred
 CREATE INDEX idx_report_history_report     ON report_history(report_id, occurred_at);
 CREATE INDEX idx_report_history_user       ON report_history(user_id, occurred_at);
 CREATE INDEX idx_chat_msg_conv_created     ON chat_messages(conversation_id, created_at);
+
+-- Actualizar para que no se usen alter table en el futuro, sino directamente al crear la tabla
+-- ── Categorías ────────────────────────────────────────────────────────────────
+CREATE TABLE product_categories (
+    id          SERIAL PRIMARY KEY,
+    name        VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT         DEFAULT NULL,
+    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TRIGGER trg_product_categories_updated BEFORE UPDATE ON product_categories
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- ── Alterar products ──────────────────────────────────────────────────────────
+ALTER TABLE products
+    ADD COLUMN category_id INT          DEFAULT NULL,
+    ADD COLUMN updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ALTER COLUMN rating TYPE DECIMAL(3,2),
+    ALTER COLUMN rating SET DEFAULT 0,
+    DROP CONSTRAINT IF EXISTS chk_product_rating;
+
+ALTER TABLE products
+    ADD CONSTRAINT chk_product_rating CHECK (rating >= 0 AND rating <= 5),
+    ADD CONSTRAINT fk_product_category FOREIGN KEY (category_id)
+        REFERENCES product_categories(id) ON DELETE SET NULL;
+
+CREATE TRIGGER trg_products_updated BEFORE UPDATE ON products
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE INDEX idx_products_category ON products(category_id);
+
+-- ── Beneficios ────────────────────────────────────────────────────────────────
+CREATE TABLE product_benefits (
+    id          SERIAL PRIMARY KEY,
+    product_id  INT          NOT NULL,
+    title       VARCHAR(150) NOT NULL,
+    description TEXT         DEFAULT NULL,
+    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_benefit_product FOREIGN KEY (product_id)
+        REFERENCES products(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_benefits_product ON product_benefits(product_id);
+
+-- ── Especificaciones ──────────────────────────────────────────────────────────
+CREATE TABLE product_specifications (
+    id          SERIAL PRIMARY KEY,
+    product_id  INT          NOT NULL,
+    name        VARCHAR(150) NOT NULL,
+    value       TEXT         NOT NULL,
+    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_spec_product FOREIGN KEY (product_id)
+        REFERENCES products(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_specs_product ON product_specifications(product_id);
+
+-- ── Incluye ───────────────────────────────────────────────────────────────────
+CREATE TABLE product_includes (
+    id          SERIAL PRIMARY KEY,
+    product_id  INT  NOT NULL,
+    description TEXT NOT NULL,
+    created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_include_product FOREIGN KEY (product_id)
+        REFERENCES products(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_includes_product ON product_includes(product_id);
+
+-- ── Reseñas ───────────────────────────────────────────────────────────────────
+CREATE TABLE product_reviews (
+    id          SERIAL PRIMARY KEY,
+    product_id  INT  NOT NULL,
+    user_id     INT  NOT NULL,
+    rating      INT  NOT NULL,
+    comment     TEXT DEFAULT NULL,
+    created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_review_rating CHECK (rating >= 1 AND rating <= 5),
+    CONSTRAINT chk_review_comment CHECK (comment IS NULL OR char_length(comment) <= 1000),
+    CONSTRAINT uq_review_user_product UNIQUE (product_id, user_id),
+    CONSTRAINT fk_review_product FOREIGN KEY (product_id)
+        REFERENCES products(id) ON DELETE CASCADE,
+    CONSTRAINT fk_review_user FOREIGN KEY (user_id)
+        REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_reviews_product ON product_reviews(product_id);
