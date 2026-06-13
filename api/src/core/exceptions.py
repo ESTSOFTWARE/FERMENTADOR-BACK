@@ -201,6 +201,60 @@ class ProductAlreadyExistsException(AppException):
             status_code=status.HTTP_409_CONFLICT,
             detail="Ya existe un producto con ese SKU"
         )
+        
+# ── Categorías ────────────────────────────────────────────────────────────────
+class CategoryNotFoundException(AppException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Categoría no encontrada"
+        )
+
+class CategoryAlreadyExistsException(AppException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ya existe una categoría con ese nombre"
+        )
+
+# ── Beneficios ────────────────────────────────────────────────────────────────
+class BenefitNotFoundException(AppException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Beneficio no encontrado"
+        )
+
+# ── Especificaciones ──────────────────────────────────────────────────────────
+class SpecificationNotFoundException(AppException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Especificación no encontrada"
+        )
+
+# ── Incluye ───────────────────────────────────────────────────────────────────
+class IncludeNotFoundException(AppException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Elemento 'incluye' no encontrado"
+        )
+
+# ── Reseñas ───────────────────────────────────────────────────────────────────
+class ReviewNotFoundException(AppException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Reseña no encontrada"
+        )
+
+class ReviewAlreadyExistsException(AppException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ya existe una reseña tuya para este producto"
+        )
 
 
 # ── RabbitMQ ──────────────────────────────────────────────────────────────────
