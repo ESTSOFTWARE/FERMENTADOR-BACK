@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, File, UploadFile
 
-from src.core.dependencies import require_admin, require_admin_or_profesor
+from src.core.dependencies import require_admin, require_admin_or_profesor, require_any_role
 from src.services.groups.domain.dto.group_schema import (
     AddMemberRequest,
     CreateGroupRequest,
     GroupResponse,
+    JoinGroupRequest,
 )
 from src.services.groups.infrastructure.controllers.add_member_controller import add_member
 from src.services.groups.infrastructure.controllers.create_group_controller import create_group
@@ -16,6 +17,7 @@ from src.services.groups.infrastructure.controllers.get_groups_controller import
     get_all_groups,
     get_groups,
 )
+from src.services.groups.infrastructure.controllers.join_group_controller import join_group
 from src.services.groups.infrastructure.controllers.remove_member_controller import remove_member
 from src.services.groups.infrastructure.controllers.upload_cover_controller import (
     upload_group_cover,
@@ -30,6 +32,14 @@ async def create_group_route(
     current_user: dict = Depends(require_admin_or_profesor),
 ):
     return await create_group(body=body, professor_id=current_user["user_id"])
+
+
+@router.post("/join", response_model=GroupResponse, summary="Unirse a un grupo por código (alumno, QR/enlace)")
+async def join_group_route(
+    body: JoinGroupRequest,
+    current_user: dict = Depends(require_any_role),
+):
+    return await join_group(code=body.code, student_id=current_user["user_id"])
 
 
 @router.get("/all", response_model=list[GroupResponse], summary="Listar grupos de mis docentes (solo admin)")
