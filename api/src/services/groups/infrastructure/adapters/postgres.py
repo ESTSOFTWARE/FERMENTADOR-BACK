@@ -1,4 +1,4 @@
-from sqlalchemy import delete, select
+from sqlalchemy import delete, inspect, select
 from sqlalchemy.orm import selectinload
 
 from src.core.models.group_models import GroupMemberModel, GroupModel
@@ -33,7 +33,7 @@ class GroupRepository(IGroupRepository):
         async with self._session_factory() as session:
             result = await session.execute(
                 select(GroupModel)
-                .options(selectinload(GroupModel.members).selectinload(GroupMemberModel.student))
+                .options(selectinload(GroupModel.professor), selectinload(GroupModel.members).selectinload(GroupMemberModel.student))
                 .order_by(GroupModel.created_at.desc())
             )
             return [self._to_entity(m) for m in result.scalars().all()]
@@ -43,7 +43,7 @@ class GroupRepository(IGroupRepository):
             result = await session.execute(
                 select(GroupModel)
                 .join(UserModel, GroupModel.professor_id == UserModel.id)
-                .options(selectinload(GroupModel.members).selectinload(GroupMemberModel.student))
+                .options(selectinload(GroupModel.professor), selectinload(GroupModel.members).selectinload(GroupMemberModel.student))
                 .where(UserModel.created_by == admin_id)
                 .order_by(GroupModel.created_at.desc())
             )
@@ -53,7 +53,7 @@ class GroupRepository(IGroupRepository):
         async with self._session_factory() as session:
             result = await session.execute(
                 select(GroupModel)
-                .options(selectinload(GroupModel.members).selectinload(GroupMemberModel.student))
+                .options(selectinload(GroupModel.professor), selectinload(GroupModel.members).selectinload(GroupMemberModel.student))
                 .where(GroupModel.professor_id == professor_id)
                 .order_by(GroupModel.created_at.desc())
             )
@@ -63,7 +63,7 @@ class GroupRepository(IGroupRepository):
         async with self._session_factory() as session:
             result = await session.execute(
                 select(GroupModel)
-                .options(selectinload(GroupModel.members).selectinload(GroupMemberModel.student))
+                .options(selectinload(GroupModel.professor), selectinload(GroupModel.members).selectinload(GroupMemberModel.student))
                 .where(GroupModel.id == group_id)
             )
             model = result.scalar_one_or_none()
@@ -104,7 +104,7 @@ class GroupRepository(IGroupRepository):
         async with self._session_factory() as session:
             result = await session.execute(
                 select(GroupModel)
-                .options(selectinload(GroupModel.members).selectinload(GroupMemberModel.student))
+                .options(selectinload(GroupModel.professor), selectinload(GroupModel.members).selectinload(GroupMemberModel.student))
                 .where(GroupModel.code == code)
             )
             model = result.scalar_one_or_none()
@@ -125,6 +125,11 @@ class GroupRepository(IGroupRepository):
             subject=model.subject,
             cover_image=model.cover_image,
             professor_id=model.professor_id,
+            professor_name=(
+                f"{model.professor.name} {model.professor.last_name}"
+                if "professor" not in inspect(model).unloaded and model.professor is not None
+                else None
+            ),
             code=model.code,
             created_at=model.created_at,
             members=[

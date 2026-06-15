@@ -63,6 +63,23 @@ class UserRepository(IUserRepository):
             )
             return [self._to_entity(m) for m in result.scalars().all()]
 
+    async def get_by_circuit_of(self, user_id: int) -> list[User]:
+        """Todos los usuarios del mismo circuito que user_id (admin → ve todo su circuito)."""
+        async with self._session_factory() as session:
+            circuit_subq = (
+                select(UserModel.circuit_id)
+                .where(UserModel.id == user_id)
+                .scalar_subquery()
+            )
+            result = await session.execute(
+                select(UserModel)
+                .options(selectinload(UserModel.role))
+                .where(UserModel.circuit_id == circuit_subq)
+                .where(UserModel.circuit_id.isnot(None))
+                .order_by(UserModel.id)
+            )
+            return [self._to_entity(m) for m in result.scalars().all()]
+
     async def create(self, user: User) -> User:
         async with self._session_factory() as session:
             model = UserModel(
