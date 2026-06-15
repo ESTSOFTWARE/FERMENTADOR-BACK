@@ -18,6 +18,10 @@ async def session_ws(websocket: WebSocket):
     Su única función es recibir `session:revoked` cuando el usuario inicia sesión
     en otro dispositivo, para expulsar este al instante.
     """
+    # Aceptar primero: así un cierre con código (4401) llega al cliente
+    # y este puede dejar de reconectar (en vez de un 403 de handshake = code 1006).
+    await websocket.accept()
+
     token = websocket.cookies.get("access_token")
     if not token:
         await websocket.close(code=4401)

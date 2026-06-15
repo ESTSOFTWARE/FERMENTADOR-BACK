@@ -1,6 +1,11 @@
 from fastapi import APIRouter, Depends, File, UploadFile
 
-from src.core.dependencies import require_admin, require_admin_or_profesor, require_any_role
+from src.core.dependencies import (
+    get_current_user,
+    require_admin,
+    require_admin_or_profesor,
+    require_any_role,
+)
 from src.services.users.domain.dto.activate_circuit_schema import (
     ActivateCircuitRequest,
     ActivateCircuitResponse,
@@ -88,6 +93,11 @@ async def get_all_users(current_user: dict = Depends(require_admin_or_profesor))
         requester_id=current_user["user_id"],
         requester_role=current_user["role"],
     )
+
+
+@router.get("/me", response_model=UserResponse, summary="Usuario autenticado actual (por cookie)")
+async def get_me(current_user: dict = Depends(get_current_user)):
+    return await get_by_id(current_user["user_id"])
 
 
 @router.get("/{user_id}", response_model=UserResponse, summary="Obtener usuario por ID")
