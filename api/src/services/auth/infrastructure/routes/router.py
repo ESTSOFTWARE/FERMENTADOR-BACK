@@ -39,8 +39,8 @@ async def register_route(body: RegisterRequest):
 
 @router.post(
     "/login",
-    response_model=LoginCookieResponse,
-    summary="Iniciar sesión (establece HttpOnly cookies)",
+    response_model=TokenResponse,
+    summary="Iniciar sesión (establece HttpOnly cookies y devuelve tokens en body)",
 )
 async def login_route(body: LoginRequest, response: Response):
     return await login(body, response)

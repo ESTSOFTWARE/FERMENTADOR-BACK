@@ -21,7 +21,6 @@ class SessionWebSocketManager:
         self._lock = asyncio.Lock()
 
     async def connect(self, user_id: int, websocket: WebSocket) -> None:
-        await websocket.accept()
         async with self._lock:
             self.connections.setdefault(user_id, []).append(websocket)
         logger.info(f"[WS:Session] Conectado → user_id={user_id}")
