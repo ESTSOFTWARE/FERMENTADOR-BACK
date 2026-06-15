@@ -14,6 +14,10 @@ class AddMemberRequest(BaseModel):
     student_id: int
 
 
+class JoinGroupRequest(BaseModel):
+    code: str
+
+
 class GroupMemberResponse(BaseModel):
     id:             int
     student_id:     int
