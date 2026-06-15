@@ -8,7 +8,6 @@ from src.services.groups.domain.dto.group_schema import (
     JoinGroupRequest,
 )
 from src.services.groups.infrastructure.controllers.add_member_controller import add_member
-from src.services.groups.infrastructure.controllers.join_group_controller import join_group
 from src.services.groups.infrastructure.controllers.create_group_controller import create_group
 from src.services.groups.infrastructure.controllers.delete_group_controller import delete_group
 from src.services.groups.infrastructure.controllers.get_group_by_id_controller import (
@@ -18,6 +17,7 @@ from src.services.groups.infrastructure.controllers.get_groups_controller import
     get_all_groups,
     get_groups,
 )
+from src.services.groups.infrastructure.controllers.join_group_controller import join_group
 from src.services.groups.infrastructure.controllers.remove_member_controller import remove_member
 from src.services.groups.infrastructure.controllers.upload_cover_controller import (
     upload_group_cover,
