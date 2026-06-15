@@ -11,4 +11,9 @@ async def login(body: LoginRequest, response: Response) -> dict:
     repo   = AuthRepository(AsyncSessionLocal)
     result = await LoginUseCase(repo).execute(email=body.email, password=body.password)
     set_auth_cookies(response, result["access_token"], result["refresh_token"])
-    return {"user": result["user"]}
+    return {
+        "access_token":  result["access_token"],
+        "refresh_token": result["refresh_token"],
+        "token_type":    result["token_type"],
+        "user":          result["user"],
+    }
