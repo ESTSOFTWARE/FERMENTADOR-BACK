@@ -23,6 +23,11 @@ class IUserRepository(ABC):
         ...
 
     @abstractmethod
+    async def get_by_circuit_of(self, user_id: int) -> list[User]:
+        """Retorna todos los usuarios del mismo circuito que user_id (admin → ve todo su circuito)."""
+        ...
+
+    @abstractmethod
     async def get_all_students(self) -> list[User]:
         """Retorna todos los usuarios con rol estudiante."""
         ...
