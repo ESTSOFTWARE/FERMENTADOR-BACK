@@ -20,6 +20,7 @@ class Group:
     subject:      str
     professor_id: int
     code:         str
+    professor_name: str | None = None
     cover_image:  str | None = None
     created_at:   datetime | None = None
     members:      list[GroupMember] = field(default_factory=list)

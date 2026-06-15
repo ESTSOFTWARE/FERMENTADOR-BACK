@@ -13,11 +13,12 @@ class GetUserUseCase:
 
     async def get_all(self, requester_id: int, requester_role: str) -> list[User]:
         """
-        - admin: ve todos los usuarios que él creó (created_by = requester_id)
-        - profesor: ve todos los usuarios que él creó (created_by = requester_id)
-        Solo un superadmin técnico (sin restricción) vería get_all completo,
-        pero en este sistema admin y profesor siempre ven solo sus creados.
+        - admin: ve TODO su circuito (admins, docentes y alumnos), incluidos los
+          alumnos que crearon sus docentes — todos comparten el mismo circuit_id.
+        - profesor: ve solo los usuarios que él creó directamente (sus alumnos).
         """
+        if requester_role == "admin":
+            return await self._repo.get_by_circuit_of(requester_id)
         return await self._repo.get_created_by(requester_id)
 
     async def get_by_id(self, user_id: int) -> User:
