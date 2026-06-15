@@ -190,6 +190,7 @@ from src.services.auth.infrastructure.routes.oauth_callbacks import router as oa
 from src.services.auth.infrastructure.routes.router import router as auth_router
 from src.services.auth.infrastructure.routes.session_websocket import router as session_ws_router
 from src.services.billing.infrastructure.routes.router import router as billing_router
+from src.services.categories.infrastructure.routes.router import router as categories_router
 from src.services.chat.infrastructure.routes.router import router as chat_router
 from src.services.chat.infrastructure.routes.websocket import router as chat_ws_router
 from src.services.circuits.infrastructure.routes.router import router as circuits_router
@@ -200,6 +201,12 @@ from src.services.groups.infrastructure.routes.router import router as groups_ro
 from src.services.notifications.infrastructure.routes.router import router as notifications_router
 from src.services.notifications.infrastructure.routes.websocket import (
     router as notifications_ws_router,
+)
+from src.services.product_benefits.infrastructure.routes.router import router as benefits_router
+from src.services.product_includes.infrastructure.routes.router import router as includes_router
+from src.services.product_reviews.infrastructure.routes.router import router as reviews_router
+from src.services.product_specifications.infrastructure.routes.router import (
+    router as specifications_router,
 )
 from src.services.products.infrastructure.routes.router import router as products_router
 from src.services.sensors.infrastructure.routes.router import router as sensors_router
@@ -215,7 +222,12 @@ app.include_router(auth_router,             prefix="/api/auth",          tags=["
 app.include_router(session_ws_router,       prefix="",                   tags=["Session WS"])
 app.include_router(oauth_callbacks_router,  prefix="/auth",              tags=["Auth OAuth"])
 app.include_router(users_router,            prefix="/api/users",         tags=["Users"])
-app.include_router(products_router,         prefix="/api/products",      tags=["Products"])
+app.include_router(categories_router,       prefix="/api/categories",                              tags=["Categories"])
+app.include_router(products_router,         prefix="/api/products",                                tags=["Products"])
+app.include_router(benefits_router,         prefix="/api/products/{product_id}/benefits",          tags=["Product Benefits"])
+app.include_router(specifications_router,   prefix="/api/products/{product_id}/specifications",    tags=["Product Specifications"])
+app.include_router(includes_router,         prefix="/api/products/{product_id}/includes",          tags=["Product Includes"])
+app.include_router(reviews_router,          prefix="/api/products/{product_id}/reviews",           tags=["Product Reviews"])
 app.include_router(circuits_router,         prefix="/api/circuits",      tags=["Circuits"])
 app.include_router(circuits_ws_router,      prefix="",                   tags=["Circuits WS"])
 app.include_router(sensors_router,          prefix="/api/sensors",       tags=["Sensors"])

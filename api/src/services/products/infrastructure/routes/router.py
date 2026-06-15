@@ -10,9 +10,13 @@ from src.services.products.infrastructure.controllers.create_product_controller 
 from src.services.products.infrastructure.controllers.delete_product_controller import delete
 from src.services.products.infrastructure.controllers.get_product_by_id_controller import get_by_id
 from src.services.products.infrastructure.controllers.get_products_controller import get_all
+from src.services.products.infrastructure.controllers.get_related_products_controller import (
+    get_related,
+)
 from src.services.products.infrastructure.controllers.update_product_controller import update
 
 router = APIRouter()
+
 
 @router.get("/", summary="Obtener todos los productos")
 async def get_all_products(
@@ -22,17 +26,29 @@ async def get_all_products(
 ):
     return await get_all(page, limit, search)
 
+
+@router.get("/{product_id}/related", response_model=list[ProductResponse], summary="Obtener productos relacionados")
+async def get_related_products(
+    product_id: int,
+    limit: int = Query(6, ge=1, le=20)
+):
+    return await get_related(product_id, limit)
+
+
 @router.get("/{product_id}", response_model=ProductResponse, summary="Obtener producto por ID")
 async def get_product(product_id: int):
     return await get_by_id(product_id)
+
 
 @router.post("/", response_model=ProductResponse, status_code=201, summary="Crear producto (solo admin)")
 async def create_product(body: CreateProductRequest, current_user: dict = Depends(require_admin)):
     return await create(body)
 
+
 @router.put("/{product_id}", response_model=ProductResponse, summary="Actualizar producto (solo admin)")
 async def update_product(product_id: int, body: UpdateProductRequest, current_user: dict = Depends(require_admin)):
     return await update(product_id, body)
+
 
 @router.delete("/{product_id}", status_code=200, summary="Eliminar producto (solo admin)")
 async def delete_product(product_id: int, current_user: dict = Depends(require_admin)):

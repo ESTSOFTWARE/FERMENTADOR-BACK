@@ -13,6 +13,6 @@ async def create(body: CreateProductRequest) -> ProductResponse:
         price=body.price,
         sku=body.sku,
         stock=body.stock,
-        rating=body.rating
+        category_id=body.category_id
     )
     return ProductResponse.from_entity(product)

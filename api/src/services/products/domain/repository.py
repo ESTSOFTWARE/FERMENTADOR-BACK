@@ -18,6 +18,14 @@ class IProductRepository(ABC):
         ...
 
     @abstractmethod
+    async def get_related(self, product_id: int, category_id: int, limit: int = 6) -> list[Product]:
+        ...
+
+    @abstractmethod
+    async def update_rating(self, product_id: int, rating: float) -> None:
+        ...
+
+    @abstractmethod
     async def create(self, product: Product) -> Product:
         ...
 

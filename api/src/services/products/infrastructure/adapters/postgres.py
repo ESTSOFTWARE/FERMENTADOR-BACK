@@ -26,17 +26,41 @@ class PostgresProductRepository(IProductRepository):
 
     async def get_by_id(self, product_id: int) -> Product | None:
         async with self._session_factory() as session:
-            query = select(ProductModel).where(ProductModel.id == product_id)
-            result = await session.execute(query)
+            result = await session.execute(
+                select(ProductModel).where(ProductModel.id == product_id)
+            )
             model = result.scalar_one_or_none()
             return self._to_entity(model) if model else None
 
     async def get_by_sku(self, sku: str) -> Product | None:
         async with self._session_factory() as session:
-            query = select(ProductModel).where(ProductModel.sku == sku)
-            result = await session.execute(query)
+            result = await session.execute(
+                select(ProductModel).where(ProductModel.sku == sku)
+            )
             model = result.scalar_one_or_none()
             return self._to_entity(model) if model else None
+
+    async def get_related(self, product_id: int, category_id: int, limit: int = 6) -> list[Product]:
+        async with self._session_factory() as session:
+            result = await session.execute(
+                select(ProductModel)
+                .where(
+                    ProductModel.category_id == category_id,
+                    ProductModel.id != product_id
+                )
+                .limit(limit)
+                .order_by(ProductModel.id.desc())
+            )
+            return [self._to_entity(m) for m in result.scalars().all()]
+
+    async def update_rating(self, product_id: int, rating: float) -> None:
+        async with self._session_factory() as session:
+            await session.execute(
+                update(ProductModel)
+                .where(ProductModel.id == product_id)
+                .values(rating=rating)
+            )
+            await session.commit()
 
     async def create(self, product: Product) -> Product:
         async with self._session_factory() as session:
@@ -46,7 +70,8 @@ class PostgresProductRepository(IProductRepository):
                 price=product.price,
                 sku=product.sku,
                 stock=product.stock,
-                rating=product.rating
+                rating=0,
+                category_id=product.category_id
             )
             session.add(model)
             await session.commit()
@@ -64,15 +89,21 @@ class PostgresProductRepository(IProductRepository):
                     price=product.price,
                     sku=product.sku,
                     stock=product.stock,
-                    rating=product.rating
+                    category_id=product.category_id
                 )
             )
             await session.commit()
-            return product
+            result = await session.execute(
+                select(ProductModel).where(ProductModel.id == product.id)
+            )
+            model = result.scalar_one()
+            return self._to_entity(model)
 
     async def delete(self, product_id: int) -> None:
         async with self._session_factory() as session:
-            await session.execute(delete(ProductModel).where(ProductModel.id == product_id))
+            await session.execute(
+                delete(ProductModel).where(ProductModel.id == product_id)
+            )
             await session.commit()
 
     async def count(self, search: str | None = None) -> int:
@@ -97,6 +128,8 @@ class PostgresProductRepository(IProductRepository):
             price=model.price,
             sku=model.sku,
             stock=model.stock,
-            rating=model.rating,
-            created_at=model.created_at
+            rating=float(model.rating),
+            category_id=model.category_id,
+            created_at=model.created_at,
+            updated_at=model.updated_at
         )
