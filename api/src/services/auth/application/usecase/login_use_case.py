@@ -9,7 +9,7 @@ Flujo de login con migración automática bcrypt → Argon2:
 
 import logging
 
-from src.core.exceptions import InvalidCredentialsException
+from src.core.exceptions import AccountDeactivatedException, InvalidCredentialsException
 from src.core.security import (
     create_access_token,
     create_refresh_token,
@@ -36,6 +36,9 @@ class LoginUseCase:
 
         if not user.password or not verify_password(password, user.password):
             raise InvalidCredentialsException()
+
+        if not user.is_active:
+            raise AccountDeactivatedException()
 
         # ── Migración progresiva bcrypt → Argon2 ──────────────────────────────
         # Se ejecuta de forma transparente tras un login exitoso.
