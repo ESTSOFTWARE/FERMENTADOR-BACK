@@ -10,5 +10,7 @@ export function createPool(): Pool {
     password: config.db.password,
     database: config.db.database,
     max:      10,
+    // SSL para BD gestionada (Supabase). El proveedor termina TLS; no verificamos CA.
+    ssl:      config.db.ssl ? { rejectUnauthorized: false } : undefined,
   })
 }

@@ -1,9 +1,21 @@
+import ssl
+
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
 from src.core.config import settings
 
-# ── Motor async ──────────────────────────────────────────────────────────────
+# SSL para BD gestionada (Supabase, etc.)
+# asyncpg recibe el contexto vía connect_args["ssl"]. Sin verificación de cert
+# (el proveedor ya termina TLS) para evitar fallos por CA en el contenedor.
+_connect_args = {}
+if settings.DB_SSL:
+    _ssl_ctx = ssl.create_default_context()
+    _ssl_ctx.check_hostname = False
+    _ssl_ctx.verify_mode = ssl.CERT_NONE
+    _connect_args["ssl"] = _ssl_ctx
+
+# Motor async
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=settings.DEBUG,      # Imprime SQL en consola solo en desarrollo
@@ -12,9 +24,10 @@ engine = create_async_engine(
     pool_pre_ping=True,       # Verifica que la conexión siga viva antes de usarla
     pool_recycle=1800,        # Recicla conexiones cada 30 min para evitar conexiones obsoletas
     pool_timeout=30,          # Tiempo máximo esperando una conexión libre del pool
+    connect_args=_connect_args,
 )
 
-# ── Fábrica de sesiones ───────────────────────────────────────────────────────
+# Fábrica de sesiones
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
@@ -23,12 +36,12 @@ AsyncSessionLocal = async_sessionmaker(
     autoflush=False,
 )
 
-# ── Base para todos los modelos SQLAlchemy ────────────────────────────────────
+# Base para todos los modelos SQLAlchemy
 class Base(DeclarativeBase):
     pass
 
 
-# ── Dependencia de sesión para FastAPI ───────────────────────────────────────
+# Dependencia de sesión para FastAPI
 async def get_db() -> AsyncSession:
     async with AsyncSessionLocal() as session:
         try:
@@ -41,7 +54,7 @@ async def get_db() -> AsyncSession:
             await session.close()
 
 
-# ── Inicializar tablas (solo desarrollo) ─────────────────────────────────────
+# Inicializar tablas (solo desarrollo)
 async def init_db() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
