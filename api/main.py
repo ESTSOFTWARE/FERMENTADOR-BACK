@@ -64,11 +64,13 @@ async def lifespan(app: FastAPI):
     await init_db()
     logger.info("Base de datos inicializada")
 
-    # 2. RabbitMQ (opcional hasta tener EC2)
+    # 2. RabbitMQ (opcional hasta tener broker)
     rabbitmq_available = False
     try:
         from src.core.rabbitmq.connection import rabbitmq
-        await rabbitmq.connect()
+        # Timeout para no bloquear el arranque si el broker no responde
+        # (ej. puerto firewall'd que da ETIMEDOUT en vez de refused).
+        await asyncio.wait_for(rabbitmq.connect(), timeout=8)
 
         from src.core.rabbitmq.exchanges import exchange_manager
         await exchange_manager.setup()
