@@ -4,23 +4,24 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # ── App ──────────────────────────────────────
+    # App 
     APP_NAME: str = "sensor_db_backend"
     APP_ENV: str = "development"
     DEBUG: bool = True
 
-    # ── JWT ──────────────────────────────────────
+    # JWT 
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # ── PostgreSQL ────────────────────────────────
+    # PostgreSQL
     DB_HOST: str
     DB_PORT: int
     DB_USER: str
     DB_PASSWORD: str
     DB_NAME: str
+    DB_SSL: bool = False   # True para BD gestionada con SSL (ej. Supabase en prod)
 
     @property
     def DATABASE_URL(self) -> str:
@@ -29,7 +30,7 @@ class Settings(BaseSettings):
             f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
         )
 
-    # ── RabbitMQ ──────────────────────────────────
+    # RabbitMQ 
     RABBITMQ_HOST: str
     RABBITMQ_PORT: int
     RABBITMQ_USER: str
@@ -42,28 +43,28 @@ class Settings(BaseSettings):
             f"@{self.RABBITMQ_HOST}:{self.RABBITMQ_PORT}/"
         )
 
-    # ── OAuth — Google ────────────────────────────────
+    # OAuth — Google 
     GOOGLE_CLIENT_ID:     str = ""
     GOOGLE_CLIENT_SECRET: str = ""
     GOOGLE_REDIRECT_URI:  str = "http://localhost:8000/api/auth/callback/google"
 
-    # ── OAuth — GitHub ────────────────────────────────
+    # OAuth — GitHub
     GITHUB_CLIENT_ID:     str = ""
     GITHUB_CLIENT_SECRET: str = ""
     GITHUB_REDIRECT_URI:  str = "http://localhost:8000/api/auth/callback/github"
 
-    # ── Frontend ──────────────────────────────────────
+    # Frontend
     FRONTEND_URL: str = "http://localhost:3000"
 
-    # ── CORS ──────────────────────────────────────────
+    # CORS
     ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173"]
 
-    # ── Cookies ───────────────────────────────────────
+    # Cookies
     COOKIE_SECURE:   bool = False   # True en producción (HTTPS)
     COOKIE_SAMESITE: str  = "lax"
     COOKIE_DOMAIN:   str  = ""      # vacío = sin dominio explícito
 
-    # ── PayPal ────────────────────────────────────────
+    # PayPal
     PAYPAL_CLIENT_ID:     str = ""
     PAYPAL_CLIENT_SECRET: str = ""
     PAYPAL_MODE:          str = "sandbox"   # sandbox | live
@@ -76,7 +77,7 @@ class Settings(BaseSettings):
     PAYPAL_PLAN_ENTERPRISE_MONTHLY: str = ""
     PAYPAL_PLAN_ENTERPRISE_ANNUAL:  str = ""
 
-    # ── Stripe ────────────────────────────────────────
+    # Stripe
     STRIPE_SECRET_KEY:    str = ""
     STRIPE_PUBLIC_KEY:    str = ""
     STRIPE_WEBHOOK_SECRET: str = ""
@@ -89,17 +90,17 @@ class Settings(BaseSettings):
     STRIPE_PRICE_ENTERPRISE_MONTHLY: str = ""
     STRIPE_PRICE_ENTERPRISE_ANNUAL:  str = ""
 
-    # ── Cloudinary ────────────────────────────────────
+    # Cloudinary
     CLOUDINARY_CLOUD_NAME: str = ""
     CLOUDINARY_API_KEY:    str = ""
     CLOUDINARY_API_SECRET: str = ""
 
-    # ── Resend (email) ────────────────────────────────
+    # Resend (email) 
     RESEND_API_KEY:  str = ""
     MAIL_FROM:       str = ""
     MAIL_FROM_NAME:  str = "Nich-ká"
 
-    # ── Sensores ──────────────────────────────────
+    # Sensores
     SENSOR_TYPES: list[str] = [
         "alcohol",
         "density",

@@ -20,6 +20,7 @@ export const config = {
     user:     required('DB_USER'),
     password: required('DB_PASSWORD'),
     database: required('DB_NAME'),
+    ssl:      process.env.DB_SSL === 'true',   // true para BD gestionada (Supabase)
   },
 
   rabbitmq: {
