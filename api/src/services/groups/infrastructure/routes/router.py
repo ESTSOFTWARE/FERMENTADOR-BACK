@@ -17,6 +17,7 @@ from src.services.groups.infrastructure.controllers.get_groups_controller import
     get_all_groups,
     get_groups,
 )
+from src.services.groups.infrastructure.controllers.get_my_groups_controller import get_my_groups
 from src.services.groups.infrastructure.controllers.join_group_controller import join_group
 from src.services.groups.infrastructure.controllers.remove_member_controller import remove_member
 from src.services.groups.infrastructure.controllers.upload_cover_controller import (
@@ -40,6 +41,11 @@ async def join_group_route(
     current_user: dict = Depends(require_any_role),
 ):
     return await join_group(code=body.code, student_id=current_user["user_id"])
+
+
+@router.get("/me", response_model=list[GroupResponse], summary="Listar mis grupos (alumno)")
+async def get_my_groups_route(current_user: dict = Depends(require_any_role)):
+    return await get_my_groups(student_id=current_user["user_id"])
 
 
 @router.get("/all", response_model=list[GroupResponse], summary="Listar grupos de mis docentes (solo admin)")

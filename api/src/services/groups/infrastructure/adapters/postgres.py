@@ -92,6 +92,17 @@ class GroupRepository(IGroupRepository):
             )
             await session.commit()
 
+    async def get_all_by_student(self, student_id: int) -> list[Group]:
+        async with self._session_factory() as session:
+            result = await session.execute(
+                select(GroupModel)
+                .join(GroupMemberModel, GroupMemberModel.group_id == GroupModel.id)
+                .options(selectinload(GroupModel.professor), selectinload(GroupModel.members).selectinload(GroupMemberModel.student))
+                .where(GroupMemberModel.student_id == student_id)
+                .order_by(GroupModel.created_at.desc())
+            )
+            return [self._to_entity(m) for m in result.scalars().all()]
+
     async def student_has_group(self, student_id: int) -> bool:
         async with self._session_factory() as session:
             result = await session.execute(
