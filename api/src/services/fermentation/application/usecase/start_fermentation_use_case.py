@@ -6,6 +6,7 @@ from src.core.exceptions import (
     FermentationSessionNotFoundException,
 )
 from src.core.threads.sensor_thread_manager import thread_manager
+from src.core.websocket.sensor_audience import invalidate_audience
 from src.services.fermentation.domain.entities.fermentation_session import FermentationSession
 from src.services.fermentation.domain.repository import IFermentationRepository
 
@@ -37,6 +38,9 @@ class StartFermentationUseCase:
         )
 
         circuit_id     = session.circuit_id
+        # La sesión ya está "running": fuerza recálculo de la audiencia del
+        # circuito (ahora con el grupo de esta sesión).
+        invalidate_audience(circuit_id)
         active_sensors = await self._fermentation_repo.get_active_sensors_for_circuit(circuit_id)
 
         for sensor_type in active_sensors:

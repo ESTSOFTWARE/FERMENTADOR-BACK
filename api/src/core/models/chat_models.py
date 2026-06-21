@@ -1,4 +1,5 @@
 from sqlalchemy import (
+    Boolean,
     Column,
     DateTime,
     Enum,
@@ -65,10 +66,10 @@ class ChatMessageModel(Base):
     content         = Column(Text, nullable=True)
     reply_to_id     = Column(Integer, ForeignKey("chat_messages.id"), nullable=True)
     priority        = Column(Enum("normal", "important", "urgent", native_enum=False), nullable=False, server_default="normal")
-    pinned          = Column(Integer, nullable=False, server_default=text("0"))
-    edited          = Column(Integer, nullable=False, server_default=text("0"))
+    pinned          = Column(Boolean, nullable=False, server_default=text("false"))
+    edited          = Column(Boolean, nullable=False, server_default=text("false"))
     edited_at       = Column(DateTime, nullable=True)
-    deleted         = Column(Integer, nullable=False, server_default=text("0"))
+    deleted         = Column(Boolean, nullable=False, server_default=text("false"))
     created_at      = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
 
     sender      = relationship("UserModel", foreign_keys=[sender_id])

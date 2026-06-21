@@ -11,6 +11,7 @@ class UserResponse(BaseModel):
     role_id:       int
     role_name:     str | None
     circuit_id:    int | None
+    circuit_code:  str | None = None
     created_by:    int | None
     created_at:    datetime | None
     profile_image:  str | None = None
@@ -28,6 +29,7 @@ class UserResponse(BaseModel):
             role_id=user.role_id,
             role_name=user.role_name,
             circuit_id=user.circuit_id,
+            circuit_code=getattr(user, "circuit_code", None),
             created_by=user.created_by,
             created_at=user.created_at,
             profile_image=user.profile_image,

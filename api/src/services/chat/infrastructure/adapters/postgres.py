@@ -216,7 +216,7 @@ class ChatRepository(IChatRepository):
         cond = [
             ChatMessageModel.conversation_id == conversation_id,
             ChatMessageModel.sender_id != viewer_id,
-            ChatMessageModel.deleted == 0,
+            ChatMessageModel.deleted.is_(False),
         ]
         if last_read_at is not None:
             cond.append(ChatMessageModel.created_at > last_read_at)
@@ -424,7 +424,7 @@ class ChatRepository(IChatRepository):
             await session.execute(
                 update(ChatMessageModel)
                 .where(ChatMessageModel.id == message_id)
-                .values(content=content, edited=1, edited_at=datetime.utcnow())
+                .values(content=content, edited=True, edited_at=datetime.utcnow())
             )
             await session.commit()
         return await self.get_message(message_id)
@@ -434,7 +434,7 @@ class ChatRepository(IChatRepository):
             await session.execute(
                 update(ChatMessageModel)
                 .where(ChatMessageModel.id == message_id)
-                .values(deleted=1)
+                .values(deleted=True)
             )
             await session.commit()
 
@@ -443,14 +443,14 @@ class ChatRepository(IChatRepository):
             current = (await session.execute(
                 select(ChatMessageModel.pinned).where(ChatMessageModel.id == message_id)
             )).scalar_one()
-            new_value = 0 if current else 1
+            new_value = not current
             await session.execute(
                 update(ChatMessageModel)
                 .where(ChatMessageModel.id == message_id)
                 .values(pinned=new_value)
             )
             await session.commit()
-            return bool(new_value)
+            return new_value
 
     async def set_priority(self, message_id: int, priority: str) -> None:
         async with self._session_factory() as session:

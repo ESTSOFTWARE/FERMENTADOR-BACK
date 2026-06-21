@@ -45,6 +45,7 @@ class UserModel(Base):
 
     role    = relationship("RoleModel", back_populates="users")
     creator = relationship("UserModel", remote_side=[id])
+    circuit = relationship("CircuitModel", foreign_keys=[circuit_id], viewonly=True)
 
 
 class PasswordResetCodeModel(Base):

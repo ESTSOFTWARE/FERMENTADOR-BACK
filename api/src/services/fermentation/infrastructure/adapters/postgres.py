@@ -35,6 +35,7 @@ class FermentationSessionModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     circuit_id = Column(Integer, ForeignKey("circuits.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    group_id = Column(Integer, ForeignKey("classrooms.id", ondelete="SET NULL"), nullable=True)
     formula_id = Column(Integer, ForeignKey(
         "efficiency_formula.id"), nullable=False)
     scheduled_start = Column(DateTime, nullable=False)
@@ -158,11 +159,13 @@ class FermentationRepository(IFermentationRepository):
         formula_id:      int,
         scheduled_start: datetime,
         scheduled_end:   datetime,
+        group_id:        int | None = None,
     ) -> FermentationSession:
         async with self._session_factory() as session:
             model = FermentationSessionModel(
                 circuit_id=circuit_id,
                 user_id=user_id,
+                group_id=group_id,
                 formula_id=formula_id,
                 scheduled_start=scheduled_start,
                 scheduled_end=scheduled_end,
@@ -414,6 +417,7 @@ class FermentationRepository(IFermentationRepository):
             id=model.id,
             circuit_id=model.circuit_id,
             user_id=model.user_id,
+            group_id=model.group_id,
             formula_id=model.formula_id,
             scheduled_start=model.scheduled_start,
             scheduled_end=model.scheduled_end,

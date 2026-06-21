@@ -30,17 +30,18 @@ class Settings(BaseSettings):
             f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
         )
 
-    # RabbitMQ 
+    # RabbitMQ
     RABBITMQ_HOST: str
     RABBITMQ_PORT: int
     RABBITMQ_USER: str
     RABBITMQ_PASSWORD: str
+    RABBITMQ_VHOST: str = ""  # CloudAMQP exige el vhost (= usuario); local usa "" (default)
 
     @property
     def RABBITMQ_URL(self) -> str:
         return (
             f"amqp://{self.RABBITMQ_USER}:{self.RABBITMQ_PASSWORD}"
-            f"@{self.RABBITMQ_HOST}:{self.RABBITMQ_PORT}/"
+            f"@{self.RABBITMQ_HOST}:{self.RABBITMQ_PORT}/{self.RABBITMQ_VHOST}"
         )
 
     # OAuth — Google 

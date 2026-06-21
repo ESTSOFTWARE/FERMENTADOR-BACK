@@ -34,6 +34,7 @@ def conversation_dto(c: SupportConversation) -> SupportConversationResponse:
         admin_id=c.admin_id,
         admin_name=c.admin_name,
         admin_email=c.admin_email,
+        admin_image=c.admin_image,
         created_at=c.created_at,
         last_message=message_dto(c.last_message) if c.last_message else None,
         unread_count=c.unread_count,

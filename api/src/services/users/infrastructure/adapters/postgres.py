@@ -26,11 +26,15 @@ class UserRepository(IUserRepository):
         async with self._session_factory() as session:
             result = await session.execute(
                 select(UserModel)
-                .options(selectinload(UserModel.role))
+                .options(selectinload(UserModel.role), selectinload(UserModel.circuit))
                 .where(UserModel.id == user_id)
             )
             model = result.scalar_one_or_none()
-            return self._to_entity(model) if model else None
+            if not model:
+                return None
+            entity = self._to_entity(model)
+            entity.circuit_code = model.circuit.activation_code if model.circuit else None
+            return entity
 
     async def get_by_email(self, email: str) -> User | None:
         async with self._session_factory() as session:

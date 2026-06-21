@@ -16,6 +16,7 @@ async def schedule(body: ScheduleFermentationRequest, user_id: int) -> Fermentat
     session = await ScheduleFermentationUseCase(repo).execute(
         circuit_id      = body.circuit_id,
         user_id         = user_id,
+        group_id        = body.group_id,
         scheduled_start = body.scheduled_start,
         scheduled_end   = body.scheduled_end,
         initial_sugar   = body.initial_sugar,

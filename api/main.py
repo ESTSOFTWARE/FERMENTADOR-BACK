@@ -240,7 +240,7 @@ app.include_router(notifications_ws_router, prefix="",                   tags=["
 app.include_router(formula_router,          prefix="/api/formula",       tags=["Formula"])
 app.include_router(announcements_router,    prefix="/api/announcements", tags=["Announcements"])
 app.include_router(groups_router,           prefix="/api/groups",        tags=["Groups"])
-app.include_router(support_router,          prefix="/support",           tags=["Support"])
+app.include_router(support_router,          prefix="/api/support",       tags=["Support"])
 app.include_router(billing_router,          prefix="/api/billing",       tags=["Billing"])
 app.include_router(chat_router,             prefix="/api/chat",          tags=["Chat"])
 app.include_router(chat_ws_router,          prefix="",                   tags=["Chat WS"])

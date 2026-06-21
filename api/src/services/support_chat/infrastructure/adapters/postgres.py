@@ -28,11 +28,11 @@ class SupportChatRepository(ISupportChatRepository):
         if not ids:
             return {}
         rows = (await session.execute(
-            select(UserModel.id, UserModel.name, UserModel.last_name, UserModel.email)
+            select(UserModel.id, UserModel.name, UserModel.last_name, UserModel.email, UserModel.profile_image)
             .where(UserModel.id.in_(ids))
         )).all()
         return {
-            r[0]: {"name": f"{r[1]} {r[2]}".strip(), "email": r[3]}
+            r[0]: {"name": f"{r[1]} {r[2]}".strip(), "email": r[3], "image": r[4]}
             for r in rows
         }
 
@@ -111,6 +111,7 @@ class SupportChatRepository(ISupportChatRepository):
             admin_id=model.admin_id,
             admin_name=admin.get("name", "Admin"),
             admin_email=admin.get("email", ""),
+            admin_image=admin.get("image"),
             created_at=model.created_at,
             last_message=last_message,
             unread_count=unread,

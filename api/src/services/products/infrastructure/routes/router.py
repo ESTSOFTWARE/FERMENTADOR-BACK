@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 
-from src.core.dependencies import require_admin
+from src.core.dependencies import require_admin_or_soporte
 from src.services.products.domain.dto.product_schema import (
     CreateProductRequest,
     ProductResponse,
@@ -40,16 +40,16 @@ async def get_product(product_id: int):
     return await get_by_id(product_id)
 
 
-@router.post("/", response_model=ProductResponse, status_code=201, summary="Crear producto (solo admin)")
-async def create_product(body: CreateProductRequest, current_user: dict = Depends(require_admin)):
+@router.post("/", response_model=ProductResponse, status_code=201, summary="Crear producto (admin o soporte)")
+async def create_product(body: CreateProductRequest, current_user: dict = Depends(require_admin_or_soporte)):
     return await create(body)
 
 
-@router.put("/{product_id}", response_model=ProductResponse, summary="Actualizar producto (solo admin)")
-async def update_product(product_id: int, body: UpdateProductRequest, current_user: dict = Depends(require_admin)):
+@router.put("/{product_id}", response_model=ProductResponse, summary="Actualizar producto (admin o soporte)")
+async def update_product(product_id: int, body: UpdateProductRequest, current_user: dict = Depends(require_admin_or_soporte)):
     return await update(product_id, body)
 
 
-@router.delete("/{product_id}", status_code=200, summary="Eliminar producto (solo admin)")
-async def delete_product(product_id: int, current_user: dict = Depends(require_admin)):
+@router.delete("/{product_id}", status_code=200, summary="Eliminar producto (admin o soporte)")
+async def delete_product(product_id: int, current_user: dict = Depends(require_admin_or_soporte)):
     return await delete(product_id)

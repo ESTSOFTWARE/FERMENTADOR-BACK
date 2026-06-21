@@ -1,11 +1,27 @@
 from datetime import datetime, timezone
 
 from src.core.rabbitmq.publisher import publisher
-from src.core.rabbitmq.ws_events import to_room
+from src.core.rabbitmq.ws_events import to_room, to_users
 from src.core.websocket.schemas import SensorDataMessage, SensorDeactivatedMessage
+from src.core.websocket.sensor_audience import resolve_audience
 from src.core.websocket.websocket_manager import ws_manager
 from src.services.sensors.domain.entities.sensor_reading import SensorReading
 from src.services.sensors.domain.repository import ISensorRepository
+
+
+async def _deliver(circuit_id: int, msg) -> None:
+    """
+    Entrega una lectura por WebSocket respetando la audiencia del circuito.
+    audience None → a todos (sala del circuito). audience set → solo a esos
+    usuarios (aislamiento por grupo), tanto in-process como vía ws-service.
+    """
+    audience = await resolve_audience(circuit_id)
+    if ws_manager.is_circuit_connected(circuit_id):
+        await ws_manager.broadcast_sensor(circuit_id, msg, audience)
+    if audience is not None:
+        await to_users("sensors", list(audience), msg.model_dump(mode="json"))
+    else:
+        await to_room("sensors", f"circuit:{circuit_id}", msg.model_dump(mode="json"))
 
 
 class SaveReadingUseCase:
@@ -34,11 +50,7 @@ class SaveReadingUseCase:
             session_id=session_id,
             timestamp=reading.timestamp or datetime.now(timezone.utc),
         )
-        # In-process (transición): solo si hay clientes locales en el /ws de este back.
-        if ws_manager.is_circuit_connected(circuit_id):
-            await ws_manager.broadcast_sensor(circuit_id, msg)
-        # RabbitMQ → ws-service (Node): siempre, a la sala del circuito.
-        await to_room("sensors", f"circuit:{circuit_id}", msg.model_dump(mode="json"))
+        await _deliver(circuit_id, msg)
 
         return reading
 
@@ -69,6 +81,4 @@ class SaveReadingUseCase:
             last_reading=value,
             occurred_at=now,
         )
-        if ws_manager.is_circuit_connected(circuit_id):
-            await ws_manager.broadcast_sensor(circuit_id, msg)
-        await to_room("sensors", f"circuit:{circuit_id}", msg.model_dump(mode="json"))
+        await _deliver(circuit_id, msg)

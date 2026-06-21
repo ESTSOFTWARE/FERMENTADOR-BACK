@@ -11,6 +11,7 @@ class User:
     password:   str
     role_id:    int
     circuit_id:            int | None = None
+    circuit_code:          str | None = None
     role_name:             str | None = None
     created_by:            int | None = None
     created_at:            datetime | None = None
