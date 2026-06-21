@@ -9,6 +9,7 @@ class RoleSchema(BaseModel):
 
 class CircuitSchema(BaseModel):
     id: int | None
+    code: str | None
     has_circuit: bool
 
 class PhoneSchema(BaseModel):
@@ -49,6 +50,7 @@ class AdminResponse(BaseModel):
             ),
             circuit=CircuitSchema(
                 id=user.circuit_id,
+                code=user.circuit.activation_code if user.circuit else None,
                 has_circuit=user.circuit_id is not None
             ),
             auth_provider=auth_provider,

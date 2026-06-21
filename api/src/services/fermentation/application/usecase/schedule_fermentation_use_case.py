@@ -17,6 +17,7 @@ class ScheduleFermentationUseCase:
         scheduled_start: datetime,
         scheduled_end:   datetime,
         initial_sugar:   float,
+        group_id:        int | None = None,
     ) -> FermentationSession:
         if scheduled_end <= scheduled_start:
             raise BadRequestException(
@@ -33,6 +34,7 @@ class ScheduleFermentationUseCase:
             formula_id=1,
             scheduled_start=scheduled_start,
             scheduled_end=scheduled_end,
+            group_id=group_id,
         )
         await self._repo.create_report(
             session_id=session.id,

@@ -16,6 +16,7 @@ class IFermentationRepository(ABC):
         formula_id:      int,
         scheduled_start: datetime,
         scheduled_end:   datetime,
+        group_id:        int | None = None,
     ) -> FermentationSession:
         ...
         

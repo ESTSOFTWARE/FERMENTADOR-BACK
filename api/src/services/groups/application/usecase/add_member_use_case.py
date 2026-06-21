@@ -28,7 +28,8 @@ class AddMemberUseCase:
         if student.role_name and student.role_name.lower() != "estudiante":
             raise BadRequestException("Solo se pueden agregar alumnos a un grupo")
 
-        if await self._group_repo.student_has_group(student_id):
-            raise ConflictException("El alumno ya pertenece a un grupo")
+        # Un alumno puede estar en varios grupos, pero no dos veces en el mismo.
+        if any(m.student_id == student_id for m in group.members):
+            raise ConflictException("El alumno ya pertenece a este grupo")
 
         return await self._group_repo.add_member(group_id, student_id)

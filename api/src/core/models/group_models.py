@@ -28,7 +28,8 @@ class GroupMemberModel(Base):
     joined_at  = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
 
     __table_args__ = (
-        UniqueConstraint("student_id", name="uq_student_one_group"),
+        # Un alumno puede estar en varios grupos, pero no dos veces en el mismo.
+        UniqueConstraint("group_id", "student_id", name="uq_group_student"),
     )
 
     group   = relationship("GroupModel", back_populates="members")

@@ -91,6 +91,7 @@ CREATE TABLE fermentation_sessions (
     id               SERIAL PRIMARY KEY,
     circuit_id       INT       NOT NULL,
     user_id          INT       NOT NULL,
+    group_id         INT       DEFAULT NULL,
     formula_id       INT       NOT NULL,
     scheduled_start  TIMESTAMP NOT NULL,
     scheduled_end    TIMESTAMP NOT NULL,
@@ -283,12 +284,17 @@ CREATE TABLE classrooms (
     CONSTRAINT fk_classroom_professor FOREIGN KEY (professor_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- FK de fermentation_sessions.group_id → classrooms (referencia hacia adelante:
+-- fermentation_sessions se crea antes que classrooms, por eso la FK va aquí).
+ALTER TABLE fermentation_sessions
+    ADD CONSTRAINT fk_session_group FOREIGN KEY (group_id) REFERENCES classrooms(id) ON DELETE SET NULL;
+
 CREATE TABLE group_members (
     id         SERIAL PRIMARY KEY,
     group_id   INT       NOT NULL,
     student_id INT       NOT NULL,
     joined_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uq_student_one_group  UNIQUE (student_id),
+    CONSTRAINT uq_group_student  UNIQUE (group_id, student_id),
     CONSTRAINT fk_member_group   FOREIGN KEY (group_id)   REFERENCES classrooms(id) ON DELETE CASCADE,
     CONSTRAINT fk_member_student FOREIGN KEY (student_id) REFERENCES users(id)       ON DELETE CASCADE
 );
@@ -303,6 +309,17 @@ CREATE TABLE password_reset_codes (
     CONSTRAINT fk_reset_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- ── Categorías ────────────────────────────────────────────────────────────────
+CREATE TABLE product_categories (
+    id          SERIAL PRIMARY KEY,
+    name        VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT         DEFAULT NULL,
+    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TRIGGER trg_product_categories_updated BEFORE UPDATE ON product_categories
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
 CREATE TABLE products (
     id          SERIAL PRIMARY KEY,
     name        VARCHAR(150)     NOT NULL,
@@ -310,12 +327,19 @@ CREATE TABLE products (
     price       DOUBLE PRECISION NOT NULL,
     sku         VARCHAR(50)      NOT NULL UNIQUE,
     stock       INT              NOT NULL DEFAULT 0,
-    rating      INT              NOT NULL DEFAULT 1,
+    rating      DECIMAL(3,2)     NOT NULL DEFAULT 0,
+    category_id INT              DEFAULT NULL,
     created_at  TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT chk_product_price  CHECK (price > 0),
     CONSTRAINT chk_product_stock  CHECK (stock >= 0),
-    CONSTRAINT chk_product_rating CHECK (rating >= 1 AND rating <= 5)
+    CONSTRAINT chk_product_rating CHECK (rating >= 0 AND rating <= 5),
+    CONSTRAINT fk_product_category FOREIGN KEY (category_id)
+        REFERENCES product_categories(id) ON DELETE SET NULL
 );
+CREATE TRIGGER trg_products_updated BEFORE UPDATE ON products
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+CREATE INDEX idx_products_category ON products(category_id);
 
 CREATE TABLE subscriptions (
     id                      SERIAL PRIMARY KEY,
@@ -463,36 +487,6 @@ CREATE INDEX idx_sensor_events_circuit     ON sensor_events(circuit_id, occurred
 CREATE INDEX idx_report_history_report     ON report_history(report_id, occurred_at);
 CREATE INDEX idx_report_history_user       ON report_history(user_id, occurred_at);
 CREATE INDEX idx_chat_msg_conv_created     ON chat_messages(conversation_id, created_at);
-
--- Actualizar para que no se usen alter table en el futuro, sino directamente al crear la tabla
--- ── Categorías ────────────────────────────────────────────────────────────────
-CREATE TABLE product_categories (
-    id          SERIAL PRIMARY KEY,
-    name        VARCHAR(100) NOT NULL UNIQUE,
-    description TEXT         DEFAULT NULL,
-    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-CREATE TRIGGER trg_product_categories_updated BEFORE UPDATE ON product_categories
-    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
--- ── Alterar products ──────────────────────────────────────────────────────────
-ALTER TABLE products
-    ADD COLUMN category_id INT          DEFAULT NULL,
-    ADD COLUMN updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    ALTER COLUMN rating TYPE DECIMAL(3,2),
-    ALTER COLUMN rating SET DEFAULT 0,
-    DROP CONSTRAINT IF EXISTS chk_product_rating;
-
-ALTER TABLE products
-    ADD CONSTRAINT chk_product_rating CHECK (rating >= 0 AND rating <= 5),
-    ADD CONSTRAINT fk_product_category FOREIGN KEY (category_id)
-        REFERENCES product_categories(id) ON DELETE SET NULL;
-
-CREATE TRIGGER trg_products_updated BEFORE UPDATE ON products
-    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
-CREATE INDEX idx_products_category ON products(category_id);
 
 -- ── Beneficios ────────────────────────────────────────────────────────────────
 CREATE TABLE product_benefits (

@@ -36,6 +36,7 @@ class SupportConversationResponse(BaseModel):
     admin_id:     int             = Field(serialization_alias="adminId")
     admin_name:   str             = Field(serialization_alias="adminName")
     admin_email:  str             = Field(serialization_alias="adminEmail")
+    admin_image:  str | None      = Field(default=None, serialization_alias="adminImage")
     created_at:   datetime        = Field(serialization_alias="createdAt")
     last_message: SupportMessageResponse | None = Field(default=None, serialization_alias="lastMessage")
     unread_count: int             = Field(default=0, serialization_alias="unreadCount")

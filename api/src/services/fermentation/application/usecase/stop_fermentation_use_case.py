@@ -5,6 +5,7 @@ from src.core.exceptions import (
     FermentationSessionNotFoundException,
 )
 from src.core.threads.sensor_thread_manager import thread_manager
+from src.core.websocket.sensor_audience import invalidate_audience
 from src.services.fermentation.domain.entities.fermentation_session import FermentationSession
 from src.services.fermentation.domain.repository import IFermentationRepository
 
@@ -61,6 +62,8 @@ class StopFermentationUseCase:
             )
 
         thread_manager.stop_session(circuit_id)
+        # Ya no hay sesión corriendo: la audiencia vuelve a "todos" en la próxima lectura.
+        invalidate_audience(circuit_id)
         return session
 
     async def _calculate_efficiency(self, session_id: int) -> None:

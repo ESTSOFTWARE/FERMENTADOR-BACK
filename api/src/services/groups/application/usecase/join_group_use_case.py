@@ -1,6 +1,5 @@
 from src.core.exceptions import (
     BadRequestException,
-    ConflictException,
     NotFoundException,
 )
 from src.services.groups.domain.entities.group import Group
@@ -30,8 +29,5 @@ class JoinGroupUseCase:
         if any(m.student_id == student_id for m in group.members):
             return group
 
-        # Un alumno solo puede pertenecer a un grupo a la vez
-        if await self._group_repo.student_has_group(student_id):
-            raise ConflictException("Ya perteneces a un grupo")
-
+        # Un alumno puede pertenecer a varios grupos (clases distintas).
         return await self._group_repo.add_member(group.id, student_id)

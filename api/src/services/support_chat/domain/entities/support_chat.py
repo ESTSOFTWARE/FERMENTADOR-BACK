@@ -31,5 +31,6 @@ class SupportConversation:
     admin_name:   str
     admin_email:  str
     created_at:   datetime
+    admin_image:  str | None = None
     last_message: SupportMessage | None = None
     unread_count: int = 0

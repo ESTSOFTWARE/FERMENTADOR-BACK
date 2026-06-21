@@ -7,6 +7,7 @@ class FermentationSessionResponse(BaseModel):
     id:              int
     circuit_id:      int
     user_id:         int
+    group_id:        int | None = None
     formula_id:      int
     scheduled_start: datetime
     scheduled_end:   datetime
@@ -22,6 +23,7 @@ class FermentationSessionResponse(BaseModel):
             id              = session.id,
             circuit_id      = session.circuit_id,
             user_id         = session.user_id,
+            group_id        = getattr(session, "group_id", None),
             formula_id      = session.formula_id,
             scheduled_start = session.scheduled_start,
             scheduled_end   = session.scheduled_end,

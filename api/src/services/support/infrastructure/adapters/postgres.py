@@ -13,7 +13,7 @@ class SupportRepositoryPostgres(SupportRepository):
         stmt = (
             select(UserModel)
             .where(UserModel.role_id == 1)
-            .options(selectinload(UserModel.role))
+            .options(selectinload(UserModel.role), selectinload(UserModel.circuit))
         )
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
@@ -23,7 +23,7 @@ class SupportRepositoryPostgres(SupportRepository):
             select(UserModel)
             .where(UserModel.id == admin_id)
             .where(UserModel.role_id == 1)
-            .options(selectinload(UserModel.role))
+            .options(selectinload(UserModel.role), selectinload(UserModel.circuit))
         )
         result = await self.session.execute(stmt)
         return result.scalars().first()

@@ -19,8 +19,10 @@ class WebSocketManager:
     """
 
     def __init__(self):
-        # circuit_id → lista de websockets conectados
-        self.sensor_connections: dict[int, list[WebSocket]] = {}
+        # circuit_id → lista de (websocket, user_id|None) conectados.
+        # El user_id permite filtrar por audiencia cuando una fermentación
+        # corre para un grupo específico.
+        self.sensor_connections: dict[int, list[tuple[WebSocket, int | None]]] = {}
         # user_id → lista de websockets conectados
         self.notification_connections: dict[int, list[WebSocket]] = {}
         # Lock para evitar condiciones de carrera al modificar los dicts
@@ -28,48 +30,62 @@ class WebSocketManager:
 
 
     # ── Sensores ──────────────────────────────────────────────────────────────
-    async def connect_sensor(self, circuit_id: int, websocket: WebSocket) -> None:
+    async def connect_sensor(self, circuit_id: int, websocket: WebSocket, user_id: int | None = None) -> None:
         """Registra una conexión WS al canal de sensores de un circuito."""
         await websocket.accept()
         async with self._lock:
             if circuit_id not in self.sensor_connections:
                 self.sensor_connections[circuit_id] = []
-            self.sensor_connections[circuit_id].append(websocket)
-        logger.info(f"[WS] Sensor conectado → circuit_id={circuit_id}")
+            self.sensor_connections[circuit_id].append((websocket, user_id))
+        logger.info(f"[WS] Sensor conectado → circuit_id={circuit_id} | user_id={user_id}")
 
     async def disconnect_sensor(self, circuit_id: int, websocket: WebSocket) -> None:
         """Elimina una conexión WS del canal de sensores."""
         async with self._lock:
             if circuit_id in self.sensor_connections:
-                self.sensor_connections[circuit_id].remove(websocket)
+                self.sensor_connections[circuit_id] = [
+                    c for c in self.sensor_connections[circuit_id] if c[0] is not websocket
+                ]
                 if not self.sensor_connections[circuit_id]:
                     del self.sensor_connections[circuit_id]
         logger.info(f"[WS] Sensor desconectado → circuit_id={circuit_id}")
 
-    async def broadcast_sensor(self, circuit_id: int, message: BaseModel) -> None:
+    async def broadcast_sensor(
+        self, circuit_id: int, message: BaseModel, audience: set[int] | None = None,
+    ) -> None:
         """
-        Envía un mensaje a todos los clientes conectados al canal
-        de sensores de un circuito específico.
+        Envía un mensaje a los clientes del canal de sensores de un circuito.
+
+        Si `audience` es None → a todos. Si es un set de user_ids → solo a las
+        conexiones cuyo usuario autenticado esté en la audiencia (aislamiento por
+        grupo). Las conexiones anónimas (user_id None) quedan excluidas cuando hay
+        audiencia.
         """
         async with self._lock:
-            connections = list(self.sensor_connections.get(circuit_id, []))
-        if not connections:
+            conns = list(self.sensor_connections.get(circuit_id, []))
+        if not conns:
             return
+
+        if audience is not None:
+            conns = [c for c in conns if c[1] is not None and c[1] in audience]
+            if not conns:
+                return
 
         payload = message.model_dump_json()
 
         results = await asyncio.gather(
-            *[ws.send_text(payload) for ws in connections],
+            *[ws.send_text(payload) for ws, _ in conns],
             return_exceptions=True,
         )
 
-        disconnected = [ws for ws, r in zip(connections, results) if isinstance(r, Exception)]
+        disconnected = [ws for (ws, _), r in zip(conns, results) if isinstance(r, Exception)]
         if disconnected:
             logger.warning(f"[WS] {len(disconnected)} conexión(es) rota(s) en sensor broadcast → circuit_id={circuit_id}")
             async with self._lock:
-                for ws in disconnected:
-                    if ws in self.sensor_connections.get(circuit_id, []):
-                        self.sensor_connections[circuit_id].remove(ws)
+                if circuit_id in self.sensor_connections:
+                    self.sensor_connections[circuit_id] = [
+                        c for c in self.sensor_connections[circuit_id] if c[0] not in disconnected
+                    ]
 
 
     # ── Notificaciones ────────────────────────────────────────────────────────
