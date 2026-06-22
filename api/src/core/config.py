@@ -57,8 +57,22 @@ class Settings(BaseSettings):
     # Frontend
     FRONTEND_URL: str = "http://localhost:3000"
 
-    # CORS
-    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173"]
+    # CORS — se lee como texto y se parsea: acepta JSON (["a","b"]) o lista
+    # separada por comas (a,b). Así no truena el deploy por un valor mal formado.
+    ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:5173"
+
+    @property
+    def allowed_origins(self) -> list[str]:
+        raw = (self.ALLOWED_ORIGINS or "").strip()
+        if not raw:
+            return []
+        if raw.startswith("["):
+            import json
+            try:
+                return [str(o).strip() for o in json.loads(raw)]
+            except Exception:  # noqa: BLE001 — fallback a CSV si el JSON viene mal
+                pass
+        return [o.strip() for o in raw.split(",") if o.strip()]
 
     # Cookies
     COOKIE_SECURE:   bool = False   # True en producción (HTTPS)
