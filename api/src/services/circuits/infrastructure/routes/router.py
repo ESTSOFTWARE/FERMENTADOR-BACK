@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends
 
-from src.core.dependencies import require_admin_or_profesor, require_any_role
+from src.core.dependencies import (
+    require_admin_or_profesor,
+    require_admin_or_soporte,
+    require_any_role,
+)
 from src.services.circuits.domain.dto.circuit_schema import CircuitResponse
 from src.services.circuits.domain.dto.create_circuit_schema import CreateCircuitResponse
 from src.services.circuits.infrastructure.controllers.create_circuit_controller import create
@@ -16,9 +20,9 @@ router = APIRouter()
     "/",
     response_model=CreateCircuitResponse,
     status_code=201,
-    summary="Crear nuevo circuito (solo equipo de instalación)",
+    summary="Crear nuevo circuito (equipo de instalación: admin o soporte)",
 )
-async def create_circuit():
+async def create_circuit(_: dict = Depends(require_admin_or_soporte)):
     return await create()
 
 

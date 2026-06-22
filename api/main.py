@@ -197,6 +197,7 @@ from src.services.chat.infrastructure.routes.router import router as chat_router
 from src.services.chat.infrastructure.routes.websocket import router as chat_ws_router
 from src.services.circuits.infrastructure.routes.router import router as circuits_router
 from src.services.circuits.infrastructure.routes.websocket import router as circuits_ws_router
+from src.services.fermentadores.infrastructure.routes.router import router as fermentadores_router
 from src.services.fermentation.infrastructure.routes.router import router as fermentation_router
 from src.services.formula.infrastructure.routes.router import router as formula_router
 from src.services.groups.infrastructure.routes.router import router as groups_router
@@ -231,6 +232,7 @@ app.include_router(specifications_router,   prefix="/api/products/{product_id}/s
 app.include_router(includes_router,         prefix="/api/products/{product_id}/includes",          tags=["Product Includes"])
 app.include_router(reviews_router,          prefix="/api/products/{product_id}/reviews",           tags=["Product Reviews"])
 app.include_router(circuits_router,         prefix="/api/circuits",      tags=["Circuits"])
+app.include_router(fermentadores_router,    prefix="/api/fermentadores", tags=["Fermentadores"])
 app.include_router(circuits_ws_router,      prefix="",                   tags=["Circuits WS"])
 app.include_router(sensors_router,          prefix="/api/sensors",       tags=["Sensors"])
 app.include_router(sensors_ws_router,       prefix="",                   tags=["Sensors WS"])
