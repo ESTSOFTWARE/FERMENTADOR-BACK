@@ -27,7 +27,7 @@ class StopFermentationUseCase:
         if session.status != "running":
             raise FermentationNotRunningException()
 
-        now        = datetime.now(timezone.utc)
+        now        = datetime.now(timezone.utc).replace(tzinfo=None)  # naive para columnas sin zona
         status     = "interrupted" if interrupted_by else "completed"
         circuit_id = session.circuit_id
 
