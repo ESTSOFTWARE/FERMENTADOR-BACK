@@ -1,18 +1,19 @@
 import ssl
+import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
 from src.core.config import settings
 
-# SSL para BD gestionada (Supabase, etc.)
-# asyncpg recibe el contexto vía connect_args["ssl"]. Sin verificación de cert
-# (el proveedor ya termina TLS) para evitar fallos por CA en el contenedor.
-#
-# statement_cache_size=0: obligatorio con el pooler de TRANSACCIÓN de Supabase
-# (puerto 6543), que no soporta prepared statements cacheados. Es inofensivo en
-# el de sesión (5432). Evita los timeouts de 30s por saturación de conexiones.
-_connect_args = {"statement_cache_size": 0}
+_connect_args = {
+    "statement_cache_size": 0,
+    "prepared_statement_cache_size": 0,
+    "prepared_statement_name_func": lambda: f"__asyncpg_{uuid.uuid4()}__",
+}
+
+# SSL para BD gestionada (Supabase, etc.). asyncpg recibe el contexto vía
+# connect_args["ssl"]; sin verificación de cert (el proveedor termina TLS).
 if settings.DB_SSL:
     _ssl_ctx = ssl.create_default_context()
     _ssl_ctx.check_hostname = False
