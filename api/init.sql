@@ -69,6 +69,21 @@ CREATE TABLE users (
     CONSTRAINT fk_user_creator FOREIGN KEY (created_by) REFERENCES users(id)    ON DELETE SET NULL
 );
 
+-- Fermentadores físicos registrados por soporte (cada uno vinculado a un circuito).
+CREATE TABLE fermentadores (
+    id         SERIAL PRIMARY KEY,
+    serial     VARCHAR(20) NOT NULL UNIQUE,
+    circuit_id INT         DEFAULT NULL,
+    vendido    BOOLEAN     NOT NULL DEFAULT FALSE,
+    estado     VARCHAR(20) NOT NULL DEFAULT 'disponible',
+    cliente_id INT         DEFAULT NULL,
+    created_by INT         DEFAULT NULL,
+    created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_ferm_circuit FOREIGN KEY (circuit_id) REFERENCES circuits(id) ON DELETE SET NULL,
+    CONSTRAINT fk_ferm_cliente FOREIGN KEY (cliente_id) REFERENCES users(id)    ON DELETE SET NULL,
+    CONSTRAINT fk_ferm_creator FOREIGN KEY (created_by) REFERENCES users(id)    ON DELETE SET NULL
+);
+
 CREATE TABLE efficiency_formula (
     id                  SERIAL PRIMARY KEY,
     name                VARCHAR(100)     NOT NULL,
