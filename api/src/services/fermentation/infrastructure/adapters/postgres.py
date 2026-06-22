@@ -405,7 +405,7 @@ class FermentationRepository(IFermentationRepository):
         async with self._session_factory() as session:
             result = await session.execute(
                 select(EfficiencyFormulaModel.conversion_factor)
-                .where(EfficiencyFormulaModel.is_active == 1)
+                .where(EfficiencyFormulaModel.is_active.is_(True))
                 .limit(1)
             )
             factor = result.scalar_one_or_none()
