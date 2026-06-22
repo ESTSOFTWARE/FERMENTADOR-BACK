@@ -29,7 +29,7 @@ class StartFermentationUseCase:
                 f"No se puede iniciar una sesión en estado '{session.status}'"
             )
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)  # naive para columnas sin zona
 
         session = await self._fermentation_repo.update_session_status(
             session_id=session_id,
