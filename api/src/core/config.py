@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     DB_PASSWORD: str
     DB_NAME: str
     DB_SSL: bool = False   # True para BD gestionada con SSL (ej. Supabase en prod)
+    # Pool de conexiones. En Supabase free el límite es bajo (~15), así que el
+    # default es chico. Súbelo en local si quieres.
+    DB_POOL_SIZE: int = 5
+    DB_MAX_OVERFLOW: int = 5
 
     @property
     def DATABASE_URL(self) -> str:
