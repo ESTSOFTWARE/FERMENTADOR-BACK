@@ -8,7 +8,11 @@ from src.core.config import settings
 # SSL para BD gestionada (Supabase, etc.)
 # asyncpg recibe el contexto vía connect_args["ssl"]. Sin verificación de cert
 # (el proveedor ya termina TLS) para evitar fallos por CA en el contenedor.
-_connect_args = {}
+#
+# statement_cache_size=0: obligatorio con el pooler de TRANSACCIÓN de Supabase
+# (puerto 6543), que no soporta prepared statements cacheados. Es inofensivo en
+# el de sesión (5432). Evita los timeouts de 30s por saturación de conexiones.
+_connect_args = {"statement_cache_size": 0}
 if settings.DB_SSL:
     _ssl_ctx = ssl.create_default_context()
     _ssl_ctx.check_hostname = False
