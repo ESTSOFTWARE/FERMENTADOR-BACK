@@ -99,9 +99,12 @@ class FermentadorRepository(IFermentadorRepository):
         cliente_id: int | None = None,
     ) -> Fermentador | None:
         values: dict = {}
-        if vendido is not None:    values["vendido"] = vendido
-        if estado is not None:     values["estado"] = estado
-        if cliente_id is not None: values["cliente_id"] = cliente_id
+        if vendido is not None:
+            values["vendido"] = vendido
+        if estado is not None:
+            values["estado"] = estado
+        if cliente_id is not None:
+            values["cliente_id"] = cliente_id
         if values:
             async with self._session_factory() as session:
                 await session.execute(
