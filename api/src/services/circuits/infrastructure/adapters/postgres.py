@@ -91,7 +91,7 @@ class CircuitRepository(ICircuitRepository):
                 .where(CircuitModel.id == circuit_id)
                 .values(
                     is_active=True,
-                    activated_at=datetime.now(timezone.utc),
+                    activated_at=datetime.now(timezone.utc).replace(tzinfo=None),
                 )
             )
             await session.commit()
@@ -136,7 +136,7 @@ class CircuitRepository(ICircuitRepository):
         return await self.get_by_id(circuit_id)
 
     async def delete_expired_unactivated(self, expiration_days: int) -> int:
-        expiration_threshold = datetime.now(timezone.utc) - timedelta(days=expiration_days)
+        expiration_threshold = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=expiration_days)
 
         async with self._session_factory() as session:
             result = await session.execute(
