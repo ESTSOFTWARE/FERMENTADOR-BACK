@@ -162,7 +162,7 @@ class UserRepository(IUserRepository):
             await session.commit()
 
     async def deactivate_expired(self, days: int) -> int:
-        threshold = datetime.now(timezone.utc) - timedelta(days=days)
+        threshold = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=days)
         async with self._session_factory() as session:
             result = await session.execute(
                 update(UserModel)
