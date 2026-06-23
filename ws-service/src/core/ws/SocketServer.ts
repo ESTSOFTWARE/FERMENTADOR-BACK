@@ -53,7 +53,9 @@ export class SocketServer {
     const descriptor = this.byPath.get(parts[1])
     if (!descriptor) { socket.close(4404); return }
 
-    const token = parseCookie(req.headers.cookie, 'access_token')
+    const token =
+      url.searchParams.get('token') ??
+      parseCookie(req.headers.cookie, 'access_token')
 
     let conn: Connection
     try {
