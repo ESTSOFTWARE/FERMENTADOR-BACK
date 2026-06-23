@@ -209,6 +209,17 @@ class FermentationRepository(IFermentationRepository):
             model = result.scalar_one_or_none()
             return self._session_to_entity(model) if model else None
 
+    async def get_running_sessions_past_end(self, now: datetime) -> list[FermentationSession]:
+        async with self._session_factory() as session:
+            result = await session.execute(
+                select(FermentationSessionModel)
+                .where(
+                    FermentationSessionModel.status == "running",
+                    FermentationSessionModel.scheduled_end <= now,
+                )
+            )
+            return [self._session_to_entity(m) for m in result.scalars().all()]
+
     async def update_session_status(
         self,
         session_id:     int,

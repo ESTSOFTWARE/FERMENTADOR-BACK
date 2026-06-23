@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 _CLEANUP_INTERVAL_SECONDS = 24 * 60 * 60  # cada 24 horas
 _WARNING_EMAIL_INTERVAL_SECONDS = 12 * 60 * 60  # cada 12 horas
+_AUTO_STOP_INTERVAL_SECONDS = 60  # revisa fermentaciones vencidas cada minuto
 
 
 async def _run_warning_email_task() -> None:
@@ -52,6 +53,28 @@ async def _run_user_cleanup_task() -> None:
         except Exception as e:
             logger.error(f"[Cleanup] Error en tarea de desactivación: {e}")
         await asyncio.sleep(_CLEANUP_INTERVAL_SECONDS)
+
+
+async def _run_auto_stop_fermentations_task() -> None:
+    await asyncio.sleep(20)  # breve espera para que la BD esté lista
+    while True:
+        try:
+            from src.core.database import AsyncSessionLocal
+            from src.services.fermentation.application.usecase.auto_stop_expired_fermentations_use_case import (
+                AutoStopExpiredFermentationsUseCase,
+            )
+            from src.services.fermentation.infrastructure.adapters.postgres import (
+                FermentationRepository,
+            )
+
+            count = await AutoStopExpiredFermentationsUseCase(
+                FermentationRepository(AsyncSessionLocal)
+            ).execute()
+            if count:
+                logger.info(f"[AutoStop] {count} fermentación(es) detenida(s) por fin programado")
+        except Exception as e:
+            logger.error(f"[AutoStop] Error en tarea de auto-detención: {e}")
+        await asyncio.sleep(_AUTO_STOP_INTERVAL_SECONDS)
 
 
 @asynccontextmanager
@@ -135,17 +158,26 @@ async def lifespan(app: FastAPI):
     cleanup_task = asyncio.create_task(_run_user_cleanup_task())
     logger.info("Tarea de limpieza de cuentas iniciada")
 
+    # 5. Tarea periódica de auto-detención de fermentaciones vencidas (scheduled_end)
+    auto_stop_task = asyncio.create_task(_run_auto_stop_fermentations_task())
+    logger.info("Tarea de auto-detención de fermentaciones iniciada")
+
     logger.info("Aplicación lista")
     yield
 
     warning_email_task.cancel()
     cleanup_task.cancel()
+    auto_stop_task.cancel()
     try:
         await warning_email_task
     except asyncio.CancelledError:
         pass
     try:
         await cleanup_task
+    except asyncio.CancelledError:
+        pass
+    try:
+        await auto_stop_task
     except asyncio.CancelledError:
         pass
 
