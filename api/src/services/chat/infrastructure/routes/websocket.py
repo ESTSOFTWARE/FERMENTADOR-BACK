@@ -15,16 +15,18 @@ router = APIRouter()
 
 
 @router.websocket("/ws/chat")
-async def chat_ws(websocket: WebSocket):
+async def chat_ws(websocket: WebSocket, token: str | None = None):
     """
-    Canal bidireccional del chat, autenticado por cookie HttpOnly (access_token).
+    Canal bidireccional del chat.
+    Autenticación: cookie HttpOnly `access_token` (web) o query param `token` (móvil/API).
 
     Servidor → Cliente: message:new, message:edited, message:deleted, message:pinned,
                          message:priority, reaction:updated, conversation:new,
                          member:left, typing.
     Cliente → Servidor:  typing:start, typing:stop.
     """
-    token = websocket.cookies.get("access_token")
+    # Acepta cookie (web) o query param (móvil)
+    token = token or websocket.cookies.get("access_token")
     if not token:
         await websocket.close(code=4401)
         return
