@@ -39,6 +39,13 @@ class IFermentationRepository(ABC):
         ...
 
     @abstractmethod
+    async def get_running_sessions_past_end(
+        self, now: datetime
+    ) -> list[FermentationSession]:
+        """Sesiones en estado 'running' cuyo scheduled_end ya pasó (para auto-detener)."""
+        ...
+
+    @abstractmethod
     async def update_session_status(
         self,
         session_id:     int,
