@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 
@@ -34,13 +35,16 @@ class Publisher:
         payload:     dict,
     ):
         try:
-            channel = await rabbitmq.get_channel()
-            exch    = await channel.get_exchange(exchange)
-            message = aio_pika.Message(
-                body=json.dumps(payload).encode(),
-                delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
-            )
-            await exch.publish(message, routing_key=routing_key)
+            async def _do() -> None:
+                channel = await rabbitmq.get_channel()
+                exch    = await channel.get_exchange(exchange)
+                message = aio_pika.Message(
+                    body=json.dumps(payload).encode(),
+                    delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
+                )
+                await exch.publish(message, routing_key=routing_key)
+
+            await asyncio.wait_for(_do(), timeout=5)
             logger.debug(
                 f"[Publisher] Publicado en {exchange} "
                 f"→ routing_key={routing_key}"
@@ -51,5 +55,4 @@ class Publisher:
             raise MessagePublishException()
 
 
-# Instancia global
 publisher = Publisher()
