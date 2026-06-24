@@ -23,7 +23,10 @@ async def sensors_ws(
     la conexión queda anónima (solo recibe cuando no hay aislamiento por grupo).
     """
     user_id: int | None = None
-    token = websocket.cookies.get("access_token")
+    # Web manda el token por cookie; el móvil (sin cookies) lo manda por query
+    # param ?token=. Aceptamos ambos para que el filtrado por audiencia (grupo)
+    # funcione también en la app.
+    token = websocket.cookies.get("access_token") or websocket.query_params.get("token")
     if token:
         try:
             user_id = int(decode_token(token)["sub"])
