@@ -59,7 +59,7 @@ async def get_active_session(current_user: dict = Depends(require_any_role)):
     summary="Historial de sesiones del usuario",
 )
 async def get_sessions_history_route(current_user: dict = Depends(require_any_role)):
-    return await get_sessions_history(current_user.get("circuit_id"), current_user.get("user_id"))
+    return await get_sessions_history(current_user["user_id"], current_user["role"])
 
 
 @router.get(
