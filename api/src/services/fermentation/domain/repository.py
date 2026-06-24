@@ -27,6 +27,12 @@ class IFermentationRepository(ABC):
         ...
 
     @abstractmethod
+    async def get_sessions_by_circuit(
+        self, circuit_id: int
+    ) -> list[FermentationSession]:
+        ...
+
+    @abstractmethod
     async def get_session_by_id(
         self, session_id: int
     ) -> FermentationSession | None:
