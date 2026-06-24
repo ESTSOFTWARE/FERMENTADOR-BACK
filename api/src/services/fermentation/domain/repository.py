@@ -27,8 +27,8 @@ class IFermentationRepository(ABC):
         ...
 
     @abstractmethod
-    async def get_sessions_by_circuit(
-        self, circuit_id: int
+    async def get_sessions_visible_to(
+        self, user_id: int, role: str
     ) -> list[FermentationSession]:
         ...
 

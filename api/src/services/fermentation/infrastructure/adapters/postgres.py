@@ -10,6 +10,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    or_,
     select,
     text,
     update,
@@ -197,13 +198,25 @@ class FermentationRepository(IFermentationRepository):
             for m in result.scalars().all()
         ]
 
-    async def get_sessions_by_circuit(self, circuit_id: int) -> list[FermentationSession]:
+    async def get_sessions_visible_to(self, user_id: int, role: str) -> list[FermentationSession]:
+        # Aislamiento por grupo: el alumno ve las sesiones de SUS grupos; la
+        # maestra ve las que ella creó; el admin ve todas.
+        from src.core.models.group_models import GroupMemberModel
         async with self._session_factory() as session:
-            result = await session.execute(
-                select(FermentationSessionModel)
-                .where(FermentationSessionModel.circuit_id == circuit_id)
-                .order_by(FermentationSessionModel.id.desc())
-            )
+            stmt = select(FermentationSessionModel)
+            if role != "admin":
+                my_groups = (
+                    select(GroupMemberModel.group_id)
+                    .where(GroupMemberModel.student_id == user_id)
+                )
+                stmt = stmt.where(
+                    or_(
+                        FermentationSessionModel.user_id == user_id,
+                        FermentationSessionModel.group_id.in_(my_groups),
+                    )
+                )
+            stmt = stmt.order_by(FermentationSessionModel.id.desc())
+            result = await session.execute(stmt)
         return [
             self._session_to_entity(m)
             for m in result.scalars().all()
