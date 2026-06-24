@@ -197,6 +197,18 @@ class FermentationRepository(IFermentationRepository):
             for m in result.scalars().all()
         ]
 
+    async def get_sessions_by_circuit(self, circuit_id: int) -> list[FermentationSession]:
+        async with self._session_factory() as session:
+            result = await session.execute(
+                select(FermentationSessionModel)
+                .where(FermentationSessionModel.circuit_id == circuit_id)
+                .order_by(FermentationSessionModel.id.desc())
+            )
+        return [
+            self._session_to_entity(m)
+            for m in result.scalars().all()
+        ]
+
     async def get_active_session_by_circuit(self, circuit_id: int) -> FermentationSession | None:
         async with self._session_factory() as session:
             result = await session.execute(
