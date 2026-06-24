@@ -19,6 +19,9 @@ from src.services.fermentation.infrastructure.controllers.get_report_controller 
 from src.services.fermentation.infrastructure.controllers.get_report_history_controller import (
     get_report_history,
 )
+from src.services.fermentation.infrastructure.controllers.get_report_pdf_controller import (
+    get_report_pdf,
+)
 from src.services.fermentation.infrastructure.controllers.get_sessions_history_controller import (
     get_sessions_history,
 )
@@ -106,3 +109,14 @@ async def get_report_route(
     current_user: dict = Depends(require_any_role),
 ):
     return await get_report(session_id, current_user["user_id"])
+
+
+@router.get(
+    "/{session_id}/report/pdf",
+    summary="Descargar el reporte de una sesión en PDF",
+)
+async def get_report_pdf_route(
+    session_id: int,
+    current_user: dict = Depends(require_any_role),
+):
+    return await get_report_pdf(session_id)
