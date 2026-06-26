@@ -118,6 +118,9 @@ class Settings(BaseSettings):
     RESEND_API_KEY:  str = ""
     MAIL_FROM:       str = ""
     MAIL_FROM_NAME:  str = "Nich-ká"
+    # Correo donde llegan las solicitudes de eliminación de cuenta (si está vacío
+    # se usa MAIL_FROM).
+    SUPPORT_EMAIL:   str = ""
 
     # Sensores
     SENSOR_TYPES: list[str] = [

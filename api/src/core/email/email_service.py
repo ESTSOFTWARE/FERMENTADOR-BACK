@@ -243,6 +243,54 @@ async def send_welcome_email(to_email: str, name: str) -> None:
         logger.error(f"[Email] Error al enviar correo de bienvenida a {to_email}: {e}")
 
 
+def _deletion_request_html(name: str, email: str, reason: str) -> str:
+    safe_reason = (reason or "").replace("\n", "<br>")
+    return f"""
+    <div style="font-family: Arial, sans-serif; color:#18181b; max-width:560px; margin:auto;">
+      <div style="background:#22c55e; color:#fff; padding:16px 20px; border-radius:10px 10px 0 0;">
+        <h2 style="margin:0;">Nich-ká · Solicitud de eliminación de cuenta</h2>
+      </div>
+      <div style="border:1px solid #e4e4e7; border-top:0; padding:20px; border-radius:0 0 10px 10px;">
+        <p><strong>Nombre:</strong> {name}</p>
+        <p><strong>Correo:</strong> {email}</p>
+        <p><strong>Motivo:</strong><br>{safe_reason}</p>
+        <hr style="border:0; border-top:1px solid #e4e4e7; margin:16px 0;">
+        <p style="color:#71717a; font-size:13px;">
+          Esta cuenta debe eliminarse en un plazo máximo de <strong>72 horas</strong>
+          desde la recepción de esta solicitud.
+        </p>
+      </div>
+    </div>
+    """
+
+
+async def send_account_deletion_request(name: str, email: str, reason: str) -> None:
+    """Envía la solicitud de eliminación de cuenta al correo de soporte."""
+    if not settings.RESEND_API_KEY or not settings.MAIL_FROM:
+        logger.warning("[Email] RESEND_API_KEY o MAIL_FROM no configurados, omitiendo envío")
+        return
+
+    to_email = settings.SUPPORT_EMAIL or settings.MAIL_FROM
+    try:
+        resend.api_key = settings.RESEND_API_KEY
+        from_address = (
+            f"{settings.MAIL_FROM_NAME} <{settings.MAIL_FROM}>"
+            if settings.MAIL_FROM_NAME
+            else settings.MAIL_FROM
+        )
+        params: resend.Emails.SendParams = {
+            "from": from_address,
+            "to": [to_email],
+            "reply_to": email,
+            "subject": f"Solicitud de eliminación de cuenta — {email}",
+            "html": _deletion_request_html(name, email, reason),
+        }
+        resend.Emails.send(params)
+        logger.info(f"[Email] Solicitud de eliminación enviada a soporte ({to_email}) para {email}")
+    except Exception as e:
+        logger.error(f"[Email] Error al enviar solicitud de eliminación para {email}: {e}")
+
+
 def _warning_email_html(name: str) -> str:
     return f"""
 <!DOCTYPE html>
