@@ -79,20 +79,15 @@ async def _run_auto_stop_fermentations_task() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # ── Startup ───────────────────────────────────────────────────────────────
     logger.info("Iniciando aplicación...")
 
-    # 1. Base de datos (siempre requerida)
     from src.core.database import init_db
     await init_db()
     logger.info("Base de datos inicializada")
 
-    # 2. RabbitMQ (opcional hasta tener broker)
     rabbitmq_available = False
     try:
         from src.core.rabbitmq.connection import rabbitmq
-        # Timeout para no bloquear el arranque si el broker no responde
-        # (ej. puerto firewall'd que da ETIMEDOUT en vez de refused).
         await asyncio.wait_for(rabbitmq.connect(), timeout=8)
 
         from src.core.rabbitmq.exchanges import exchange_manager
@@ -150,15 +145,12 @@ async def lifespan(app: FastAPI):
             "Los datos de sensores en tiempo real estarán deshabilitados."
         )
 
-    # 3. Tarea periódica de envío de correos de advertencia
     warning_email_task = asyncio.create_task(_run_warning_email_task())
     logger.info("Tarea de correos de advertencia iniciada")
 
-    # 4. Tarea periódica de desactivación de cuentas sin circuito
     cleanup_task = asyncio.create_task(_run_user_cleanup_task())
     logger.info("Tarea de limpieza de cuentas iniciada")
 
-    # 5. Tarea periódica de auto-detención de fermentaciones vencidas (scheduled_end)
     auto_stop_task = asyncio.create_task(_run_auto_stop_fermentations_task())
     logger.info("Tarea de auto-detención de fermentaciones iniciada")
 
@@ -181,7 +173,6 @@ async def lifespan(app: FastAPI):
     except asyncio.CancelledError:
         pass
 
-    # ── Shutdown ──────────────────────────────────────────────────────────────
     logger.info("Cerrando aplicación...")
 
     if rabbitmq_available:
@@ -201,7 +192,6 @@ async def lifespan(app: FastAPI):
     logger.info("Aplicación cerrada correctamente")
 
 
-# ── App ───────────────────────────────────────────────────────────────────────
 app = FastAPI(
     title="Nich-Ká",
     description="API para monitoreo de fermentación con ESP32",
@@ -221,7 +211,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Routers ───────────────────────────────────────────────────────────────────
 from src.services.announcements.infrastructure.routes.router import router as announcements_router
 from src.services.auth.infrastructure.routes.oauth_callbacks import router as oauth_callbacks_router
 from src.services.auth.infrastructure.routes.router import router as auth_router
@@ -284,8 +273,6 @@ app.include_router(chat_ws_router,          prefix="",                   tags=["
 app.include_router(support_chat_router,     prefix="/api/support-chat",  tags=["Support Chat"])
 app.include_router(support_chat_ws_router,  prefix="",                   tags=["Support Chat WS"])
 
-
-# ── Health ────────────────────────────────────────────────────────────────────
 @app.get("/health", tags=["Health"])
 async def health():
     from src.core.rabbitmq.connection import rabbitmq
