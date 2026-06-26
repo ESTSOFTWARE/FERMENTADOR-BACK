@@ -197,9 +197,9 @@ app = FastAPI(
     description="API para monitoreo de fermentación con ESP32",
     version="1.0.0",
     lifespan=lifespan,
-    docs_url="/docs" if settings.debug else None,
-    redoc_url="/redoc" if settings.debug else None,
-    openapi_url="/openapi.json" if settings.debug else None,
+    docs_url="/docs" if settings.DEBUG else None,
+    redoc_url="/redoc" if settings.DEBUG else None,
+    openapi_url="/openapi.json" if settings.DEBUG else None,
 )
 
 app.add_middleware(
