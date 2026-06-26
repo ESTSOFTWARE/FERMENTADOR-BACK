@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, Response
 
+from src.services.auth.domain.dto.delete_account_schema import DeleteAccountRequest
 from src.services.auth.domain.dto.login_schema import (
     LoginCookieResponse,
     LoginRequest,
@@ -12,6 +13,9 @@ from src.services.auth.domain.dto.password_reset_schema import (
     ResetPasswordRequest,
 )
 from src.services.auth.domain.dto.register_schema import RegisterRequest, RegisterResponse
+from src.services.auth.infrastructure.controllers.delete_account_controller import (
+    request_account_deletion,
+)
 from src.services.auth.infrastructure.controllers.forgot_password_controller import (
     forgot_password,
 )
@@ -99,3 +103,11 @@ async def forgot_password_route(body: ForgotPasswordRequest):
 )
 async def reset_password_route(body: ResetPasswordRequest):
     return await reset_password(body)
+
+
+@router.post(
+    "/delete-account-request",
+    summary="Solicitar eliminación de cuenta (público, sin autenticación)",
+)
+async def delete_account_request_route(body: DeleteAccountRequest):
+    return await request_account_deletion(body)
