@@ -300,30 +300,155 @@ _ROLE_ES = {
 
 def _credentials_html(name: str, creator_name: str, role_label: str, email: str, password: str) -> str:
     return f"""
-    <div style="font-family: Arial, sans-serif; color:#18181b; max-width:520px; margin:auto;">
-      <div style="background:#22c55e; color:#fff; padding:20px 24px; border-radius:12px 12px 0 0;">
-        <h1 style="margin:0; font-size:22px;">Bienvenido a Nich-ká</h1>
-      </div>
-      <div style="border:1px solid #e4e4e7; border-top:0; padding:24px; border-radius:0 0 12px 12px;">
-        <p style="margin:0 0 18px; font-size:15px;">
-          Hola <strong>{name}</strong>, <strong>{creator_name}</strong> creó esta cuenta
-          para ti como <strong>{role_label}</strong>.
-        </p>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bienvenido a Nich-Ká</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet"/>
+  <style>
+    @media only screen and (max-width: 600px) {{
+      .email-wrapper {{ padding: 24px 12px !important; }}
+      .email-body {{ padding: 24px 20px !important; }}
+      .email-header {{ padding: 28px 20px 22px !important; }}
+      .email-title {{ font-size: 19px !important; }}
+    }}
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:#0A0A0B;font-family:'Poppins',sans-serif;">
 
-        <p style="margin:0 0 8px; color:#52525b; font-size:12px; text-transform:uppercase; letter-spacing:0.05em;">
-          Credenciales de acceso a la app móvil
-        </p>
-        <div style="background:#f4f4f5; border:1px solid #e4e4e7; border-radius:10px; padding:16px; margin-bottom:18px;">
-          <p style="margin:0 0 6px; font-size:14px;"><strong>Correo:</strong> {email}</p>
-          <p style="margin:0; font-size:14px;"><strong>Contraseña:</strong> {password}</p>
-        </div>
+  <table width="100%" cellpadding="0" cellspacing="0" class="email-wrapper"
+         style="background-color:#0A0A0B;padding:48px 16px;">
+    <tr>
+      <td align="center">
+        <table cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
 
-        <p style="margin:0; color:#a16207; background:#fef9c3; border:1px solid #fde68a; border-radius:8px; padding:12px; font-size:13px;">
-          🔒 Por tu seguridad, te recomendamos cambiar tu contraseña la primera vez que inicies sesión.
-        </p>
-      </div>
-    </div>
-    """
+          <!-- Logo + nombre -->
+          <tr>
+            <td align="left" style="padding-bottom:32px;">
+              <a href="https://www.nich-ka.space/" style="text-decoration:none;">
+                <table cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="vertical-align:middle;padding-right:10px;">
+                      <img src="https://www.nich-ka.space/assets/logo.svg"
+                           alt="Nich-Ká" width="40" height="40"
+                           style="display:block;border:0;width:40px;height:40px;"/>
+                    </td>
+                    <td style="vertical-align:middle;">
+                      <span style="color:#f4f4f5;font-size:20px;font-weight:700;
+                                   letter-spacing:-0.5px;font-family:'Poppins',sans-serif;">
+                        Nich-Ká
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+              </a>
+            </td>
+          </tr>
+
+          <!-- Card -->
+          <tr>
+            <td style="background-color:#111113;border:1px solid #2a2a2d;
+                        border-radius:14px;overflow:hidden;">
+
+              <!-- Header -->
+              <tr>
+                <td class="email-header"
+                    style="padding:36px 40px 28px;border-bottom:1px solid #2a2a2d;">
+                  <h1 class="email-title"
+                      style="margin:0 0 8px;color:#f4f4f5;font-size:22px;font-weight:600;
+                              letter-spacing:-0.3px;font-family:'Poppins',sans-serif;">
+                    Bienvenido a Nich-Ká, {name} 👋
+                  </h1>
+                  <p style="margin:0;color:#a1a1aa;font-size:14px;line-height:1.6;
+                              font-family:'Poppins',sans-serif;">
+                    <strong style="color:#f4f4f5;">{creator_name}</strong> creó esta cuenta
+                    para ti como <strong style="color:#4ade80;">{role_label}</strong>.
+                  </p>
+                </td>
+              </tr>
+
+              <!-- Body -->
+              <tr>
+                <td class="email-body" style="padding:32px 40px;">
+
+                  <p style="margin:0 0 12px;color:#a1a1aa;font-size:13px;
+                              font-family:'Poppins',sans-serif;">
+                    Credenciales de acceso a la app móvil:
+                  </p>
+
+                  <!-- Credenciales -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                    <tr>
+                      <td style="background-color:#1a1a1d;border:1px solid #2a2a2d;
+                                  border-radius:12px;padding:20px 22px;">
+                        <p style="margin:0 0 6px;color:#a1a1aa;font-size:12px;
+                                    font-family:'Poppins',sans-serif;">Correo</p>
+                        <p style="margin:0 0 18px;color:#f4f4f5;font-size:15px;font-weight:600;
+                                    font-family:'Poppins',sans-serif;">{email}</p>
+                        <p style="margin:0 0 6px;color:#a1a1aa;font-size:12px;
+                                    font-family:'Poppins',sans-serif;">Contraseña</p>
+                        <p style="margin:0;color:#f4f4f5;font-size:15px;font-weight:600;
+                                    letter-spacing:1px;font-family:'Poppins',sans-serif;">{password}</p>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Aviso seguridad -->
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="background-color:rgba(234,179,8,0.06);
+                                  border:1px solid rgba(234,179,8,0.2);
+                                  border-radius:10px;padding:16px 18px;">
+                        <table cellpadding="0" cellspacing="0" width="100%">
+                          <tr>
+                            <td style="vertical-align:top;padding-right:10px;
+                                        padding-top:2px;width:22px;">
+                              <img src="https://img.icons8.com/color/20/lock--v1.png"
+                                   width="16" height="16" alt=""
+                                   style="display:block;border:0;width:16px;height:16px;"/>
+                            </td>
+                            <td>
+                              <p style="margin:0;color:#a1a1aa;font-size:13px;line-height:1.7;
+                                         font-family:'Poppins',sans-serif;">
+                                Por tu seguridad, te recomendamos
+                                <strong style="color:#f4f4f5;">cambiar tu contraseña</strong>
+                                la primera vez que inicies sesión.
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+
+                </td>
+              </tr>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:28px 0;text-align:center;">
+              <p style="margin:0;color:#52525b;font-size:12px;line-height:1.6;
+                          font-family:'Poppins',sans-serif;">
+                Este correo fue enviado automáticamente por Nich-Ká.<br/>
+                Si no esperabas esta cuenta, puedes ignorar este mensaje.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
+"""
 
 
 async def send_credentials_email(
