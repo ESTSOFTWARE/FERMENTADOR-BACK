@@ -291,6 +291,73 @@ async def send_account_deletion_request(name: str, email: str, reason: str) -> N
         logger.error(f"[Email] Error al enviar solicitud de eliminación para {email}: {e}")
 
 
+_ROLE_ES = {
+    "estudiante": "estudiante",
+    "profesor": "docente",
+    "admin": "administrador",
+}
+
+
+def _credentials_html(name: str, creator_name: str, role_label: str, email: str, password: str) -> str:
+    return f"""
+    <div style="font-family: Arial, sans-serif; color:#18181b; max-width:520px; margin:auto;">
+      <div style="background:#22c55e; color:#fff; padding:20px 24px; border-radius:12px 12px 0 0;">
+        <h1 style="margin:0; font-size:22px;">Bienvenido a Nich-ká</h1>
+      </div>
+      <div style="border:1px solid #e4e4e7; border-top:0; padding:24px; border-radius:0 0 12px 12px;">
+        <p style="margin:0 0 18px; font-size:15px;">
+          Hola <strong>{name}</strong>, <strong>{creator_name}</strong> creó esta cuenta
+          para ti como <strong>{role_label}</strong>.
+        </p>
+
+        <p style="margin:0 0 8px; color:#52525b; font-size:12px; text-transform:uppercase; letter-spacing:0.05em;">
+          Credenciales de acceso a la app móvil
+        </p>
+        <div style="background:#f4f4f5; border:1px solid #e4e4e7; border-radius:10px; padding:16px; margin-bottom:18px;">
+          <p style="margin:0 0 6px; font-size:14px;"><strong>Correo:</strong> {email}</p>
+          <p style="margin:0; font-size:14px;"><strong>Contraseña:</strong> {password}</p>
+        </div>
+
+        <p style="margin:0; color:#a16207; background:#fef9c3; border:1px solid #fde68a; border-radius:8px; padding:12px; font-size:13px;">
+          🔒 Por tu seguridad, te recomendamos cambiar tu contraseña la primera vez que inicies sesión.
+        </p>
+      </div>
+    </div>
+    """
+
+
+async def send_credentials_email(
+    to_email: str,
+    name: str,
+    creator_name: str,
+    role: str,
+    password: str,
+) -> None:
+    """Envía al usuario recién creado sus credenciales de acceso."""
+    if not settings.RESEND_API_KEY or not settings.MAIL_FROM:
+        logger.warning("[Email] RESEND_API_KEY o MAIL_FROM no configurados, omitiendo envío")
+        return
+
+    role_label = _ROLE_ES.get(role, role)
+    try:
+        resend.api_key = settings.RESEND_API_KEY
+        from_address = (
+            f"{settings.MAIL_FROM_NAME} <{settings.MAIL_FROM}>"
+            if settings.MAIL_FROM_NAME
+            else settings.MAIL_FROM
+        )
+        params: resend.Emails.SendParams = {
+            "from": from_address,
+            "to": [to_email],
+            "subject": "Bienvenido a Nich-ká — Tus credenciales de acceso",
+            "html": _credentials_html(name, creator_name, role_label, to_email, password),
+        }
+        resend.Emails.send(params)
+        logger.info(f"[Email] Credenciales enviadas a {to_email}")
+    except Exception as e:
+        logger.error(f"[Email] Error al enviar credenciales a {to_email}: {e}")
+
+
 def _warning_email_html(name: str) -> str:
     return f"""
 <!DOCTYPE html>
