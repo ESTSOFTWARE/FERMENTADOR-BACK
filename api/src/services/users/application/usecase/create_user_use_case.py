@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
+from src.core.email.email_service import send_credentials_email
 from src.core.exceptions import (
     ActivationCodeExpiredException,
     ForbiddenException,
@@ -81,4 +82,25 @@ class CreateUserUseCase:
         if not circuit.is_active:
             await self._circuit_repo.activate(circuit.id)
 
-        return await self._user_repo.create(new_user)
+        created = await self._user_repo.create(new_user)
+
+        # Enviar las credenciales por correo al usuario recién creado.
+        # Va con la contraseña en texto plano (la que se acaba de definir) y NO
+        # debe bloquear la creación si el correo falla.
+        try:
+            creator = await self._user_repo.get_by_id(created_by)
+            creator_name = (
+                f"{creator.name} {creator.last_name}".strip()
+                if creator else "Un administrador"
+            )
+            await send_credentials_email(
+                to_email=email,
+                name=name,
+                creator_name=creator_name,
+                role=role,
+                password=password,
+            )
+        except Exception:  # noqa: BLE001 — el correo es best-effort
+            pass
+
+        return created
