@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from src.core.dependencies import require_admin_or_profesor, require_any_role
+from src.core.dependencies import require_admin_or_profesor, require_any_role, require_feature
 from src.services.fermentation.domain.dto.fermentation_report_schema import (
     FermentationReportResponse,
 )
@@ -117,6 +117,6 @@ async def get_report_route(
 )
 async def get_report_pdf_route(
     session_id: int,
-    current_user: dict = Depends(require_any_role),
+    current_user: dict = Depends(require_feature("reports")),
 ):
     return await get_report_pdf(session_id)

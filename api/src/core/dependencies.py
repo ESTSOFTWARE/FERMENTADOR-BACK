@@ -105,3 +105,20 @@ async def require_any_role(
     if current_user["role"] not in ("admin", "profesor", "estudiante", "soporte"):
         raise ForbiddenException()
     return current_user
+
+
+def require_feature(feature: str):
+    """
+    Dependency factory: exige que el plan del usuario incluya `feature`.
+    Si no, devuelve 403. Úsala en endpoints de funciones de pago, ej:
+        current_user: dict = Depends(require_feature("reports"))
+    """
+    async def _dep(current_user: dict = Depends(get_current_user)) -> dict:
+        from src.core.entitlements import get_user_plan, plan_allows
+        plan = await get_user_plan(current_user["user_id"])
+        if not plan_allows(plan, feature):
+            raise ForbiddenException(
+                f"Tu plan ({plan}) no incluye esta función. Mejora tu plan para usarla."
+            )
+        return current_user
+    return _dep
