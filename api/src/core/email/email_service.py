@@ -451,6 +451,19 @@ def _credentials_html(name: str, creator_name: str, role_label: str, email: str,
 """
 
 
+def _credentials_text(name: str, creator_name: str, role_label: str, email: str, password: str) -> str:
+    return (
+        f"Bienvenido a Nich-Ká, {name}.\n\n"
+        f"{creator_name} creó esta cuenta para ti como {role_label}.\n\n"
+        f"Datos de acceso a la app móvil:\n"
+        f"  Usuario: {email}\n"
+        f"  Clave temporal: {password}\n\n"
+        f"Por tu seguridad, te recomendamos cambiar tu clave la primera vez que "
+        f"inicies sesión.\n\n"
+        f"— Nich-Ká"
+    )
+
+
 async def send_credentials_email(
     to_email: str,
     name: str,
@@ -474,8 +487,9 @@ async def send_credentials_email(
         params: resend.Emails.SendParams = {
             "from": from_address,
             "to": [to_email],
-            "subject": "Bienvenido a Nich-ká — Tus credenciales de acceso",
+            "subject": f"Tu cuenta de Nich-Ká está lista, {name}",
             "html": _credentials_html(name, creator_name, role_label, to_email, password),
+            "text": _credentials_text(name, creator_name, role_label, to_email, password),
         }
         resend.Emails.send(params)
         logger.info(f"[Email] Credenciales enviadas a {to_email}")

@@ -61,11 +61,11 @@ class UserRepository(IUserRepository):
         async with self._session_factory() as session:
             result = await session.execute(
                 select(UserModel)
-                .options(selectinload(UserModel.role))
+                .options(selectinload(UserModel.role), selectinload(UserModel.circuit))
                 .where(UserModel.created_by == creator_id)
                 .order_by(UserModel.id)
             )
-            return [self._to_entity(m) for m in result.scalars().all()]
+            return [self._with_circuit_code(m) for m in result.scalars().all()]
 
     async def get_by_circuit_of(self, user_id: int) -> list[User]:
         """Todos los usuarios del mismo circuito que user_id (admin → ve todo su circuito)."""
@@ -77,12 +77,12 @@ class UserRepository(IUserRepository):
             )
             result = await session.execute(
                 select(UserModel)
-                .options(selectinload(UserModel.role))
+                .options(selectinload(UserModel.role), selectinload(UserModel.circuit))
                 .where(UserModel.circuit_id == circuit_subq)
                 .where(UserModel.circuit_id.isnot(None))
                 .order_by(UserModel.id)
             )
-            return [self._to_entity(m) for m in result.scalars().all()]
+            return [self._with_circuit_code(m) for m in result.scalars().all()]
 
     async def create(self, user: User) -> User:
         async with self._session_factory() as session:
@@ -243,6 +243,12 @@ class UserRepository(IUserRepository):
                 select(UserModel.id).where(UserModel.is_active == True)  # noqa: E712
             )
             return list(result.scalars().all())
+
+    def _with_circuit_code(self, model: UserModel) -> User:
+        # Requiere que la query haya cargado la relación circuit (selectinload).
+        entity = self._to_entity(model)
+        entity.circuit_code = model.circuit.activation_code if model.circuit else None
+        return entity
 
     def _to_entity(self, model: UserModel) -> User:
         return User(
