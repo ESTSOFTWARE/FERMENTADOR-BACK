@@ -48,6 +48,17 @@ async def get_subscription_route(
     return await get_subscription(current_user)
 
 
+@router.get(
+    "/entitlements",
+    summary="Plan y features habilitadas del usuario (para gatear la UI)",
+)
+async def get_entitlements_route(
+    current_user: dict = Depends(get_current_user),
+):
+    from src.core.entitlements import get_user_entitlements
+    return await get_user_entitlements(current_user["user_id"])
+
+
 @router.delete(
     "/subscription",
     summary="Cancelar suscripción al final del período",

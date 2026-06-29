@@ -48,6 +48,34 @@ class CreateUserUseCase:
                 "Los profesores solo pueden crear cuentas de tipo 'estudiante'"
             )
 
+        # ── Límite de cuentas por plan ────────────────────────────────────────
+        # El plan lo define el admin dueño de la cuenta: si crea un admin, es él;
+        # si crea un profesor, es el admin que lo creó.
+        from src.core.entitlements import get_user_plan, max_users
+
+        if creator_role == "admin":
+            owner_admin_id = created_by
+        else:
+            creator = await self._user_repo.get_by_id(created_by)
+            owner_admin_id = creator.created_by if creator and creator.created_by else created_by
+
+        plan  = await get_user_plan(owner_admin_id)
+        limit = max_users(plan, role)
+        label = {"admin": "administradores", "profesor": "docentes", "estudiante": "alumnos"}.get(role, role)
+        if limit is not None:
+            if limit == 0:
+                raise ForbiddenException(
+                    f"Tu plan ({plan}) no permite crear {label}. Mejora tu plan para habilitarlo."
+                )
+            existing = [
+                u for u in await self._user_repo.get_created_by(owner_admin_id)
+                if u.role_id == ROLE_IDS.get(role)
+            ]
+            if len(existing) >= limit:
+                raise ForbiddenException(
+                    f"Tu plan ({plan}) permite máximo {limit} {label}. Mejora tu plan para agregar más."
+                )
+
         # ── Verificar email único ─────────────────────────────────────────────
         existing = await self._user_repo.get_by_email(email)
         if existing:
