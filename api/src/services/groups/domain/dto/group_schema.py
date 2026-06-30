@@ -34,7 +34,8 @@ class GroupResponse(BaseModel):
     subject:      str
     cover_image:  str | None
     professor_id: int
-    professor_name: str | None = None
+    professor_name:  str | None = None
+    professor_email: str | None = None
     code:         str
     created_at:   datetime | None
     members:      list[GroupMemberResponse] = []
@@ -48,6 +49,7 @@ class GroupResponse(BaseModel):
             cover_image=group.cover_image,
             professor_id=group.professor_id,
             professor_name=group.professor_name,
+            professor_email=group.professor_email,
             code=group.code,
             created_at=group.created_at,
             members=[
