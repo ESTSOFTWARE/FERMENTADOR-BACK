@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import cloudinary.uploader
 from fastapi import status
@@ -52,13 +53,27 @@ _DOCUMENT_TYPES = {
 }
 
 
-def _derive_chat_type(content_type: str) -> str:
-    """image | video | document | file según el MIME."""
-    if content_type.startswith("image/"):
+_IMAGE_EXTS    = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".heic", ".heif", ".svg"}
+_VIDEO_EXTS    = {".mp4", ".mov", ".avi", ".mkv", ".webm", ".m4v", ".3gp"}
+_DOCUMENT_EXTS = {".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv"}
+
+
+def _derive_chat_type(content_type: str, filename: str = "") -> str:
+    """image | video | document | file según el MIME, con fallback por extensión."""
+    ct = (content_type or "").lower()
+    if ct.startswith("image/"):
         return "image"
-    if content_type.startswith("video/"):
+    if ct.startswith("video/"):
         return "video"
-    if content_type in _DOCUMENT_TYPES:
+    if ct in _DOCUMENT_TYPES:
+        return "document"
+    # Fallback por extensión (cuando el MIME viene vacío o genérico, ej. octet-stream)
+    ext = os.path.splitext(filename or "")[1].lower()
+    if ext in _IMAGE_EXTS:
+        return "image"
+    if ext in _VIDEO_EXTS:
+        return "video"
+    if ext in _DOCUMENT_EXTS:
         return "document"
     return "file"
 
@@ -83,7 +98,7 @@ async def upload_chat_file(file_bytes: bytes, content_type: str, filename: str) 
         )
 
     return {
-        "type":       _derive_chat_type(content_type or ""),
+        "type":       _derive_chat_type(content_type or "", filename),
         "name":       filename,
         "url":        result["secure_url"],
         "size":       result.get("bytes", len(file_bytes)),
