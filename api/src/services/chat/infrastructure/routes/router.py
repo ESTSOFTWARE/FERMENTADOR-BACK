@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, File, Query, UploadFile
 
-from src.core.dependencies import require_admin_or_profesor, require_any_role
+from src.core.dependencies import require_any_role
 from src.services.chat.domain.dto.chat_schema import (
     ContactDTO,
     ConversationResponse,
@@ -44,10 +44,10 @@ async def list_conversations_route(current_user: dict = Depends(require_any_role
     return await get_conversations(current_user["user_id"])
 
 
-@router.post("/conversations", response_model=ConversationResponse, status_code=201, summary="Crear conversación (admin/profesor)")
+@router.post("/conversations", response_model=ConversationResponse, status_code=201, summary="Crear conversación (cualquier rol)")
 async def create_conversation_route(
     body: CreateConversationRequest,
-    current_user: dict = Depends(require_admin_or_profesor),
+    current_user: dict = Depends(require_any_role),
 ):
     return await create_conversation(body, current_user["user_id"])
 
