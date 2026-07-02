@@ -6,6 +6,7 @@ from src.core.dependencies import (
     require_admin_or_profesor,
     require_any_role,
 )
+from src.core.exceptions import ForbiddenException
 from src.services.users.domain.dto.activate_circuit_schema import (
     ActivateCircuitRequest,
     ActivateCircuitResponse,
@@ -114,8 +115,15 @@ async def create_user(body: CreateUserRequest, current_user: dict = Depends(requ
     )
 
 
-@router.put("/{user_id}", response_model=UserResponse, summary="Actualizar usuario (solo admin)")
-async def update_user(user_id: int, body: UpdateUserRequest, current_user: dict = Depends(require_admin)):
+@router.put("/{user_id}", response_model=UserResponse, summary="Actualizar usuario (admin o el propio usuario)")
+async def update_user(user_id: int, body: UpdateUserRequest, current_user: dict = Depends(get_current_user)):
+    is_admin = current_user["role"] == "admin"
+    # Cualquiera puede editar su propio perfil; solo admin puede editar a otros.
+    if not is_admin and current_user["user_id"] != user_id:
+        raise ForbiddenException()
+    # Un no-admin no puede cambiar su rol (evita escalación de privilegios).
+    if not is_admin:
+        body.role = None
     return await update(user_id, body)
 
 
