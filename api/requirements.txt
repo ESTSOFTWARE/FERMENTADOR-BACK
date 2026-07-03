@@ -1,6 +1,7 @@
 aio-pika==9.6.1
 aiormq==6.9.3
 asyncpg==0.30.0
+firebase-admin==6.5.0
 alembic==1.18.4
 annotated-doc==0.0.4
 annotated-types==0.7.0

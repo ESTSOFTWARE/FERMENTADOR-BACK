@@ -45,4 +45,16 @@ class SendNotificationUseCase:
         # recibía el front (mismo shape que model_dump_json).
         await to_users("notifications", [user_id], notif_msg.model_dump(mode="json"))
 
+        # Push FCM (app cerrada / segundo plano). Best-effort: no rompe si falla.
+        try:
+            from src.core.fcm.fcm_service import send_push_to_user
+            await send_push_to_user(
+                user_id=user_id,
+                title="Nich-Ká",
+                body=message,
+                data={"type": notification_type, "notification_id": notification.id},
+            )
+        except Exception:  # noqa: BLE001
+            pass
+
         return notification.id

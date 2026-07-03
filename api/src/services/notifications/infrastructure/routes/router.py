@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel
 
 from src.core.dependencies import get_current_user
 from src.services.notifications.domain.dto.notification_schema import NotificationResponse
@@ -39,3 +40,17 @@ async def mark_as_read(notification_id: int, current_user: dict = Depends(get_cu
 @router.patch("/read-all", status_code=204, summary="Marcar todas las notificaciones como leídas")
 async def mark_all_read(current_user: dict = Depends(get_current_user)):
     await mark_all_as_read(current_user["user_id"])
+
+
+class DeviceTokenRequest(BaseModel):
+    token:    str
+    platform: str = "android"
+
+
+@router.post("/device-token", status_code=204, summary="Registrar token FCM del dispositivo (push)")
+async def register_device_token(
+    body: DeviceTokenRequest,
+    current_user: dict = Depends(get_current_user),
+):
+    from src.core.fcm.fcm_service import save_device_token
+    await save_device_token(current_user["user_id"], body.token, body.platform)
