@@ -18,10 +18,17 @@ async def add_member(group_id: int, body: AddMemberRequest, professor_id: int) -
         professor_id=professor_id,
     )
 
+    # Mensaje personalizado: quién te agregó y a qué grupo.
+    prof       = await user_repo.get_by_id(professor_id)
+    prof_name  = f"{prof.name} {prof.last_name}".strip() if prof else "Tu profesor"
+    role_label = {1: "El administrador", 2: "El profesor"}.get(
+        prof.role_id if prof else 2, "El profesor"
+    )
+
     notif_repo = NotificationRepository(AsyncSessionLocal)
     await SendNotificationUseCase(notif_repo).execute(
         user_id=body.student_id,
-        message=f"Fuiste agregado al grupo \"{group.name}\" ({group.subject}).",
+        message=f"{role_label} {prof_name} te agregó a {group.name}.",
         notification_type="member_added",
     )
 

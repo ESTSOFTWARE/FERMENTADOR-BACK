@@ -21,17 +21,26 @@ async def join_group(code: str, student_id: int) -> GroupResponse:
         student_id=student_id,
     )
 
-    # Avisar al profesor (best-effort: no debe romper la unión)
+    # Avisar al profesor Y al alumno (best-effort: no debe romper la unión)
     try:
         notif_repo   = NotificationRepository(AsyncSessionLocal)
+        use_case     = SendNotificationUseCase(notif_repo)
         student      = await user_repo.get_by_id(student_id)
         student_name = f"{student.name} {student.last_name}" if student else "Un alumno"
-        await SendNotificationUseCase(notif_repo).execute(
+
+        # Profesor: "{alumno} se unió a tu grupo"
+        await use_case.execute(
             user_id=group.professor_id,
             message=f"{student_name} se unió a tu grupo \"{group.name}\".",
             notification_type="member_added",
         )
+        # Alumno: "Te has unido a {grupo}"
+        await use_case.execute(
+            user_id=student_id,
+            message=f"Te has unido a {group.name}.",
+            notification_type="member_added",
+        )
     except Exception as e:  # noqa: BLE001
-        logger.warning(f"[join_group] No se pudo notificar al profesor: {e}")
+        logger.warning(f"[join_group] No se pudo notificar: {e}")
 
     return GroupResponse.from_entity(group)

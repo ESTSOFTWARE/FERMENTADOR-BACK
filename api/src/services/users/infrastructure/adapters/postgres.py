@@ -237,11 +237,12 @@ class UserRepository(IUserRepository):
             )
             await session.commit()
 
-    async def get_all_active_ids(self) -> list[int]:
+    async def get_all_active_ids(self, exclude_role_ids: list[int] | None = None) -> list[int]:
         async with self._session_factory() as session:
-            result = await session.execute(
-                select(UserModel.id).where(UserModel.is_active == True)  # noqa: E712
-            )
+            stmt = select(UserModel.id).where(UserModel.is_active == True)  # noqa: E712
+            if exclude_role_ids:
+                stmt = stmt.where(UserModel.role_id.notin_(exclude_role_ids))
+            result = await session.execute(stmt)
             return list(result.scalars().all())
 
     def _with_circuit_code(self, model: UserModel) -> User:

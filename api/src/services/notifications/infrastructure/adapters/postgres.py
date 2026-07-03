@@ -21,6 +21,7 @@ from src.services.notifications.domain.repository import INotificationRepository
 
 # ── Enums ─────────────────────────────────────────────────────────────────────
 class NotificationTypeEnum(str, enum.Enum):
+    FERMENTATION_STARTED     = "fermentation_started"
     FERMENTATION_COMPLETE    = "fermentation_complete"
     FERMENTATION_INTERRUPTED = "fermentation_interrupted"
     HIGH_TEMPERATURE         = "high_temperature"
