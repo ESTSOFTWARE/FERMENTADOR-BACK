@@ -41,6 +41,7 @@ def message_dto(m: Message) -> MessageResponse:
         content=m.content,
         created_at=m.created_at,
         read=m.read,
+        status=m.status,
         deleted=m.deleted,
         edited=m.edited,
         edited_at=m.edited_at,

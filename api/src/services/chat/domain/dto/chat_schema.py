@@ -44,6 +44,7 @@ class MessageResponse(BaseModel):
     content:         str | None
     created_at:      datetime        = Field(serialization_alias="createdAt")
     read:            bool            = False
+    status:          str             = "sent"
     deleted:         bool            = False
     edited:          bool            = False
     edited_at:       datetime | None = Field(default=None, serialization_alias="editedAt")

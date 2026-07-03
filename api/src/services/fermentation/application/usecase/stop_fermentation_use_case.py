@@ -4,6 +4,7 @@ from src.core.exceptions import (
     FermentationNotRunningException,
     FermentationSessionNotFoundException,
 )
+from src.core.rabbitmq.ws_events import to_room
 from src.core.threads.sensor_thread_manager import thread_manager
 from src.core.websocket.sensor_audience import invalidate_audience
 from src.services.fermentation.domain.entities.fermentation_session import FermentationSession
@@ -64,6 +65,12 @@ class StopFermentationUseCase:
         thread_manager.stop_session(circuit_id)
         # Ya no hay sesión corriendo: la audiencia vuelve a "todos" en la próxima lectura.
         invalidate_audience(circuit_id)
+
+        # Avisar al front por WS (sin polling): la fermentación se detuvo.
+        await to_room("sensors", f"circuit:{circuit_id}", {
+            "type": "fermentation_stopped",
+            "session_id": session_id,
+        })
         return session
 
     async def _calculate_efficiency(self, session_id: int) -> None:

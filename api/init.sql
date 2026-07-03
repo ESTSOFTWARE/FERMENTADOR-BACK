@@ -399,8 +399,9 @@ CREATE TABLE chat_conversation_members (
     id              SERIAL PRIMARY KEY,
     conversation_id INT       NOT NULL,
     user_id         INT       NOT NULL,
-    joined_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_read_at    TIMESTAMP NULL,
+    joined_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_read_at      TIMESTAMP NULL,
+    last_delivered_at TIMESTAMP NULL,
     CONSTRAINT uq_conversation_member UNIQUE (conversation_id, user_id),
     CONSTRAINT fk_chat_member_conv FOREIGN KEY (conversation_id) REFERENCES chat_conversations(id) ON DELETE CASCADE,
     CONSTRAINT fk_chat_member_user FOREIGN KEY (user_id) REFERENCES users(id)

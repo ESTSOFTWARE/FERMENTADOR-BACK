@@ -21,6 +21,7 @@ from src.services.chat.infrastructure.controllers.conversation_controller import
     get_conversations,
     get_members,
     leave_conversation,
+    mark_delivered,
     mark_read,
     update_conversation,
 )
@@ -96,6 +97,14 @@ async def mark_read_route(
     current_user: dict = Depends(require_any_role),
 ):
     return await mark_read(conversation_id, current_user["user_id"])
+
+
+@router.post("/conversations/{conversation_id}/delivered", summary="Marcar mensajes como entregados")
+async def mark_delivered_route(
+    conversation_id: int,
+    current_user: dict = Depends(require_any_role),
+):
+    return await mark_delivered(conversation_id, current_user["user_id"])
 
 
 # ── Mensajes ──────────────────────────────────────────────────────────────────

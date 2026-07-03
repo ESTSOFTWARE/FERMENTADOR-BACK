@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from src.core.database import AsyncSessionLocal
 from src.services.chat.application.usecase.conversation_use_cases import (
     CreateConversationUseCase,
@@ -80,5 +82,20 @@ async def get_members(conversation_id: int, user_id: int) -> list[MemberDTO]:
 
 
 async def mark_read(conversation_id: int, user_id: int) -> dict:
-    await MarkReadUseCase(_repo()).execute(conversation_id, user_id)
+    repo = _repo()
+    await MarkReadUseCase(repo).execute(conversation_id, user_id)
+    # Avisar al remitente para pintar las flechas azules (leído).
+    await broadcaster.conversation_read(
+        repo, conversation_id, user_id, datetime.utcnow().isoformat()
+    )
+    return {"message": "ok"}
+
+
+async def mark_delivered(conversation_id: int, user_id: int) -> dict:
+    repo = _repo()
+    await repo.mark_delivered(conversation_id, user_id)
+    # Avisar al remitente para pintar la doble flecha gris (entregado).
+    await broadcaster.conversation_delivered(
+        repo, conversation_id, user_id, datetime.utcnow().isoformat()
+    )
     return {"message": "ok"}

@@ -37,6 +37,7 @@ class Message:
     content:         str | None
     created_at:      datetime
     read:            bool = False
+    status:          str = "sent"   # sent | delivered | read (para MIS mensajes)
     deleted:         bool = False
     edited:          bool = False
     edited_at:       datetime | None = None

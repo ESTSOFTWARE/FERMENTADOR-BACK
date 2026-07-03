@@ -100,3 +100,29 @@ async def member_left(remaining_ids: list[int], conversation_id: int, user_id: i
         "conversationId": conversation_id,
         "userId": user_id,
     })
+
+
+async def conversation_read(
+    repo: IChatRepository, conversation_id: int, user_id: int, read_at: str,
+) -> None:
+    """Avisa a los miembros que `user_id` leyó hasta `read_at` (para flechas azules)."""
+    ids = await _member_ids(repo, conversation_id)
+    await _emit(ids, {
+        "type": "conversation:read",
+        "conversationId": conversation_id,
+        "userId": user_id,
+        "readAt": read_at,
+    })
+
+
+async def conversation_delivered(
+    repo: IChatRepository, conversation_id: int, user_id: int, delivered_at: str,
+) -> None:
+    """Avisa a los miembros que a `user_id` le llegaron los mensajes hasta `delivered_at`."""
+    ids = await _member_ids(repo, conversation_id)
+    await _emit(ids, {
+        "type": "conversation:delivered",
+        "conversationId": conversation_id,
+        "userId": user_id,
+        "deliveredAt": delivered_at,
+    })
