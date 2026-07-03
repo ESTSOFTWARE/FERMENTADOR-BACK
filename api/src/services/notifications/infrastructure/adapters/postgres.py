@@ -56,6 +56,18 @@ class NotificationModel(Base):
     )
 
 
+class DeviceTokenModel(Base):
+    """Token FCM por dispositivo/usuario para notificaciones push."""
+    __tablename__  = "device_tokens"
+    __table_args__ = {"extend_existing": True}
+
+    id         = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id    = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    token      = Column(String(255), nullable=False, unique=True)
+    platform   = Column(String(20), nullable=False, default="android")
+    created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+
+
 # ── Repositorio ───────────────────────────────────────────────────────────────
 class NotificationRepository(INotificationRepository):
 

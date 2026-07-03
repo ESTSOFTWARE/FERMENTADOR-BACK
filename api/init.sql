@@ -555,3 +555,14 @@ CREATE TABLE product_reviews (
         REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE INDEX idx_reviews_product ON product_reviews(product_id);
+-- Tokens FCM por dispositivo (notificaciones push)
+CREATE TABLE IF NOT EXISTS device_tokens (
+    id          BIGSERIAL PRIMARY KEY,
+    user_id     INTEGER NOT NULL,
+    token       VARCHAR(255) NOT NULL UNIQUE,
+    platform    VARCHAR(20) NOT NULL DEFAULT 'android',
+    created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_device_token_user FOREIGN KEY (user_id)
+        REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_device_tokens_user ON device_tokens(user_id);

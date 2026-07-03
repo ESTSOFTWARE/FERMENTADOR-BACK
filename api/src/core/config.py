@@ -58,6 +58,9 @@ class Settings(BaseSettings):
     GITHUB_CLIENT_SECRET: str = ""
     GITHUB_REDIRECT_URI:  str = "http://localhost:8000/api/auth/callback/github"
 
+    # Firebase Cloud Messaging (push). JSON del service account (contenido, no ruta).
+    FIREBASE_CREDENTIALS_JSON: str = ""
+
     # Frontend
     FRONTEND_URL: str = "http://localhost:3000"
 
