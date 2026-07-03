@@ -46,8 +46,9 @@ class ChatConversationMemberModel(Base):
     id              = Column(Integer, primary_key=True, autoincrement=True)
     conversation_id = Column(Integer, ForeignKey("chat_conversations.id", ondelete="CASCADE"), nullable=False)
     user_id         = Column(Integer, ForeignKey("users.id"), nullable=False)
-    joined_at       = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
-    last_read_at    = Column(DateTime, nullable=True)
+    joined_at         = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+    last_read_at      = Column(DateTime, nullable=True)
+    last_delivered_at = Column(DateTime, nullable=True)
 
     __table_args__ = (
         UniqueConstraint("conversation_id", "user_id", name="uq_conversation_member"),

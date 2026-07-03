@@ -95,3 +95,6 @@ class IChatRepository(ABC):
 
     @abstractmethod
     async def mark_read(self, conversation_id: int, user_id: int) -> None: ...
+
+    @abstractmethod
+    async def mark_delivered(self, conversation_id: int, user_id: int) -> None: ...

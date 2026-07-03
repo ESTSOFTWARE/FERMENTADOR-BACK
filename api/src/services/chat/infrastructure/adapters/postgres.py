@@ -161,6 +161,29 @@ class ChatRepository(IChatRepository):
 
         umap = await self._users_map(session, sender_ids)
 
+        # Timestamps de entrega/lectura de los OTROS miembros → status de MIS mensajes.
+        others_ts: list[tuple] = []
+        if viewer_id is not None:
+            conv_id = models[0].conversation_id
+            rows = (await session.execute(
+                select(
+                    ChatConversationMemberModel.last_delivered_at,
+                    ChatConversationMemberModel.last_read_at,
+                )
+                .where(ChatConversationMemberModel.conversation_id == conv_id)
+                .where(ChatConversationMemberModel.user_id != viewer_id)
+            )).all()
+            others_ts = [(r[0], r[1]) for r in rows]
+
+        def _status(created_at: datetime) -> str:
+            if not others_ts:
+                return "sent"
+            if all(r is not None and created_at <= r for _, r in others_ts):
+                return "read"
+            if all(d is not None and created_at <= d for d, _ in others_ts):
+                return "delivered"
+            return "sent"
+
         result = []
         for m in models:
             u = umap.get(m.sender_id, {})
@@ -176,6 +199,7 @@ class ChatRepository(IChatRepository):
                 content=None if m.deleted else m.content,
                 created_at=m.created_at,
                 read=is_read,
+                status=_status(m.created_at) if m.sender_id == viewer_id else "sent",
                 deleted=bool(m.deleted),
                 edited=bool(m.edited),
                 edited_at=m.edited_at,
@@ -492,12 +516,26 @@ class ChatRepository(IChatRepository):
 
     async def mark_read(self, conversation_id: int, user_id: int) -> None:
         async with self._session_factory() as session:
+            now = datetime.utcnow()
             await session.execute(
                 update(ChatConversationMemberModel)
                 .where(and_(
                     ChatConversationMemberModel.conversation_id == conversation_id,
                     ChatConversationMemberModel.user_id == user_id,
                 ))
-                .values(last_read_at=datetime.utcnow())
+                # Al leer también queda entregado.
+                .values(last_read_at=now, last_delivered_at=now)
+            )
+            await session.commit()
+
+    async def mark_delivered(self, conversation_id: int, user_id: int) -> None:
+        async with self._session_factory() as session:
+            await session.execute(
+                update(ChatConversationMemberModel)
+                .where(and_(
+                    ChatConversationMemberModel.conversation_id == conversation_id,
+                    ChatConversationMemberModel.user_id == user_id,
+                ))
+                .values(last_delivered_at=datetime.utcnow())
             )
             await session.commit()
