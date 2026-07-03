@@ -26,7 +26,8 @@ async def create_announcement(body: CreateAnnouncementRequest, creator_id: int):
     user_repo  = UserRepository(AsyncSessionLocal)
     notif_repo = NotificationRepository(AsyncSessionLocal)
     use_case   = SendNotificationUseCase(notif_repo)
-    user_ids   = await user_repo.get_all_active_ids()
+    # Los comunicados NO van a alumnos (rol 3), solo admin/profesor/soporte.
+    user_ids   = await user_repo.get_all_active_ids(exclude_role_ids=[3])
 
     await asyncio.gather(*[
         use_case.execute(

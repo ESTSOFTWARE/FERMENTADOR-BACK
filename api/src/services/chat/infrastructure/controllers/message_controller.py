@@ -49,6 +49,28 @@ async def send_message(
     )
     dto = message_dto(msg)
     await broadcaster.message_new(repo, dto)
+
+    # Push a los demás miembros: "Ameth te envió un mensaje" (best-effort).
+    try:
+        import asyncio
+
+        from src.core.fcm.fcm_service import send_push_to_user
+
+        members = await repo.get_members(conversation_id)
+        preview = dto.content.strip() if dto.content else "📎 Te envió un archivo"
+        await asyncio.gather(*[
+            send_push_to_user(
+                user_id=m.id,
+                title=dto.sender_name,
+                body=preview,
+                data={"type": "chat_message", "conversation_id": conversation_id},
+            )
+            for m in members
+            if m.id != user_id
+        ])
+    except Exception:  # noqa: BLE001
+        pass
+
     return dto
 
 
