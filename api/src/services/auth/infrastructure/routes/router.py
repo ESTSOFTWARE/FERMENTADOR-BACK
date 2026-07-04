@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request, Response
+from pydantic import BaseModel
 
 from src.services.auth.domain.dto.delete_account_schema import DeleteAccountRequest
 from src.services.auth.domain.dto.login_schema import (
@@ -57,6 +58,20 @@ async def login_route(body: LoginRequest, response: Response):
 )
 async def refresh_route(request: Request, response: Response):
     return await refresh_token(request, response)
+
+
+class MobileRefreshRequest(BaseModel):
+    refresh_token: str
+
+
+@router.post("/refresh/mobile", summary="Renovar access token (móvil: refresh en el body)")
+async def refresh_mobile_route(body: MobileRefreshRequest):
+    from src.core.database import AsyncSessionLocal
+    from src.services.auth.application.usecase.refresh_token_use_case import RefreshTokenUseCase
+    from src.services.auth.infrastructure.adapters.postgres import AuthRepository
+
+    result = await RefreshTokenUseCase(AuthRepository(AsyncSessionLocal)).execute(body.refresh_token)
+    return {"access_token": result["access_token"]}
 
 
 @router.post(

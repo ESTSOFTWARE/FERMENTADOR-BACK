@@ -372,6 +372,20 @@ class ChatRepository(IChatRepository):
             )
             await session.commit()
 
+    async def add_member(self, conversation_id: int, user_id: int) -> None:
+        async with self._session_factory() as session:
+            exists = (await session.execute(
+                select(ChatConversationMemberModel.id).where(and_(
+                    ChatConversationMemberModel.conversation_id == conversation_id,
+                    ChatConversationMemberModel.user_id == user_id,
+                ))
+            )).scalar_one_or_none()
+            if exists is None:
+                session.add(ChatConversationMemberModel(
+                    conversation_id=conversation_id, user_id=user_id,
+                ))
+                await session.commit()
+
     async def get_members(self, conversation_id: int) -> list[Member]:
         async with self._session_factory() as session:
             return await self._members(session, conversation_id)

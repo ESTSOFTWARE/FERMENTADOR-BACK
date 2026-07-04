@@ -55,6 +55,21 @@ async def get_conversation_detail(conversation_id: int, user_id: int) -> Convers
     return conversation_dto(conv)
 
 
+async def add_members(
+    conversation_id: int, user_ids: list[int], requester_id: int,
+) -> ConversationResponse:
+    repo = _repo()
+    for uid in user_ids:
+        await repo.add_member(conversation_id, uid)
+
+    conv = await GetConversationDetailUseCase(repo).execute(conversation_id, requester_id)
+    dto = conversation_dto(conv)
+    # El nuevo miembro obtiene la conversación; los demás refrescan sus miembros.
+    await broadcaster.conversation_new(dto)
+    await broadcaster.conversation_updated(dto)
+    return dto
+
+
 async def update_conversation(
     conversation_id: int, body: UpdateConversationRequest, user_id: int,
 ) -> ConversationResponse:
