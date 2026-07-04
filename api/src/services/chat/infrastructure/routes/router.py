@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, File, Query, UploadFile
+from pydantic import BaseModel
 
 from src.core.dependencies import require_any_role
 from src.services.chat.domain.dto.chat_schema import (
@@ -15,6 +16,7 @@ from src.services.chat.domain.dto.chat_schema import (
     UploadResponse,
 )
 from src.services.chat.infrastructure.controllers.conversation_controller import (
+    add_members,
     create_conversation,
     get_contacts,
     get_conversation_detail,
@@ -89,6 +91,19 @@ async def members_route(
     current_user: dict = Depends(require_any_role),
 ):
     return await get_members(conversation_id, current_user["user_id"])
+
+
+class AddMembersRequest(BaseModel):
+    user_ids: list[int]
+
+
+@router.post("/conversations/{conversation_id}/members", response_model=ConversationResponse, summary="Agregar miembros al chat")
+async def add_members_route(
+    conversation_id: int,
+    body: AddMembersRequest,
+    current_user: dict = Depends(require_any_role),
+):
+    return await add_members(conversation_id, body.user_ids, current_user["user_id"])
 
 
 @router.post("/conversations/{conversation_id}/read", summary="Marcar conversación como leída")

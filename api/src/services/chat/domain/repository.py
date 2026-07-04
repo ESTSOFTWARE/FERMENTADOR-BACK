@@ -50,6 +50,9 @@ class IChatRepository(ABC):
     async def remove_member(self, conversation_id: int, user_id: int) -> None: ...
 
     @abstractmethod
+    async def add_member(self, conversation_id: int, user_id: int) -> None: ...
+
+    @abstractmethod
     async def get_members(self, conversation_id: int) -> list[Member]: ...
 
     @abstractmethod
