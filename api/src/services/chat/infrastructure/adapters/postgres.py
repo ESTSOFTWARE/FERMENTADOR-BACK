@@ -42,39 +42,76 @@ class ChatRepository(IChatRepository):
 
         _, created_by, role = row
 
+        # Soporte de nich-ká: solo puede conversar con administradores.
+        if role == "soporte":
+            admin_ids = {
+                r[0] for r in (await session.execute(
+                    select(UserModel.id)
+                    .join(RoleModel, UserModel.role_id == RoleModel.id)
+                    .where(RoleModel.name == "admin")
+                )).all()
+            }
+            admin_ids.discard(user_id)
+            return admin_ids
+
+        # admin/profesor/estudiante: todos los del mismo admin (sin importar la
+        # clase), excepto soporte.
         if role == "admin":
             admin_id = user_id
-        elif role == "profesor":
-            admin_id = created_by
-        elif role == "estudiante":
-            prof = (await session.execute(
-                select(UserModel.created_by).where(UserModel.id == created_by)
-            )).scalar_one_or_none() if created_by else None
-            admin_id = prof
+        elif role in ("profesor", "estudiante"):
+            # Sube por la jerarquía hasta el admin, sin asumir si al usuario lo
+            # creó un profesor o directamente el admin.
+            admin_id = await self._find_admin_id(session, created_by)
         else:
             return set()
 
         if admin_id is None:
             return set()
 
-        # Profesores del admin
+        # Profesores (u otras cuentas) creadas por el admin, excluyendo soporte.
         prof_ids = [
             r[0] for r in (await session.execute(
-                select(UserModel.id).where(UserModel.created_by == admin_id)
+                select(UserModel.id)
+                .join(RoleModel, UserModel.role_id == RoleModel.id)
+                .where(UserModel.created_by == admin_id)
+                .where(RoleModel.name != "soporte")
             )).all()
         ]
-        # Estudiantes de esos profesores
+        # Estudiantes de esos profesores.
         student_ids = []
         if prof_ids:
             student_ids = [
                 r[0] for r in (await session.execute(
-                    select(UserModel.id).where(UserModel.created_by.in_(prof_ids))
+                    select(UserModel.id)
+                    .join(RoleModel, UserModel.role_id == RoleModel.id)
+                    .where(UserModel.created_by.in_(prof_ids))
+                    .where(RoleModel.name != "soporte")
                 )).all()
             ]
 
         all_ids = {admin_id, *prof_ids, *student_ids}
         all_ids.discard(user_id)
         return all_ids
+
+    async def _find_admin_id(self, session, start_id: int | None) -> int | None:
+        """Sube por `created_by` hasta encontrar al admin. Sirve tanto para
+        admin→profesor→estudiante como para admin→estudiante directo."""
+        current_id = start_id
+        for _ in range(5):  # tope de seguridad contra ciclos
+            if current_id is None:
+                return None
+            row = (await session.execute(
+                select(UserModel.created_by, RoleModel.name)
+                .join(RoleModel, UserModel.role_id == RoleModel.id)
+                .where(UserModel.id == current_id)
+            )).first()
+            if row is None:
+                return None
+            parent, r = row
+            if r == "admin":
+                return current_id
+            current_id = parent
+        return None
 
     async def get_contacts(self, user_id: int) -> list[Member]:
         async with self._session_factory() as session:
@@ -530,7 +567,9 @@ class ChatRepository(IChatRepository):
 
     async def mark_read(self, conversation_id: int, user_id: int) -> None:
         async with self._session_factory() as session:
-            now = datetime.utcnow()
+            # Usamos el reloj de la BD (func.now()) para que sea comparable con
+            # created_at (CURRENT_TIMESTAMP). Mezclar con datetime.utcnow() de la
+            # app podía dejar un mensaje leído como "enviado" al recargar.
             await session.execute(
                 update(ChatConversationMemberModel)
                 .where(and_(
@@ -538,7 +577,7 @@ class ChatRepository(IChatRepository):
                     ChatConversationMemberModel.user_id == user_id,
                 ))
                 # Al leer también queda entregado.
-                .values(last_read_at=now, last_delivered_at=now)
+                .values(last_read_at=func.now(), last_delivered_at=func.now())
             )
             await session.commit()
 
@@ -550,6 +589,6 @@ class ChatRepository(IChatRepository):
                     ChatConversationMemberModel.conversation_id == conversation_id,
                     ChatConversationMemberModel.user_id == user_id,
                 ))
-                .values(last_delivered_at=datetime.utcnow())
+                .values(last_delivered_at=func.now())
             )
             await session.commit()
