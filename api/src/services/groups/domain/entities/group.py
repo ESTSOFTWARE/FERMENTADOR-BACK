@@ -9,6 +9,7 @@ class GroupMember:
     name:           str
     last_name:      str
     email:          str
+    avatar:         str | None = None
     joined_at:      datetime | None = None
     oauth_provider: str = 'email'
 
