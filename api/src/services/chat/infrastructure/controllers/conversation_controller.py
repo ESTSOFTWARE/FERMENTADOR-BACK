@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from src.core.database import AsyncSessionLocal
+from src.core.exceptions import ForbiddenException, NotFoundException
 from src.services.chat.application.usecase.conversation_use_cases import (
     CreateConversationUseCase,
     GetContactsUseCase,
@@ -59,6 +60,14 @@ async def add_members(
     conversation_id: int, user_ids: list[int], requester_id: int,
 ) -> ConversationResponse:
     repo = _repo()
+    # Solo el creador del grupo puede agregar miembros.
+    conv = await repo.get_conversation(conversation_id, requester_id)
+    if not conv:
+        raise NotFoundException("Conversación no encontrada")
+    if conv.created_by != requester_id:
+        raise ForbiddenException(
+            "Solo el creador del grupo puede agregar miembros"
+        )
     for uid in user_ids:
         await repo.add_member(conversation_id, uid)
 
