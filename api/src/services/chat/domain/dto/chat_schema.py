@@ -41,6 +41,7 @@ class MessageResponse(BaseModel):
     sender_id:       int             = Field(serialization_alias="senderId")
     sender_name:     str             = Field(serialization_alias="senderName")
     sender_role:     str             = Field(serialization_alias="senderRole")
+    sender_avatar:   str | None      = Field(default=None, serialization_alias="senderAvatar")
     content:         str | None
     created_at:      datetime        = Field(serialization_alias="createdAt")
     read:            bool            = False

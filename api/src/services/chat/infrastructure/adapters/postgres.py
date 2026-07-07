@@ -233,6 +233,7 @@ class ChatRepository(IChatRepository):
                 sender_id=m.sender_id,
                 sender_name=u.get("name", "Usuario"),
                 sender_role=u.get("role", "estudiante"),
+                sender_avatar=u.get("avatar"),
                 content=None if m.deleted else m.content,
                 created_at=m.created_at,
                 read=is_read,
