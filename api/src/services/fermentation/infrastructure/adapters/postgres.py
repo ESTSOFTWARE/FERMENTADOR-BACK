@@ -15,7 +15,7 @@ from sqlalchemy import (
     text,
     update,
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, selectinload
 
 from src.core.database import Base
 from src.services.fermentation.domain.entities.fermentation_report import FermentationReport
@@ -220,6 +220,37 @@ class FermentationRepository(IFermentationRepository):
         return [
             self._session_to_entity(m)
             for m in result.scalars().all()
+        ]
+
+    async def get_sessions_with_reports_visible_to(
+        self, user_id: int, role: str
+    ) -> list[tuple[FermentationSession, FermentationReport | None]]:
+        """Sesiones visibles + su reporte, en UNA sola consulta (evita el N+1)."""
+        from src.core.models.group_models import GroupMemberModel
+        async with self._session_factory() as session:
+            stmt = select(FermentationSessionModel).options(
+                selectinload(FermentationSessionModel.report)
+            )
+            if role != "admin":
+                my_groups = (
+                    select(GroupMemberModel.group_id)
+                    .where(GroupMemberModel.student_id == user_id)
+                )
+                stmt = stmt.where(
+                    or_(
+                        FermentationSessionModel.user_id == user_id,
+                        FermentationSessionModel.group_id.in_(my_groups),
+                    )
+                )
+            stmt = stmt.order_by(FermentationSessionModel.id.desc())
+            result = await session.execute(stmt)
+            models = result.scalars().all()
+        return [
+            (
+                self._session_to_entity(m),
+                self._report_to_entity(m.report) if m.report else None,
+            )
+            for m in models
         ]
 
     async def get_active_session_by_circuit(self, circuit_id: int) -> FermentationSession | None:

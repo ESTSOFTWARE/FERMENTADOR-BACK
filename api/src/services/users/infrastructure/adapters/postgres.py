@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import delete, select, update
+from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 
 from src.core.models.user_models import RoleModel, UserModel
@@ -18,6 +18,7 @@ class UserRepository(IUserRepository):
             result = await session.execute(
                 select(UserModel)
                 .options(selectinload(UserModel.role))
+                .where(UserModel.is_active.is_not(False))
                 .order_by(UserModel.id)
             )
             return [self._to_entity(m) for m in result.scalars().all()]
@@ -53,6 +54,7 @@ class UserRepository(IUserRepository):
                 .options(selectinload(UserModel.role))
                 .join(RoleModel, UserModel.role_id == RoleModel.id)
                 .where(RoleModel.name == 'estudiante')
+                .where(UserModel.is_active.is_not(False))
                 .order_by(UserModel.name)
             )
             return [self._to_entity(m) for m in result.scalars().all()]
@@ -63,6 +65,7 @@ class UserRepository(IUserRepository):
                 select(UserModel)
                 .options(selectinload(UserModel.role), selectinload(UserModel.circuit))
                 .where(UserModel.created_by == creator_id)
+                .where(UserModel.is_active.is_not(False))
                 .order_by(UserModel.id)
             )
             return [self._with_circuit_code(m) for m in result.scalars().all()]
@@ -80,6 +83,7 @@ class UserRepository(IUserRepository):
                 .options(selectinload(UserModel.role), selectinload(UserModel.circuit))
                 .where(UserModel.circuit_id == circuit_subq)
                 .where(UserModel.circuit_id.isnot(None))
+                .where(UserModel.is_active.is_not(False))
                 .order_by(UserModel.id)
             )
             return [self._with_circuit_code(m) for m in result.scalars().all()]
@@ -127,9 +131,13 @@ class UserRepository(IUserRepository):
         return await self.get_by_id(user.id)
 
     async def delete(self, user_id: int) -> None:
+        # Soft-delete: desactiva la cuenta (no borra datos ni rompe llaves foráneas).
+        # get_current_user bloquea a los is_active=False y los listados los ocultan.
         async with self._session_factory() as session:
             await session.execute(
-                delete(UserModel).where(UserModel.id == user_id)
+                update(UserModel)
+                .where(UserModel.id == user_id)
+                .values(is_active=False, active_session_id=None)
             )
             await session.commit()
 
