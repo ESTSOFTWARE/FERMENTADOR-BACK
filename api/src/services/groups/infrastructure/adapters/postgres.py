@@ -160,6 +160,7 @@ class GroupRepository(IGroupRepository):
                     name=m.student.name,
                     last_name=m.student.last_name,
                     email=m.student.email,
+                    avatar=m.student.profile_image,
                     joined_at=m.joined_at,
                     oauth_provider=self._derive_provider(m.student),
                 )

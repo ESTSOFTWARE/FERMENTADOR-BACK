@@ -24,6 +24,7 @@ class GroupMemberResponse(BaseModel):
     name:           str
     last_name:      str
     email:          str
+    avatar:         str | None = None
     joined_at:      datetime | None
     oauth_provider: str
 
@@ -61,6 +62,7 @@ class GroupResponse(BaseModel):
                     name=m.name,
                     last_name=m.last_name,
                     email=m.email,
+                    avatar=m.avatar,
                     joined_at=m.joined_at,
                     oauth_provider=m.oauth_provider,
                 )
