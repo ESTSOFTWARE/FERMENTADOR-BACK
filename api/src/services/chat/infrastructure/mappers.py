@@ -38,6 +38,7 @@ def message_dto(m: Message) -> MessageResponse:
         sender_id=m.sender_id,
         sender_name=m.sender_name,
         sender_role=m.sender_role,
+        sender_avatar=m.sender_avatar,
         content=m.content,
         created_at=m.created_at,
         read=m.read,

@@ -146,6 +146,11 @@ class GroupRepository(IGroupRepository):
                 if "professor" not in inspect(model).unloaded and model.professor is not None
                 else None
             ),
+            professor_avatar=(
+                model.professor.profile_image
+                if "professor" not in inspect(model).unloaded and model.professor is not None
+                else None
+            ),
             code=model.code,
             created_at=model.created_at,
             members=[

@@ -36,6 +36,7 @@ class Message:
     sender_role:     str
     content:         str | None
     created_at:      datetime
+    sender_avatar:   str | None = None
     read:            bool = False
     status:          str = "sent"   # sent | delivered | read (para MIS mensajes)
     deleted:         bool = False
