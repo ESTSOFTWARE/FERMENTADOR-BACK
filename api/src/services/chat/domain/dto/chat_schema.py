@@ -116,6 +116,7 @@ class SendMessageRequest(BaseModel):
     content:     str | None = None
     attachments: list[AttachmentInput] = []
     reply_to_id: int | None = Field(default=None, alias="replyToId")
+    mentions:    list[int] = []  # ids de usuarios mencionados (@)
 
 
 class EditMessageRequest(BaseModel):
