@@ -58,16 +58,31 @@ async def send_message(
 
         members = await repo.get_members(conversation_id)
         preview = dto.content.strip() if dto.content else "📎 Te envió un archivo"
-        await asyncio.gather(*[
-            send_push_to_user(
-                user_id=m.id,
-                title=dto.sender_name,
-                body=preview,
-                data={"type": "chat_message", "conversation_id": conversation_id},
-            )
-            for m in members
-            if m.id != user_id
-        ])
+        mentioned = set(body.mentions or [])
+        tasks = []
+        for m in members:
+            if m.id == user_id:
+                continue
+            if m.id in mentioned:
+                # Aviso especial de mención: "Ameth te mencionó".
+                tasks.append(send_push_to_user(
+                    user_id=m.id,
+                    title=dto.sender_name,
+                    body=f"Te mencionó: {preview}",
+                    data={
+                        "type": "chat_mention",
+                        "conversation_id": conversation_id,
+                        "message_id": dto.id,
+                    },
+                ))
+            else:
+                tasks.append(send_push_to_user(
+                    user_id=m.id,
+                    title=dto.sender_name,
+                    body=preview,
+                    data={"type": "chat_message", "conversation_id": conversation_id},
+                ))
+        await asyncio.gather(*tasks)
     except Exception:  # noqa: BLE001
         pass
 
