@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 
+from src.services.notifications.domain.dto.ml_result_dto import MlResultDTO
 from src.core.dependencies import get_current_user
 from src.services.notifications.domain.dto.notification_schema import NotificationResponse
 from src.services.notifications.infrastructure.controllers.get_notifications_controller import (
@@ -11,6 +12,9 @@ from src.services.notifications.infrastructure.controllers.mark_all_as_read_cont
 )
 from src.services.notifications.infrastructure.controllers.mark_one_as_read_controller import (
     mark_one_as_read,
+)
+from src.services.notifications.infrastructure.controllers.receive_ml_result_controller import (
+    receive_ml_result,
 )
 
 router = APIRouter()
@@ -54,3 +58,11 @@ async def register_device_token(
 ):
     from src.core.fcm.fcm_service import save_device_token
     await save_device_token(current_user["user_id"], body.token, body.platform)
+
+@router.post(
+    "/ml-results",
+    status_code=204,
+    summary="Recibe resultados del microservicio de ML (anomalías y predicciones de eficiencia)",
+)
+async def ml_results(body: MlResultDTO):
+    await receive_ml_result(body.model_dump(mode="json"))
