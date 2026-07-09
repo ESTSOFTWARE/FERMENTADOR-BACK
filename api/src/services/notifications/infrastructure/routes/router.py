@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 
-from src.services.notifications.domain.dto.ml_result_dto import MlResultDTO
 from src.core.dependencies import get_current_user
+from src.services.notifications.domain.dto.ml_result_dto import MlResultDTO
 from src.services.notifications.domain.dto.notification_schema import NotificationResponse
 from src.services.notifications.infrastructure.controllers.get_notifications_controller import (
     get_all,

@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 
-from src.services.notifications.domain.dto.ml_result_dto import MlResultDTO
 from src.services.notifications.application.usecase.send_ml_result_use_case import (
     SendMlResultUseCase,
 )
+from src.services.notifications.domain.dto.ml_result_dto import MlResultDTO
 
 router = APIRouter()
 
