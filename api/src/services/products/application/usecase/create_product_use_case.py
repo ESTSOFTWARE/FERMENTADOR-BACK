@@ -9,7 +9,8 @@ class CreateProductUseCase:
 
     async def execute(
         self, name: str, description: str, price: float,
-        sku: str, stock: int, category_id: int | None
+        sku: str, stock: int, category_id: int | None,
+        image: str | None = None,
     ) -> Product:
         existing = await self._product_repo.get_by_sku(sku)
         if existing:
@@ -23,5 +24,6 @@ class CreateProductUseCase:
             sku=sku,
             stock=stock,
             rating=0,
+            image=image,
             category_id=category_id
         ))

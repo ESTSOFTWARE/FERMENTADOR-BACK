@@ -16,6 +16,7 @@ class ProductModel(Base):
     sku:         Mapped[str]        = mapped_column(String(50), nullable=False, unique=True)
     stock:       Mapped[int]        = mapped_column(Integer, nullable=False, default=0)
     rating:      Mapped[float]      = mapped_column(DECIMAL(3, 2), nullable=False, default=0)
+    image:       Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
     category_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("product_categories.id", ondelete="SET NULL"), default=None)
     created_at:  Mapped[datetime]   = mapped_column(TIMESTAMP, nullable=False)
     updated_at:  Mapped[datetime]   = mapped_column(TIMESTAMP, nullable=False)

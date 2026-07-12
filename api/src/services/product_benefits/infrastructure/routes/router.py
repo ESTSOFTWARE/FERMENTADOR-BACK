@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from src.core.dependencies import require_admin
+from src.core.dependencies import require_admin_or_soporte
 from src.services.product_benefits.domain.dto.benefit_schema import (
     BenefitResponse,
     CreateBenefitRequest,
@@ -26,15 +26,15 @@ async def get_benefits(product_id: int):
 
 
 @router.post("/", response_model=BenefitResponse, status_code=201, summary="Crear beneficio (solo admin)")
-async def create_benefit(product_id: int, body: CreateBenefitRequest, current_user: dict = Depends(require_admin)):
+async def create_benefit(product_id: int, body: CreateBenefitRequest, current_user: dict = Depends(require_admin_or_soporte)):
     return await create(product_id, body)
 
 
 @router.put("/{benefit_id}", response_model=BenefitResponse, summary="Actualizar beneficio (solo admin)")
-async def update_benefit(product_id: int, benefit_id: int, body: UpdateBenefitRequest, current_user: dict = Depends(require_admin)):
+async def update_benefit(product_id: int, benefit_id: int, body: UpdateBenefitRequest, current_user: dict = Depends(require_admin_or_soporte)):
     return await update(product_id, benefit_id, body)
 
 
 @router.delete("/{benefit_id}", status_code=200, summary="Eliminar beneficio (solo admin)")
-async def delete_benefit(product_id: int, benefit_id: int, current_user: dict = Depends(require_admin)):
+async def delete_benefit(product_id: int, benefit_id: int, current_user: dict = Depends(require_admin_or_soporte)):
     return await delete(product_id, benefit_id)

@@ -11,6 +11,7 @@ class Product:
     sku:         str
     stock:       int
     rating:      float
+    image:       str | None = None
     category_id: int | None = None
     created_at:  datetime | None = None
     updated_at:  datetime | None = None

@@ -102,7 +102,7 @@ async def get_me(current_user: dict = Depends(get_current_user)):
 
 
 @router.get("/{user_id}", response_model=UserResponse, summary="Obtener usuario por ID")
-async def get_user(user_id: int, current_user: dict = Depends(require_admin_or_profesor)):
+async def get_user(user_id: int, current_user: dict = Depends(require_any_role)):
     return await get_by_id(user_id)
 
 

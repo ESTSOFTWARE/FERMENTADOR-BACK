@@ -71,6 +71,7 @@ class PostgresProductRepository(IProductRepository):
                 sku=product.sku,
                 stock=product.stock,
                 rating=0,
+                image=product.image,
                 category_id=product.category_id
             )
             session.add(model)
@@ -89,6 +90,7 @@ class PostgresProductRepository(IProductRepository):
                     price=product.price,
                     sku=product.sku,
                     stock=product.stock,
+                    image=product.image,
                     category_id=product.category_id
                 )
             )
@@ -129,6 +131,7 @@ class PostgresProductRepository(IProductRepository):
             sku=model.sku,
             stock=model.stock,
             rating=float(model.rating),
+            image=model.image,
             category_id=model.category_id,
             created_at=model.created_at,
             updated_at=model.updated_at
