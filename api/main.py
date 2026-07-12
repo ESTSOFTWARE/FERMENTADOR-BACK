@@ -244,11 +244,13 @@ from src.services.support_chat.infrastructure.routes.websocket import (
     router as support_chat_ws_router,
 )
 from src.services.users.infrastructure.routes.router import router as users_router
+from src.services.stickers.infrastructure.routes.router import router as stickers_router
 
 app.include_router(auth_router,             prefix="/api/auth",          tags=["Auth"])
 app.include_router(session_ws_router,       prefix="",                   tags=["Session WS"])
 app.include_router(oauth_callbacks_router,  prefix="/auth",              tags=["Auth OAuth"])
 app.include_router(users_router,            prefix="/api/users",         tags=["Users"])
+app.include_router(stickers_router,         prefix="/api/stickers",      tags=["Stickers"])
 app.include_router(categories_router,       prefix="/api/categories",                              tags=["Categories"])
 app.include_router(products_router,         prefix="/api/products",                                tags=["Products"])
 app.include_router(benefits_router,         prefix="/api/products/{product_id}/benefits",          tags=["Product Benefits"])
