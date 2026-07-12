@@ -9,6 +9,7 @@ class CreateProductRequest(BaseModel):
     price:       float      = Field(..., gt=0)
     sku:         str        = Field(..., min_length=1, max_length=50)
     stock:       int        = Field(0, ge=0)
+    image:       str | None = Field(None, max_length=500)
     category_id: int | None = None
 
 
@@ -18,6 +19,7 @@ class UpdateProductRequest(BaseModel):
     price:       float | None = Field(None, gt=0)
     sku:         str | None   = Field(None, min_length=1, max_length=50)
     stock:       int | None   = Field(None, ge=0)
+    image:       str | None   = Field(None, max_length=500)
     category_id: int | None   = None
 
 
@@ -29,6 +31,7 @@ class ProductResponse(BaseModel):
     sku:         str
     stock:       int
     rating:      float
+    image:       str | None
     category_id: int | None
     created_at:  datetime
     updated_at:  datetime
@@ -43,6 +46,7 @@ class ProductResponse(BaseModel):
             sku=product.sku,
             stock=product.stock,
             rating=product.rating,
+            image=getattr(product, "image", None),
             category_id=product.category_id,
             created_at=product.created_at,
             updated_at=product.updated_at

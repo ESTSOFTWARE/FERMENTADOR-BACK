@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, File, Query, UploadFile
 
 from src.core.dependencies import require_admin_or_soporte
 from src.services.products.domain.dto.product_schema import (
@@ -14,8 +14,24 @@ from src.services.products.infrastructure.controllers.get_related_products_contr
     get_related,
 )
 from src.services.products.infrastructure.controllers.update_product_controller import update
+from src.services.products.infrastructure.controllers.upload_product_image_controller import (
+    upload_image,
+)
 
 router = APIRouter()
+
+
+@router.post(
+    "/{product_id}/image",
+    response_model=ProductResponse,
+    summary="Subir imagen del producto (admin o soporte)",
+)
+async def upload_product_image_route(
+    product_id: int,
+    file: UploadFile = File(...),
+    current_user: dict = Depends(require_admin_or_soporte),
+):
+    return await upload_image(product_id, file)
 
 
 @router.get("/", summary="Obtener todos los productos")

@@ -37,6 +37,33 @@ async def upload_profile_image(file_bytes: bytes, content_type: str) -> dict:
     }
 
 
+async def upload_product_image(file_bytes: bytes, content_type: str) -> dict:
+    """Sube la imagen de un producto/componente a Cloudinary."""
+    if content_type not in _ALLOWED_TYPES:
+        raise BadRequestException("Solo se permiten imágenes JPG, PNG, WEBP o SVG")
+
+    if len(file_bytes) > _MAX_SIZE_BYTES:
+        raise BadRequestException("La imagen no puede superar los 5 MB")
+
+    try:
+        result = await asyncio.to_thread(
+            cloudinary.uploader.upload,
+            file_bytes,
+            folder="product_images",
+            resource_type="image",
+        )
+    except Exception as e:
+        raise AppException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Error al subir la imagen a Cloudinary: {str(e)}",
+        ) from e
+
+    return {
+        "secure_url": result["secure_url"],
+        "public_id":  result["public_id"],
+    }
+
+
 # ── Archivos de chat (imágenes, video, documentos, etc.) ──────────────────────
 _CHAT_MAX_SIZE_BYTES = 25 * 1024 * 1024  # 25 MB
 
