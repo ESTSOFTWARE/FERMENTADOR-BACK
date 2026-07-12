@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, File, UploadFile
 
 from src.core.dependencies import require_any_role
 from src.services.stickers.domain.dto.sticker_schema import (
-    StickerPackDTO,
     CreateStickerPackRequest,
+    StickerPackDTO,
 )
 
 router = APIRouter()

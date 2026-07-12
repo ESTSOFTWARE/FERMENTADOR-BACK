@@ -238,13 +238,13 @@ from src.services.product_specifications.infrastructure.routes.router import (
 from src.services.products.infrastructure.routes.router import router as products_router
 from src.services.sensors.infrastructure.routes.router import router as sensors_router
 from src.services.sensors.infrastructure.routes.websocket import router as sensors_ws_router
+from src.services.stickers.infrastructure.routes.router import router as stickers_router
 from src.services.support.infrastructure.routes.router import router as support_router
 from src.services.support_chat.infrastructure.routes.router import router as support_chat_router
 from src.services.support_chat.infrastructure.routes.websocket import (
     router as support_chat_ws_router,
 )
 from src.services.users.infrastructure.routes.router import router as users_router
-from src.services.stickers.infrastructure.routes.router import router as stickers_router
 
 app.include_router(auth_router,             prefix="/api/auth",          tags=["Auth"])
 app.include_router(session_ws_router,       prefix="",                   tags=["Session WS"])
