@@ -11,7 +11,7 @@ _camel = ConfigDict(populate_by_name=True)
 class AttachmentDTO(BaseModel):
     model_config = _camel
     id:   int
-    type: Literal["image", "video", "document", "file"]
+    type: Literal["image", "video", "document", "file", "sticker"]
     name: str
     url:  str
     size: int = 0
@@ -105,7 +105,7 @@ class UpdateConversationRequest(BaseModel):
 class AttachmentInput(BaseModel):
     model_config = _camel
     id:   int
-    type: Literal["image", "video", "document", "file"]
+    type: Literal["image", "video", "document", "file", "sticker"]
     name: str
     url:  str
     size: int = 0
