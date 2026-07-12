@@ -92,7 +92,7 @@ class ChatMessageAttachmentModel(Base):
 
     id         = Column(Integer, primary_key=True, autoincrement=True)
     message_id = Column(Integer, ForeignKey("chat_messages.id", ondelete="CASCADE"), nullable=False)
-    type       = Column(Enum("image", "video", "document", "file", native_enum=False), nullable=False)
+    type       = Column(Enum("image", "video", "document", "file", "sticker", native_enum=False), nullable=False)
     name       = Column(String(255), nullable=False)
     url        = Column(String(2048), nullable=False)
     size       = Column(Integer, nullable=False, server_default=text("0"))
