@@ -1,5 +1,10 @@
 import type { Channel } from '../events/EventEnvelope'
 import type { Connection } from './Connection'
+import type { ConnectionRegistry } from './ConnectionRegistry'
+
+export interface PresenceContext {
+  registry: ConnectionRegistry
+}
 
 /**
  * Descriptor de un canal WebSocket. Cada feature (session, chat, sensors, ...)
@@ -15,4 +20,8 @@ export interface ChannelDescriptor {
   roomFromParams?: (params: string[]) => string | null
   /** Maneja mensajes que el cliente envía por el socket (ej: typing). Opcional. */
   onClientMessage?: (conn: Connection, data: Record<string, unknown>) => void | Promise<void>
+  /** Llamado justo después de que la conexión queda registrada. */
+  onConnect?: (conn: Connection, ctx: PresenceContext) => void | Promise<void>
+  /** Llamado justo después de que la conexión es eliminada del registro. */
+  onDisconnect?: (conn: Connection, ctx: PresenceContext) => void | Promise<void>
 }
