@@ -91,14 +91,14 @@ class CreateConversationRequest(BaseModel):
     model_config = _camel
     type:        Literal["personal", "group"]
     member_ids:  list[int]   = Field(alias="memberIds")
-    name:        str | None = None
-    description: str | None = None
+    name:        str | None = Field(None, max_length=150, pattern=r'^[^<>&]*$')
+    description: str | None = Field(None, max_length=500, pattern=r'^[^<>&]*$')
 
 
 class UpdateConversationRequest(BaseModel):
     model_config = _camel
-    name:        str | None = None
-    description: str | None = None
+    name:        str | None = Field(None, max_length=150, pattern=r'^[^<>&]*$')
+    description: str | None = Field(None, max_length=500, pattern=r'^[^<>&]*$')
     avatar:      str | None = None
 
 
@@ -113,14 +113,14 @@ class AttachmentInput(BaseModel):
 
 class SendMessageRequest(BaseModel):
     model_config = _camel
-    content:     str | None = None
+    content:     str | None = Field(None, max_length=5000)
     attachments: list[AttachmentInput] = []
     reply_to_id: int | None = Field(default=None, alias="replyToId")
     mentions:    list[int] = []  # ids de usuarios mencionados (@)
 
 
 class EditMessageRequest(BaseModel):
-    content: str
+    content: str = Field(..., max_length=5000)
 
 
 class SetPriorityRequest(BaseModel):
