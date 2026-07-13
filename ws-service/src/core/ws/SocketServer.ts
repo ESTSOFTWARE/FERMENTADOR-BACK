@@ -68,14 +68,30 @@ export class SocketServer {
     const room = descriptor.roomFromParams?.(parts.slice(2))
     if (room) this.registry.joinRoom(conn, room)
 
+    const ctx = { registry: this.registry }
+
+    if (descriptor.onConnect) {
+      Promise.resolve(descriptor.onConnect(conn, ctx)).catch(() => { /* ignore */ })
+    }
+
     socket.on('message', (raw) => {
       if (!descriptor.onClientMessage) return
       let data: Record<string, unknown>
       try { data = JSON.parse(raw.toString()) } catch { return }
       Promise.resolve(descriptor.onClientMessage(conn, data)).catch(() => { /* ignore */ })
     })
-    socket.on('close', () => this.handleDisconnect.execute(conn))
-    socket.on('error', () => this.handleDisconnect.execute(conn))
+
+    let disconnected = false
+    const doDisconnect = () => {
+      if (disconnected) return
+      disconnected = true
+      this.handleDisconnect.execute(conn)
+      if (descriptor.onDisconnect) {
+        Promise.resolve(descriptor.onDisconnect(conn, ctx)).catch(() => { /* ignore */ })
+      }
+    }
+    socket.on('close', doDisconnect)
+    socket.on('error', doDisconnect)
   }
 
   listen(port: number): void {
