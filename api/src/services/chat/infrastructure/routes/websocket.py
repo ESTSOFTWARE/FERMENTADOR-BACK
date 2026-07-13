@@ -50,6 +50,13 @@ async def chat_ws(websocket: WebSocket, token: str | None = None):
 
     await chat_ws_manager.connect(user_id, websocket)
 
+    # Presencia: notificar a contactos que este usuario entró, y enviarle quiénes ya están online.
+    chatable_ids = await repo.get_chatable_user_ids(user_id)
+    others = chatable_ids - {user_id}
+    await chat_ws_manager.send_to_users(others, {"type": "user:online", "userId": user_id})
+    online_now = list((chat_ws_manager.online_user_ids() & chatable_ids) - {user_id})
+    await websocket.send_text(json.dumps({"type": "presence:init", "onlineUserIds": online_now}))
+
     try:
         while True:
             raw = await websocket.receive_text()
@@ -76,6 +83,10 @@ async def chat_ws(websocket: WebSocket, token: str | None = None):
 
     except WebSocketDisconnect:
         await chat_ws_manager.disconnect(user_id, websocket)
+        if user_id not in chat_ws_manager.online_user_ids():
+            await chat_ws_manager.send_to_users(others, {"type": "user:offline", "userId": user_id})
     except Exception as e:
         await chat_ws_manager.disconnect(user_id, websocket)
+        if user_id not in chat_ws_manager.online_user_ids():
+            await chat_ws_manager.send_to_users(others, {"type": "user:offline", "userId": user_id})
         logger.error(f"[WS:Chat] Error → user_id={user_id} | {e}")

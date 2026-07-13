@@ -37,6 +37,9 @@ class ChatWebSocketManager:
                     del self.connections[user_id]
         logger.info(f"[WS:Chat] Desconectado → user_id={user_id}")
 
+    def online_user_ids(self) -> set[int]:
+        return set(self.connections.keys())
+
     async def send_to_users(self, user_ids: list[int] | set[int], event: dict) -> None:
         """Empuja un evento (dict serializable) a todos los usuarios conectados de la lista."""
         async with self._lock:
