@@ -68,6 +68,14 @@ async def add_members(
         raise ForbiddenException(
             "Solo el creador del grupo puede agregar miembros"
         )
+    # Validación contextual: solo puedes agregar a gente de tu propio alcance
+    # (mismo admin), igual que al crear una conversación.
+    chatable = await repo.get_chatable_user_ids(requester_id)
+    invalid = [uid for uid in user_ids if uid not in chatable]
+    if invalid:
+        raise ForbiddenException(
+            "No puedes agregar a uno o más de estos usuarios",
+        )
     for uid in user_ids:
         await repo.add_member(conversation_id, uid)
 

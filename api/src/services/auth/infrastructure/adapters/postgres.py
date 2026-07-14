@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import selectinload
 
 from src.core.models.user_models import PasswordResetCodeModel, RoleModel, UserModel
@@ -19,10 +19,13 @@ class AuthRepository(IAuthRepository):
 
     async def get_user_by_email(self, email: str) -> User | None:
         async with self._session_factory() as session:
+            # Canonicalización: comparación sin distinguir mayúsculas y sin
+            # espacios, para que "User@Gmail.com" y "user@gmail.com" sean el
+            # mismo usuario (evita duplicados y fallos de login).
             result = await session.execute(
                 select(UserModel)
                 .options(selectinload(UserModel.role))
-                .where(UserModel.email == email)
+                .where(func.lower(UserModel.email) == email.strip().lower())
             )
             model = result.scalar_one_or_none()
             return self._to_entity(model) if model else None

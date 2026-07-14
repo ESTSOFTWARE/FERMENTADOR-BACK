@@ -1,13 +1,18 @@
 from pydantic import BaseModel, EmailStr, model_validator
 
-from src.core.validators import DialCodeStr, PhoneNumberStr
+from src.core.validators import (
+    DialCodeStr,
+    OptionalNameStr,
+    OptionalPasswordStr,
+    PhoneNumberStr,
+)
 
 
 class UpdateUserRequest(BaseModel):
-    name:          str | None = None
-    last_name:     str | None = None
+    name:          OptionalNameStr = None
+    last_name:     OptionalNameStr = None
     email:         EmailStr | None = None
-    password:      str | None = None
+    password:      OptionalPasswordStr = None
     role:          str | None = None
     profile_image: str | None = None
     dial_code:     DialCodeStr    = None

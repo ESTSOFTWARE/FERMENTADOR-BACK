@@ -1,13 +1,19 @@
-from pydantic import BaseModel, EmailStr, model_validator
+from pydantic import BaseModel, model_validator
 
-from src.core.validators import DialCodeStr, PhoneNumberStr
+from src.core.validators import (
+    DialCodeStr,
+    NameStr,
+    NormalizedEmailStr,
+    PasswordStr,
+    PhoneNumberStr,
+)
 
 
 class RegisterRequest(BaseModel):
-    name:         str
-    last_name:    str
-    email:        EmailStr
-    password:     str
+    name:         NameStr
+    last_name:    NameStr
+    email:        NormalizedEmailStr
+    password:     PasswordStr
     dial_code:    DialCodeStr    = None
     phone_number: PhoneNumberStr = None
 

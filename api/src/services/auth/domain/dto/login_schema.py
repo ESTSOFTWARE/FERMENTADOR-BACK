@@ -1,11 +1,13 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 from src.services.auth.domain.dto.user_schema import UserResponse
 
 
 class LoginRequest(BaseModel):
     email:    EmailStr
-    password: str
+    # En login no exigimos fortaleza (puede ser una contraseña vieja), solo
+    # límites razonables para evitar payloads gigantes.
+    password: str = Field(min_length=1, max_length=128)
 
 
 class TokenResponse(BaseModel):

@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, model_validator
 
 
 class ScheduleFermentationRequest(BaseModel):
@@ -18,3 +18,14 @@ class ScheduleFermentationRequest(BaseModel):
         if v.tzinfo is not None:
             v = v.astimezone(timezone.utc).replace(tzinfo=None)
         return v
+
+    @model_validator(mode="after")
+    def _validate_range(self):
+        # Validación cruzada: la fecha de fin debe ser posterior a la de inicio.
+        if self.scheduled_end <= self.scheduled_start:
+            raise ValueError(
+                "La fecha de fin debe ser posterior a la de inicio",
+            )
+        if self.initial_sugar <= 0:
+            raise ValueError("El azúcar inicial debe ser mayor a 0")
+        return self

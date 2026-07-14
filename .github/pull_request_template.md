@@ -37,3 +37,10 @@ Ejemplo:
 - [ ] No se introducen regresiones en funcionalidades existentes
 - [ ] Los cambios en BD están reflejados en `init.sql`
 - [ ] Se documentaron decisiones de diseño no obvias en el código
+
+## Seguridad
+
+- [ ] Toda entrada de usuario se valida en el servidor (Pydantic), no solo en el cliente
+- [ ] Las consultas usan el ORM/parámetros (sin SQL con f-strings de entrada de usuario)
+- [ ] Los endpoints nuevos verifican permisos/propiedad (guard o check de dueño)
+- [ ] Los errores no filtran información sensible (stack traces, datos internos)
