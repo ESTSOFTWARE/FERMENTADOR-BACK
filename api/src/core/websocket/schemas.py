@@ -15,6 +15,8 @@ NotificationMsgType  = Literal[
     "member_removed",
     "user_registered",
     "experiment_complete",
+    "recommendation",
+    "anomaly",
     "general",
 ]
 CommandMessageType   = Literal[
