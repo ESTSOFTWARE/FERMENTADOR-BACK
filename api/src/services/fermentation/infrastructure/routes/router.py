@@ -31,13 +31,13 @@ from src.services.fermentation.infrastructure.controllers.get_sessions_history_c
 from src.services.fermentation.infrastructure.controllers.get_sessions_with_reports_controller import (
     get_sessions_with_reports,
 )
+from src.services.fermentation.infrastructure.controllers.request_prediction_controller import (
+    request_prediction,
+)
 from src.services.fermentation.infrastructure.controllers.schedule_fermentation_controller import (
     schedule,
 )
 from src.services.fermentation.infrastructure.controllers.start_fermentation_controller import start
-from src.services.fermentation.infrastructure.controllers.request_prediction_controller import (
-    request_prediction,
-)
 from src.services.fermentation.infrastructure.controllers.stop_fermentation_controller import stop
 
 router = APIRouter()
