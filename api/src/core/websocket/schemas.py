@@ -17,6 +17,7 @@ NotificationMsgType  = Literal[
     "experiment_complete",
     "recommendation",
     "anomaly",
+    "efficiency",
     "general",
 ]
 CommandMessageType   = Literal[
