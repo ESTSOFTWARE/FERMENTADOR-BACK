@@ -25,6 +25,8 @@ class SensorThread(BaseSensorThread):
 
     async def process_reading(self, payload: ESP32SensorPayload) -> None:
         from src.core.database import AsyncSessionLocal
+        from src.core.ml.ml_client import forward_reading
+        from src.services.fermentation.infrastructure.adapters.postgres import FermentationRepository
         from src.services.sensors.application.usecase.get_history_use_case import SaveReadingUseCase
         from src.services.sensors.infrastructure.adapters.postgres import SensorRepository
 
@@ -38,6 +40,21 @@ class SensorThread(BaseSensorThread):
                 value=payload.value,
                 session_id=self._session_id,
             )
+
+            # Envía lectura al ML service (fire-and-forget, no bloquea)
+            ferm_repo = FermentationRepository(AsyncSessionLocal)
+            session   = await ferm_repo.get_active_session_by_circuit(payload.circuit_id)
+            if session:
+                asyncio.create_task(
+                    forward_reading(
+                        circuit_id=payload.circuit_id,
+                        session_id=self._session_id,
+                        actual_start=session.actual_start,
+                        scheduled_start=session.scheduled_start,
+                        scheduled_end=session.scheduled_end,
+                        sensor_repo=repo,
+                    )
+                )
         else:
             await uc.execute_deactivation(
                 circuit_id=payload.circuit_id,
