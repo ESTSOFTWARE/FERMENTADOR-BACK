@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 
 from src.core.dependencies import get_current_user
+from src.services.fermentation.infrastructure.dependencies import get_fermentation_repository
 from src.services.notifications.domain.dto.ml_result_dto import MlResultDTO
 from src.services.notifications.domain.dto.notification_schema import NotificationResponse
 from src.services.notifications.infrastructure.controllers.get_notifications_controller import (
@@ -16,6 +17,7 @@ from src.services.notifications.infrastructure.controllers.mark_one_as_read_cont
 from src.services.notifications.infrastructure.controllers.receive_ml_result_controller import (
     receive_ml_result,
 )
+from src.services.notifications.infrastructure.dependencies import get_notification_repository
 
 router = APIRouter()
 
@@ -64,5 +66,13 @@ async def register_device_token(
     status_code=204,
     summary="Recibe resultados del microservicio de ML (anomalías y predicciones de eficiencia)",
 )
-async def ml_results(body: MlResultDTO):
-    await receive_ml_result(body.model_dump(mode="json"))
+async def ml_results(
+    body: MlResultDTO,
+    fermentation_repo=Depends(get_fermentation_repository),
+    notification_repo=Depends(get_notification_repository),
+):
+    await receive_ml_result(
+        result=body.model_dump(mode="json"),
+        fermentation_repo=fermentation_repo,
+        notification_repo=notification_repo,
+    )
