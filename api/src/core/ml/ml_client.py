@@ -35,15 +35,16 @@ async def forward_reading(
     scheduled_start: datetime,
     scheduled_end:   datetime,
     sensor_repo,        # SensorRepository — inyectado desde SensorThread
+    force: bool = False,
 ) -> None:
     if not settings.ML_SERVICE_URL:
         return
 
     now = datetime.now(timezone.utc)
 
-    # Cooldown por circuito
+    # Cooldown por circuito (omitido si force=True)
     last = _last_call.get(circuit_id)
-    if last and (now - last).total_seconds() < COOLDOWN_SECONDS:
+    if not force and last and (now - last).total_seconds() < COOLDOWN_SECONDS:
         return
 
     try:

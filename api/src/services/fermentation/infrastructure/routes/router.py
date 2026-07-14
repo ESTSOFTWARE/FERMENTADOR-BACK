@@ -35,6 +35,9 @@ from src.services.fermentation.infrastructure.controllers.schedule_fermentation_
     schedule,
 )
 from src.services.fermentation.infrastructure.controllers.start_fermentation_controller import start
+from src.services.fermentation.infrastructure.controllers.request_prediction_controller import (
+    request_prediction,
+)
 from src.services.fermentation.infrastructure.controllers.stop_fermentation_controller import stop
 
 router = APIRouter()
@@ -112,6 +115,18 @@ async def stop_fermentation(
     current_user: dict = Depends(require_admin_or_profesor),
 ):
     return await stop(session_id, body, current_user["user_id"])
+
+
+@router.post(
+    "/{session_id}/predict-now",
+    status_code=204,
+    summary="Solicitar predicción de eficiencia al ML service (fire-and-forget)",
+)
+async def request_prediction_route(
+    session_id: int,
+    current_user: dict = Depends(require_any_role),
+):
+    await request_prediction(session_id)
 
 
 @router.get(

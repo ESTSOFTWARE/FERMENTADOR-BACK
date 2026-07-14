@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+from datetime import datetime, timezone
 
 from aio_pika import IncomingMessage
 
@@ -8,6 +9,9 @@ from src.core.config import settings
 from src.core.rabbitmq.connection import rabbitmq
 
 logger = logging.getLogger(__name__)
+
+
+DB_SAVE_INTERVAL = 30  # segundos entre guardados en DB por sensor
 
 
 class SensorConsumer:
@@ -18,6 +22,8 @@ class SensorConsumer:
         self._fermentation_repo    = None
         self._task_amqp            = None
         self._task_mqtt            = None
+        # (circuit_id, sensor_type) → último datetime en que se guardó en DB
+        self._last_save: dict[tuple[int, str], datetime] = {}
 
     def set_dependencies(
         self,
@@ -143,12 +149,26 @@ class SensorConsumer:
         value       = data["value"]
         session_id  = data.get("session_id")
 
-        await self._save_reading_uc.execute(
-            circuit_id=circuit_id,
-            sensor_type=sensor_type,
-            value=value,
-            session_id=session_id,
-        )
+        now = datetime.now(timezone.utc)
+        key = (circuit_id, sensor_type)
+        last = self._last_save.get(key)
+        should_save = last is None or (now - last).total_seconds() >= DB_SAVE_INTERVAL
+
+        if should_save:
+            self._last_save[key] = now
+            await self._save_reading_uc.execute(
+                circuit_id=circuit_id,
+                sensor_type=sensor_type,
+                value=value,
+                session_id=session_id,
+            )
+        else:
+            await self._save_reading_uc.broadcast_only(
+                circuit_id=circuit_id,
+                sensor_type=sensor_type,
+                value=value,
+                session_id=session_id,
+            )
 
         if sensor_type == "temperature":
             await self._trigger_temperature_alert(
