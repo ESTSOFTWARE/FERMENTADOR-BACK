@@ -17,6 +17,13 @@ _SYSTEM = (
     "Responde SOLO la recomendación, sin prefijos, listas ni explicaciones."
 )
 
+_SYSTEM_EFFICIENCY = (
+    "Eres un experto en fermentación de café de especialidad. "
+    "Genera UNA observación breve y accionable (máx. 20 palabras) "
+    "sobre la eficiencia predicha de la fermentación. "
+    "Responde SOLO la observación, sin prefijos, listas ni explicaciones."
+)
+
 
 def _client_instance() -> Groq:
     global _client
@@ -39,6 +46,33 @@ def _sensor_context(snapshot: dict) -> str:
         if val is not None:
             parts.append(f"{label} {val:{fmt.lstrip('.')}}")
     return ", ".join(parts)
+
+
+def generate_efficiency_recommendation(
+    efficiency_percent: float,
+    session_id: int,
+) -> str:
+    fallback = f"Eficiencia estimada: {efficiency_percent:.1f}%."
+    if not settings.GROQ_API_KEY:
+        return fallback
+    try:
+        response = _client_instance().chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": _SYSTEM_EFFICIENCY},
+                {
+                    "role": "user",
+                    "content": f"Sesión {session_id}. Eficiencia predicha: {efficiency_percent:.1f}%.",
+                },
+            ],
+            temperature=0.4,
+            max_tokens=60,
+        )
+        text = response.choices[0].message.content.strip()
+        return text or fallback
+    except Exception:
+        logger.exception("[Groq] Error generando recomendación de eficiencia")
+        return fallback
 
 
 def generate_anomaly_recommendation(
