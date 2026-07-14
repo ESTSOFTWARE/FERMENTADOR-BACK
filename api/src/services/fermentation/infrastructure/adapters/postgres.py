@@ -199,8 +199,10 @@ class FermentationRepository(IFermentationRepository):
         ]
 
     async def get_sessions_visible_to(self, user_id: int, role: str) -> list[FermentationSession]:
-        # Aislamiento por grupo: el alumno ve las sesiones de SUS grupos; la
-        # maestra ve las que ella creó; el admin ve todas.
+        # Aislamiento por grupo:
+        #   - admin: ve todas.
+        #   - otros: ven las propias + las de sus grupos + las sin grupo
+        #     (group_id IS NULL = fermentación global, visible para todos).
         from src.core.models.group_models import GroupMemberModel
         async with self._session_factory() as session:
             stmt = select(FermentationSessionModel)
@@ -213,6 +215,7 @@ class FermentationRepository(IFermentationRepository):
                     or_(
                         FermentationSessionModel.user_id == user_id,
                         FermentationSessionModel.group_id.in_(my_groups),
+                        FermentationSessionModel.group_id.is_(None),
                     )
                 )
             stmt = stmt.order_by(FermentationSessionModel.id.desc())
@@ -240,6 +243,7 @@ class FermentationRepository(IFermentationRepository):
                     or_(
                         FermentationSessionModel.user_id == user_id,
                         FermentationSessionModel.group_id.in_(my_groups),
+                        FermentationSessionModel.group_id.is_(None),
                     )
                 )
             stmt = stmt.order_by(FermentationSessionModel.id.desc())
