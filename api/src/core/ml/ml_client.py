@@ -124,7 +124,7 @@ async def forward_reading(
 
         async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
             resp = await client.post(
-                f"{settings.ML_SERVICE_URL.rstrip('/')}/api/realtime/reading",
+                f"{settings.ML_SERVICE_URL.rstrip('/')}/api/v1/realtime/reading",
                 json=payload,
             )
             resp.raise_for_status()
