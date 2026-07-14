@@ -117,6 +117,9 @@ class Settings(BaseSettings):
     CLOUDINARY_API_KEY:    str = ""
     CLOUDINARY_API_SECRET: str = ""
 
+    # ML service
+    ML_SERVICE_URL: str = ""   # ej. http://ml-service:8001
+
     # Groq LLM
     GROQ_API_KEY: str = ""
 
