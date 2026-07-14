@@ -54,6 +54,22 @@ class SaveReadingUseCase:
 
         return reading
 
+    async def broadcast_only(
+        self,
+        circuit_id:  int,
+        sensor_type: str,
+        value:       float,
+        session_id:  int | None = None,
+    ) -> None:
+        msg = SensorDataMessage(
+            circuit_id=circuit_id,
+            sensor_type=sensor_type,
+            value=value,
+            session_id=session_id,
+            timestamp=datetime.now(timezone.utc),
+        )
+        await _deliver(circuit_id, msg)
+
     async def execute_deactivation(
         self,
         circuit_id:  int,
