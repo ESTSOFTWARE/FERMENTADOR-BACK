@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 
 import cloudinary.uploader
@@ -6,6 +7,8 @@ from fastapi import status
 
 import src.core.cloudinary.config  # noqa: F401 — inicializa credenciales
 from src.core.exceptions import AppException, BadRequestException
+
+logger = logging.getLogger(__name__)
 
 _ALLOWED_TYPES = {"image/jpeg", "image/jpg", "image/png", "image/webp", "image/svg+xml"}
 _MAX_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB
@@ -26,9 +29,11 @@ async def upload_profile_image(file_bytes: bytes, content_type: str) -> dict:
             resource_type="image",
         )
     except Exception as e:
+        # No exponemos el detalle interno de Cloudinary al cliente; lo logueamos.
+        logger.error(f"[Cloudinary] Error al subir imagen: {e}")
         raise AppException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Error al subir la imagen a Cloudinary: {str(e)}",
+            detail="No se pudo subir la imagen. Intenta de nuevo.",
         )
 
     return {
@@ -53,9 +58,11 @@ async def upload_product_image(file_bytes: bytes, content_type: str) -> dict:
             resource_type="image",
         )
     except Exception as e:
+        # No exponemos el detalle interno de Cloudinary al cliente; lo logueamos.
+        logger.error(f"[Cloudinary] Error al subir imagen: {e}")
         raise AppException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Error al subir la imagen a Cloudinary: {str(e)}",
+            detail="No se pudo subir la imagen. Intenta de nuevo.",
         ) from e
 
     return {
@@ -119,9 +126,10 @@ async def upload_chat_file(file_bytes: bytes, content_type: str, filename: str) 
             unique_filename=True,
         )
     except Exception as e:
+        logger.error(f"[Cloudinary] Error al subir archivo: {e}")
         raise AppException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Error al subir el archivo a Cloudinary: {str(e)}",
+            detail="No se pudo subir el archivo. Intenta de nuevo.",
         )
 
     return {

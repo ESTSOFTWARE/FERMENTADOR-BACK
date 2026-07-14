@@ -51,9 +51,12 @@ async def create_paypal_order(
             currency=body.currency,
             description=body.description,
         )
-    except Exception as exc:
+    except Exception:
         logger.exception("Error creando orden PayPal")
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(
+            status_code=500,
+            detail="No se pudo crear la orden de pago. Intenta de nuevo.",
+        )
     return {"order_id": order_id}
 
 

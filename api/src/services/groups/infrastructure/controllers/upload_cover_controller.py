@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 import cloudinary.uploader
 from fastapi import UploadFile, status
@@ -29,9 +30,10 @@ async def upload_group_cover(file: UploadFile, group_id: int) -> GroupResponse:
             resource_type="image",
         )
     except Exception as e:
+        logging.getLogger(__name__).error(f"[Cloudinary] Error portada: {e}")
         raise AppException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Error al subir la imagen a Cloudinary: {str(e)}",
+            detail="No se pudo subir la imagen. Intenta de nuevo.",
         )
 
     repo  = GroupRepository(AsyncSessionLocal)

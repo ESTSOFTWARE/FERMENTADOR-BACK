@@ -12,4 +12,5 @@ async def forgot_password(body: ForgotPasswordRequest) -> dict:
 
     repo = AuthRepository(AsyncSessionLocal)
     await ForgotPasswordUseCase(repo).execute(body.email)
-    return {"message": "Código enviado al correo"}
+    # Mensaje genérico: no confirma si el correo está registrado.
+    return {"message": "Si el correo está registrado, te enviamos un código"}
