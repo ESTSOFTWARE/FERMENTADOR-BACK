@@ -35,9 +35,12 @@ async def request_prediction(session_id: int) -> None:
     if hasattr(origin, "tzinfo") and origin.tzinfo:
         origin = origin.replace(tzinfo=None)
 
-    # Historial de temperatura como eje temporal
+    # Historial de temperatura como eje temporal.
+    # Se filtra solo por circuit_id + from_dt porque el hardware envía
+    # session_id=null en los mensajes MQTT, por lo que los readings
+    # quedan en BD sin session_id y el filtro por id devolvería 0 filas.
     temp_readings = await sensor_repo.get_history(
-        circuit_id, "temperature", session_id=session_id, from_dt=from_dt
+        circuit_id, "temperature", from_dt=from_dt
     )
     if len(temp_readings) < 2:
         logger.warning("[ML] Historial insuficiente para predicción — session=%s", session_id)
@@ -49,7 +52,7 @@ async def request_prediction(session_id: int) -> None:
         if stype == "temperature":
             continue
         other_history[stype] = await sensor_repo.get_history(
-            circuit_id, stype, session_id=session_id, from_dt=from_dt
+            circuit_id, stype, from_dt=from_dt
         )
 
     # Construir series de tiempo alineadas
