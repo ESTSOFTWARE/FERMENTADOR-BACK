@@ -19,7 +19,7 @@ from src.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-REQUIRED = {"temperature", "turbidity", "conductivity", "alcohol"}
+REQUIRED = {"ph", "temperature", "turbidity", "conductivity", "alcohol"}
 HISTORY_HOURS  = 2
 COOLDOWN_SECONDS = 60
 _TIMEOUT = 5.0
