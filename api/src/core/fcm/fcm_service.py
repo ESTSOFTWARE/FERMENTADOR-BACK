@@ -75,6 +75,32 @@ async def _get_user_tokens(user_id: int) -> list[str]:
         return list(rows)
 
 
+async def get_all_registered_user_ids() -> list[int]:
+    """Devuelve los user_ids distintos que tienen al menos un token registrado."""
+    async with AsyncSessionLocal() as session:
+        from sqlalchemy import distinct
+        rows = (
+            await session.execute(
+                select(distinct(DeviceTokenModel.user_id))
+            )
+        ).scalars().all()
+        return list(rows)
+
+
+async def _get_tokens_for_users(user_ids: list[int]) -> list[str]:
+    if not user_ids:
+        return []
+    async with AsyncSessionLocal() as session:
+        rows = (
+            await session.execute(
+                select(DeviceTokenModel.token).where(
+                    DeviceTokenModel.user_id.in_(user_ids)
+                )
+            )
+        ).scalars().all()
+        return list(rows)
+
+
 async def send_push_to_user(
     user_id: int,
     title: str,
@@ -82,20 +108,34 @@ async def send_push_to_user(
     data: dict | None = None,
 ) -> None:
     """Envía push FCM a todos los dispositivos del usuario. No rompe si falla."""
+    await send_push_to_users([user_id], title=title, body=body, data=data)
+
+
+async def send_push_to_users(
+    user_ids: list[int],
+    title: str,
+    body: str,
+    data: dict | None = None,
+) -> None:
+    """Envía push FCM a todos los dispositivos de una lista de usuarios en un solo multicast."""
     if _ensure_app() is None:
         return
-    tokens = await _get_user_tokens(user_id)
+    tokens = await _get_tokens_for_users(user_ids)
     if not tokens:
         return
     try:
         from firebase_admin import messaging
 
-        message = messaging.MulticastMessage(
-            tokens=tokens,
-            notification=messaging.Notification(title=title, body=body),
-            data={k: str(v) for k, v in (data or {}).items()},
-            android=messaging.AndroidConfig(priority="high"),
-        )
-        await asyncio.to_thread(messaging.send_each_for_multicast, message)
+        # FCM multicast acepta hasta 500 tokens por llamada.
+        CHUNK = 500
+        for i in range(0, len(tokens), CHUNK):
+            chunk = tokens[i : i + CHUNK]
+            message = messaging.MulticastMessage(
+                tokens=chunk,
+                notification=messaging.Notification(title=title, body=body),
+                data={k: str(v) for k, v in (data or {}).items()},
+                android=messaging.AndroidConfig(priority="high"),
+            )
+            await asyncio.to_thread(messaging.send_each_for_multicast, message)
     except Exception as e:  # noqa: BLE001
-        logger.warning(f"[fcm] error enviando push a user {user_id}: {e}")
+        logger.warning(f"[fcm] error enviando push a {len(user_ids)} usuarios: {e}")
