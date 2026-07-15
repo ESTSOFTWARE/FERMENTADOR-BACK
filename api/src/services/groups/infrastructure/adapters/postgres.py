@@ -163,6 +163,9 @@ class GroupRepository(IGroupRepository):
                     avatar=m.student.profile_image,
                     joined_at=m.joined_at,
                     oauth_provider=self._derive_provider(m.student),
+                    dial_code=m.student.dial_code,
+                    phone_number=m.student.phone_number,
+                    description=m.student.description,
                 )
                 for m in model.members
             ],

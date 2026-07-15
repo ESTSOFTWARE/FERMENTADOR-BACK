@@ -12,6 +12,9 @@ class GroupMember:
     avatar:         str | None = None
     joined_at:      datetime | None = None
     oauth_provider: str = 'email'
+    dial_code:      str | None = None
+    phone_number:   str | None = None
+    description:    str | None = None
 
 
 @dataclass

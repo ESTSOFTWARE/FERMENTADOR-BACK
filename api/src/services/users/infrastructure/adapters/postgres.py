@@ -125,6 +125,7 @@ class UserRepository(IUserRepository):
                     profile_image=user.profile_image,
                     dial_code=user.dial_code,
                     phone_number=user.phone_number,
+                    description=user.description,
                 )
             )
             await session.commit()
@@ -274,6 +275,7 @@ class UserRepository(IUserRepository):
             profile_image=model.profile_image,
             dial_code=model.dial_code,
             phone_number=model.phone_number,
+            description=model.description,
             oauth_google_id=model.oauth_google_id,
             oauth_github_id=model.oauth_github_id,
             tour_completed=model.tour_completed or False,

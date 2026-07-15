@@ -17,6 +17,7 @@ class UserResponse(BaseModel):
     profile_image:  str | None = None
     dial_code:      str | None = None
     phone_number:   str | None = None
+    description:    str | None = None
     tour_completed: bool = False
 
     @classmethod
@@ -35,5 +36,6 @@ class UserResponse(BaseModel):
             profile_image=user.profile_image,
             dial_code=user.dial_code,
             phone_number=user.phone_number,
+            description=user.description,
             tour_completed=user.tour_completed,
         )

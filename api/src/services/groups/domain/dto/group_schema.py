@@ -27,6 +27,9 @@ class GroupMemberResponse(BaseModel):
     avatar:         str | None = None
     joined_at:      datetime | None
     oauth_provider: str
+    dial_code:      str | None = None
+    phone_number:   str | None = None
+    description:    str | None = None
 
 
 class GroupResponse(BaseModel):
@@ -65,6 +68,9 @@ class GroupResponse(BaseModel):
                     avatar=m.avatar,
                     joined_at=m.joined_at,
                     oauth_provider=m.oauth_provider,
+                    dial_code=m.dial_code,
+                    phone_number=m.phone_number,
+                    description=m.description,
                 )
                 for m in group.members
             ],

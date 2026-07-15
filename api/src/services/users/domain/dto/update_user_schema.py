@@ -17,6 +17,7 @@ class UpdateUserRequest(BaseModel):
     profile_image: str | None = None
     dial_code:     DialCodeStr    = None
     phone_number:  PhoneNumberStr = None
+    description:   str | None    = None
 
     @model_validator(mode="after")
     def phone_fields_together(self):
