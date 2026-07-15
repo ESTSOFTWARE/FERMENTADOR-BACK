@@ -60,9 +60,14 @@ async def sensors_ws(
 
     asyncio.create_task(_send_snapshot(websocket, circuit_id))
 
+    _PING_INTERVAL = 25  # segundos
+
     try:
         while True:
-            await websocket.receive_text()
+            try:
+                await asyncio.wait_for(websocket.receive_text(), timeout=_PING_INTERVAL)
+            except asyncio.TimeoutError:
+                await websocket.send_text('{"type":"ping"}')
 
     except WebSocketDisconnect:
         await ws_manager.disconnect_sensor(circuit_id, websocket)
