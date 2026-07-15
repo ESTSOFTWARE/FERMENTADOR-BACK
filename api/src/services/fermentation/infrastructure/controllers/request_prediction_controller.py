@@ -42,6 +42,7 @@ async def request_prediction(session_id: int) -> None:
     temp_readings = await sensor_repo.get_history(
         circuit_id, "temperature", from_dt=from_dt
     )
+    logger.info("[ML] Historial temperatura → circuit=%s from_dt=%s count=%s", circuit_id, from_dt, len(temp_readings))
     if len(temp_readings) < 2:
         logger.warning("[ML] Historial insuficiente para predicción — session=%s", session_id)
         return
