@@ -22,6 +22,7 @@ class UpdateUserUseCase:
         profile_image: str | None = None,
         dial_code:    str | None = None,
         phone_number: str | None = None,
+        description:  str | None = None,
     ) -> User:
         user = await self._repo.get_by_id(user_id)
         if not user:
@@ -43,5 +44,7 @@ class UpdateUserUseCase:
             user.dial_code = dial_code
         if phone_number is not None:
             user.phone_number = phone_number
+        if description is not None:
+            user.description = description or None
 
         return await self._repo.update(user)

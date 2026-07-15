@@ -34,6 +34,7 @@ class UserModel(Base):
 
     dial_code               = Column(String(10),  nullable=True)
     phone_number            = Column(String(15),  nullable=True)
+    description             = Column(Text,        nullable=True)
     oauth_google_id         = Column(String(100), nullable=True)
     oauth_github_id         = Column(String(100), nullable=True)
     tour_completed          = Column(Boolean, nullable=False, server_default=text("false"), default=False)
