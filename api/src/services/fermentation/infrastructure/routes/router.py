@@ -123,14 +123,16 @@ async def stop_fermentation(
 
 @router.post(
     "/{session_id}/predict-now",
-    status_code=204,
-    summary="Solicitar predicción de eficiencia al ML service (fire-and-forget)",
+    summary="Solicitar predicción de eficiencia al ML service",
 )
 async def request_prediction_route(
     session_id: int,
     current_user: dict = Depends(require_any_role),
 ):
-    await request_prediction(session_id)
+    result = await request_prediction(session_id)
+    if result is None:
+        return {"efficiency": None, "message": None}
+    return {"efficiency": result.efficiency, "message": result.message}
 
 
 @router.get(
