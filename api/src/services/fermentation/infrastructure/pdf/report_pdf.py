@@ -31,6 +31,10 @@ def _fmt_dt(dt) -> str:
     return dt.strftime("%d/%m/%Y %H:%M") if dt else "-"
 
 
+def _fmt_dt_short(dt) -> str:
+    return dt.strftime("%d/%m %H:%M") if dt else "-"
+
+
 def _num(v, suffix="") -> str:
     return f"{v:.2f}{suffix}" if v is not None else "-"
 
@@ -146,6 +150,8 @@ def build_report_pdf(session, report, owner_name=None, owner_role=None, circuit_
     if owner_name:
         rol = _ROLE_ES.get(owner_role, owner_role or "")
         _general.insert(1, ("Iniciada por", f"{owner_name} ({rol})" if rol else owner_name))
+    if report.generated_at:
+        _general.append(("Reporte generado", _fmt_dt(report.generated_at)))
     kv_table(_general)
     pdf.ln(2)
 
@@ -167,28 +173,46 @@ def build_report_pdf(session, report, owner_name=None, owner_role=None, circuit_
 
     # ── Sensores (tabla) ─────────────────────────────────────────────────────────
     section("Sensores")
-    c1, c2, c3 = 70.0, 56.0, 56.0
+    c1, c2, c3, c4, c5 = 38.0, 26.0, 26.0, 30.0, 62.0
 
-    pdf.set_font("Poppins", "B", 9)
+    pdf.set_font("Poppins", "B", 8)
     pdf.set_text_color(*GREY)
     pdf.set_fill_color(244, 244, 246)
     pdf.cell(c1, 6.5, "  Sensor", fill=True)
     pdf.cell(c2, 6.5, "Inicial", fill=True, align="C")
-    pdf.cell(c3, 6.5, "Final", fill=True, align="C", ln=True)
+    pdf.cell(c3, 6.5, "Final", fill=True, align="C")
+    pdf.cell(c4, 6.5, "Últ. lectura", fill=True, align="C")
+    pdf.cell(c5, 6.5, "Desactivado", fill=True, align="C", ln=True)
 
-    pdf.set_font("Poppins", "", 9.5)
-    for label, ini, fin in [
-        ("Temperatura", report.temperature_initial, report.temperature_final),
-        ("pH", report.ph_initial, report.ph_final),
-        ("Alcohol", report.alcohol_initial, report.alcohol_final),
-        ("Densidad", report.density_initial, report.density_final),
-        ("Conductividad", report.conductivity_initial, report.conductivity_final),
-        ("Turbidez", report.turbidity_initial, report.turbidity_final),
+    pdf.set_font("Poppins", "", 8.5)
+    for label, ini, fin, last, deact in [
+        ("Temperatura", report.temperature_initial, report.temperature_final,
+         report.temperature_last_reading, report.temperature_deactivated_at),
+        ("pH", report.ph_initial, report.ph_final,
+         report.ph_last_reading, report.ph_deactivated_at),
+        ("Alcohol", report.alcohol_initial, report.alcohol_final,
+         report.alcohol_last_reading, report.alcohol_deactivated_at),
+        ("Densidad", report.density_initial, report.density_final,
+         report.density_last_reading, report.density_deactivated_at),
+        ("Conductividad", report.conductivity_initial, report.conductivity_final,
+         report.conductivity_last_reading, report.conductivity_deactivated_at),
+        ("Turbidez", report.turbidity_initial, report.turbidity_final,
+         report.turbidity_last_reading, report.turbidity_deactivated_at),
     ]:
         pdf.set_text_color(*DARK)
         pdf.cell(c1, 6.5, f"  {label}", border="B")
         pdf.cell(c2, 6.5, _num(ini), border="B", align="C")
-        pdf.cell(c3, 6.5, _num(fin), border="B", align="C", ln=True)
+        pdf.cell(c3, 6.5, _num(fin), border="B", align="C")
+        pdf.cell(c4, 6.5, _num(last), border="B", align="C")
+        pdf.cell(c5, 6.5, _fmt_dt_short(deact), border="B", align="C", ln=True)
+
+    # ── Análisis (nota generada por el NLP) ──────────────────────────────────────
+    if report.notes:
+        pdf.ln(4)
+        section("Análisis")
+        pdf.set_font("Poppins", "", 9.5)
+        pdf.set_text_color(*DARK)
+        pdf.multi_cell(0, 5.2, report.notes)
 
     # ── Pie ─────────────────────────────────────────────────────────────────────
     pdf.set_auto_page_break(False)  # el pie va en el margen sin forzar otra hoja
