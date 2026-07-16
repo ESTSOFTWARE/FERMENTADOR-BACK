@@ -7,10 +7,6 @@ from src.core.config import settings
 from src.core.database import AsyncSessionLocal
 from src.core.groq.recommendation_service import generate_efficiency_recommendation
 from src.services.fermentation.infrastructure.adapters.postgres import FermentationRepository
-from src.services.notifications.application.usecase.send_notification_use_case import (
-    SendNotificationUseCase,
-)
-from src.services.notifications.infrastructure.adapters.postgres import NotificationRepository
 from src.services.sensors.infrastructure.adapters.postgres import SensorRepository
 
 logger = logging.getLogger(__name__)
@@ -19,10 +15,15 @@ HISTORY_HOURS = 2
 _SENSOR_KEYS = ["ph", "temperature", "turbidity", "conductivity", "alcohol"]
 
 
-async def request_prediction(session_id: int) -> None:
+class PredictionResult:
+    def __init__(self, efficiency: float, message: str):
+        self.efficiency = efficiency
+        self.message = message
+
+
+async def request_prediction(session_id: int) -> PredictionResult | None:
     ferm_repo    = FermentationRepository(AsyncSessionLocal)
     sensor_repo  = SensorRepository(AsyncSessionLocal)
-    notif_repo   = NotificationRepository(AsyncSessionLocal)
 
     session = await ferm_repo.get_session_by_id(session_id)
     if session is None:
@@ -45,7 +46,7 @@ async def request_prediction(session_id: int) -> None:
     logger.info("[ML] Historial temperatura → circuit=%s from_dt=%s count=%s", circuit_id, from_dt, len(temp_readings))
     if len(temp_readings) < 2:
         logger.warning("[ML] Historial insuficiente para predicción — session=%s", session_id)
-        return
+        return None
 
     # Historial del resto de sensores
     other_history: dict[str, list] = {}
@@ -102,23 +103,17 @@ async def request_prediction(session_id: int) -> None:
             data = resp.json()
     except Exception as exc:
         logger.error("[ML] Error llamando a %s: %s", ml_url, exc)
-        return
+        return None
 
     efficiency = data.get("efficiency_percent")
     if efficiency is None:
         logger.error("[ML] Respuesta sin efficiency_percent: %s", data)
-        return
+        return None
 
-    logger.info("[ML] Predicción manual → session=%s efficiency=%.1f%%", session_id, efficiency)
+    logger.info("[ML] Predicción → session=%s efficiency=%.1f%%", session_id, efficiency)
 
     message = generate_efficiency_recommendation(
         efficiency_percent=efficiency,
         session_id=session_id,
     )
-    use_case = SendNotificationUseCase(repository=notif_repo)
-    await use_case.execute(
-        user_id=session.user_id,
-        message=message,
-        notification_type="efficiency",
-        session_id=session_id,
-    )
+    return PredictionResult(efficiency=efficiency, message=message)
