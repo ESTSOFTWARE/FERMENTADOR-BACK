@@ -192,8 +192,6 @@ def build_report_pdf(session, report, owner_name=None, owner_role=None, circuit_
          report.ph_last_reading, report.ph_deactivated_at),
         ("Alcohol", report.alcohol_initial, report.alcohol_final,
          report.alcohol_last_reading, report.alcohol_deactivated_at),
-        ("Densidad", report.density_initial, report.density_final,
-         report.density_last_reading, report.density_deactivated_at),
         ("Conductividad", report.conductivity_initial, report.conductivity_final,
          report.conductivity_last_reading, report.conductivity_deactivated_at),
         ("Turbidez", report.turbidity_initial, report.turbidity_final,

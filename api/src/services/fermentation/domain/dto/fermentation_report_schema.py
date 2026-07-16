@@ -45,4 +45,5 @@ class FermentationReportResponse(BaseModel):
     rpm_deactivated_at:          datetime | None
     rpm_last_reading:            float | None
     notes:                       str | None
+    session_status:              str | None
     generated_at:                datetime | None

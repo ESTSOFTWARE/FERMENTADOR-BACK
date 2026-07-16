@@ -105,6 +105,7 @@ class FermentationReportModel(Base):
     rpm_deactivated_at = Column(DateTime, nullable=True)
     rpm_last_reading = Column(Float, nullable=True)
     notes = Column(Text, nullable=True)
+    session_status = Column(String(20), nullable=True)
     generated_at = Column(
         DateTime,
         server_default=text("CURRENT_TIMESTAMP"),
@@ -336,6 +337,7 @@ class FermentationRepository(IFermentationRepository):
                     theoretical_ethanol=report.theoretical_ethanol,
                     efficiency=report.efficiency,
                     notes=report.notes,
+                    session_status=report.session_status,
                 )
             )
             await session.commit()
@@ -537,6 +539,7 @@ class FermentationRepository(IFermentationRepository):
             rpm_deactivated_at=model.rpm_deactivated_at,
             rpm_last_reading=model.rpm_last_reading,
             notes=model.notes,
+            session_status=model.session_status,
             generated_at=model.generated_at,
         )
 

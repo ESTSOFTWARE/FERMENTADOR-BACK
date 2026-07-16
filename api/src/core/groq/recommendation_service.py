@@ -24,6 +24,14 @@ _SYSTEM_EFFICIENCY = (
     "Responde SOLO la observación, sin prefijos, listas ni explicaciones."
 )
 
+_SYSTEM_NOTES = (
+    "Eres un experto en fermentación de café de especialidad. "
+    "Redacta un análisis técnico conciso (4-6 oraciones) del proceso de fermentación "
+    "basado en los datos del reporte. Incluye observaciones sobre la eficiencia, "
+    "el comportamiento de los sensores y recomendaciones para futuras fermentaciones. "
+    "Responde ÚNICAMENTE el análisis en español, sin encabezados, listas ni bullets."
+)
+
 
 def _client_instance() -> Groq:
     global _client
@@ -72,6 +80,48 @@ def generate_efficiency_recommendation(
         return text or fallback
     except Exception:
         logger.exception("[Groq] Error generando recomendación de eficiencia")
+        return fallback
+
+
+def generate_report_notes(report, session_id: int) -> str:
+    fallback = (
+        f"Fermentación F-{session_id:03d} finalizada con estado "
+        f"'{report.session_status or 'desconocido'}'. "
+        f"Eficiencia registrada: {f'{report.efficiency:.1f}%' if report.efficiency is not None else 'no disponible'}."
+    )
+    if not settings.GROQ_API_KEY:
+        return fallback
+
+    def _fmt(v, suffix=""):
+        return f"{v:.2f}{suffix}" if v is not None else "N/A"
+
+    context = (
+        f"Estado: {report.session_status or 'desconocido'}. "
+        f"Eficiencia: {_fmt(report.efficiency, '%')}. "
+        f"Azúcar inicial: {_fmt(report.initial_sugar, ' g/L')}. "
+        f"Etanol detectado: {_fmt(report.ethanol_detected, '%')}. "
+        f"Etanol teórico: {_fmt(report.theoretical_ethanol, '%')}. "
+        f"Temperatura: inicial {_fmt(report.temperature_initial, '°C')}, final {_fmt(report.temperature_final, '°C')}. "
+        f"pH: inicial {_fmt(report.ph_initial)}, final {_fmt(report.ph_final)}. "
+        f"Alcohol: inicial {_fmt(report.alcohol_initial, '%')}, final {_fmt(report.alcohol_final, '%')}. "
+        f"Conductividad: inicial {_fmt(report.conductivity_initial, ' mS/cm')}, final {_fmt(report.conductivity_final, ' mS/cm')}. "
+        f"Turbidez: inicial {_fmt(report.turbidity_initial)}, final {_fmt(report.turbidity_final)}."
+    )
+
+    try:
+        response = _client_instance().chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": _SYSTEM_NOTES},
+                {"role": "user", "content": f"Sesión {session_id}. {context}"},
+            ],
+            temperature=0.5,
+            max_tokens=300,
+        )
+        text = response.choices[0].message.content.strip()
+        return text or fallback
+    except Exception:
+        logger.exception("[Groq] Error generando notas del reporte")
         return fallback
 
 
