@@ -20,9 +20,6 @@ from src.services.fermentation.infrastructure.controllers.get_active_session_con
     get_active,
 )
 from src.services.fermentation.infrastructure.controllers.get_report_controller import get_report
-from src.services.fermentation.infrastructure.controllers.update_report_notes_controller import (
-    update_report_notes,
-)
 from src.services.fermentation.infrastructure.controllers.get_report_history_controller import (
     get_report_history,
 )
@@ -43,6 +40,9 @@ from src.services.fermentation.infrastructure.controllers.schedule_fermentation_
 )
 from src.services.fermentation.infrastructure.controllers.start_fermentation_controller import start
 from src.services.fermentation.infrastructure.controllers.stop_fermentation_controller import stop
+from src.services.fermentation.infrastructure.controllers.update_report_notes_controller import (
+    update_report_notes,
+)
 
 router = APIRouter()
 
