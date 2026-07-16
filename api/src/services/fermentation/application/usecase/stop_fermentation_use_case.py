@@ -45,7 +45,7 @@ class StopFermentationUseCase:
                     value=latest_value,
                 )
 
-        await self._calculate_efficiency(session_id)
+        await self._calculate_efficiency(session_id, status)
 
         session = await self._fermentation_repo.update_session_status(
             session_id=session_id,
@@ -73,7 +73,7 @@ class StopFermentationUseCase:
         })
         return session
 
-    async def _calculate_efficiency(self, session_id: int) -> None:
+    async def _calculate_efficiency(self, session_id: int, session_status: str) -> None:
         report = await self._fermentation_repo.get_report_by_session(session_id)
         if not report:
             return
@@ -92,4 +92,5 @@ class StopFermentationUseCase:
         report.ethanol_detected    = ethanol_detected
         report.theoretical_ethanol = theoretical_ethanol
         report.efficiency          = efficiency
+        report.session_status      = session_status
         await self._fermentation_repo.update_report(report)

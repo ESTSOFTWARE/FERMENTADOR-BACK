@@ -40,4 +40,5 @@ class FermentationReport:
     rpm_deactivated_at:          datetime | None = None
     rpm_last_reading:            float | None = None
     notes:                       str | None = None
+    session_status:              str | None = None
     generated_at:                datetime | None = None
