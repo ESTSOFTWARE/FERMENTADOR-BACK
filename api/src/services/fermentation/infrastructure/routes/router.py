@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends
 from src.core.dependencies import require_admin_or_profesor, require_any_role, require_feature
 from src.services.fermentation.domain.dto.fermentation_report_schema import (
     FermentationReportResponse,
+    UpdateReportNotesRequest,
 )
 from src.services.fermentation.domain.dto.fermentation_session_schema import (
     FermentationSessionResponse,
@@ -19,6 +20,9 @@ from src.services.fermentation.infrastructure.controllers.get_active_session_con
     get_active,
 )
 from src.services.fermentation.infrastructure.controllers.get_report_controller import get_report
+from src.services.fermentation.infrastructure.controllers.update_report_notes_controller import (
+    update_report_notes,
+)
 from src.services.fermentation.infrastructure.controllers.get_report_history_controller import (
     get_report_history,
 )
@@ -139,6 +143,21 @@ async def get_report_route(
     current_user: dict = Depends(require_any_role),
 ):
     return await get_report(session_id, current_user["user_id"])
+
+
+@router.patch(
+    "/{session_id}/report/notes",
+    response_model=FermentationReportResponse,
+    summary="Guardar la nota (generada por el NLP) del reporte de una sesión",
+)
+async def update_report_notes_route(
+    session_id: int,
+    body: UpdateReportNotesRequest,
+    current_user: dict = Depends(require_any_role),
+):
+    return await update_report_notes(
+        session_id, body.notes, current_user["user_id"],
+    )
 
 
 @router.get(
