@@ -67,7 +67,11 @@ async def _notify_students(session: FermentationSession) -> None:
         push_body = "¡Nueva fermentación disponible!"
 
     if not targets:
+        logger.warning("[start_fermentation] targets vacío — sin alumnos a notificar")
         return
+
+    logger.info("[start_fermentation] Notificando a %s alumnos — session=%s group=%s",
+                len(targets), session.id, session.group_id)
 
     # Notificaciones in-app (una por alumno).
     inapp_tasks = [
@@ -83,13 +87,14 @@ async def _notify_students(session: FermentationSession) -> None:
     # Push FCM a todos los user_ids de este lote.
     push_user_ids = [uid for uid, _ in targets]
     if session.group_id is None:
-        # Complementar con cualquier usuario que tenga token aunque no esté en un grupo.
         all_ids = await get_all_registered_user_ids()
         push_user_ids = list({*push_user_ids, *all_ids})
 
+    logger.info("[start_fermentation] Enviando push FCM a user_ids=%s", push_user_ids)
     await send_push_to_users(
         user_ids=push_user_ids,
         title="🍵 Nueva fermentación iniciada",
         body=push_body,
         data={"type": "fermentation_started", "session_id": str(session.id)},
     )
+    logger.info("[start_fermentation] Push FCM enviado — session=%s", session.id)

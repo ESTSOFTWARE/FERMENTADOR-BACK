@@ -122,6 +122,7 @@ async def send_push_to_users(
         return
     tokens = await _get_tokens_for_users(user_ids)
     if not tokens:
+        logger.warning("[fcm] Sin tokens registrados para user_ids=%s — push omitido", user_ids)
         return
     try:
         from firebase_admin import messaging
@@ -136,6 +137,11 @@ async def send_push_to_users(
                 data={k: str(v) for k, v in (data or {}).items()},
                 android=messaging.AndroidConfig(priority="high"),
             )
-            await asyncio.to_thread(messaging.send_each_for_multicast, message)
+            batch = await asyncio.to_thread(messaging.send_each_for_multicast, message)
+            logger.info("[fcm] Batch enviado — success=%s failure=%s tokens=%s",
+                        batch.success_count, batch.failure_count, len(chunk))
+            for resp in batch.responses:
+                if not resp.success:
+                    logger.warning("[fcm] Token falló: %s", resp.exception)
     except Exception as e:  # noqa: BLE001
         logger.warning(f"[fcm] error enviando push a {len(user_ids)} usuarios: {e}")

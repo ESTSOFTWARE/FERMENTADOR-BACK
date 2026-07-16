@@ -66,6 +66,9 @@ class SensorThread(BaseSensorThread):
             )
             self.stop()
 
+    async def _main_loop(self) -> None:
+        await self._run_async()
+
     async def _run_async(self) -> None:
         channel = await rabbitmq.get_channel()
         queue   = await channel.declare_queue(self._queue_name, durable=True)
