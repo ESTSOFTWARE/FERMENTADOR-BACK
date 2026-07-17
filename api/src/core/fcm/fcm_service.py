@@ -138,8 +138,8 @@ async def send_push_to_users(
                 android=messaging.AndroidConfig(priority="high"),
             )
             batch = await asyncio.to_thread(messaging.send_each_for_multicast, message)
-            logger.info("[fcm] Batch enviado — success=%s failure=%s tokens=%s",
-                        batch.success_count, batch.failure_count, len(chunk))
+            logger.warning("[fcm] Batch enviado — success=%s failure=%s tokens=%s",
+                           batch.success_count, batch.failure_count, len(chunk))
             for resp in batch.responses:
                 if not resp.success:
                     logger.warning("[fcm] Token falló: %s", resp.exception)

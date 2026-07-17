@@ -70,11 +70,13 @@ async def _notify_students(session: FermentationSession) -> None:
         logger.warning("[start_fermentation] targets vacío — sin alumnos a notificar")
         return
 
-    logger.info("[start_fermentation] Notificando a %s alumnos — session=%s group=%s",
-                len(targets), session.id, session.group_id)
+    logger.warning("[start_fermentation] Notificando a %s alumnos — session=%s group=%s",
+                   len(targets), session.id, session.group_id)
 
     # Notificaciones in-app (una por alumno).
     # push=False: el FCM se envía abajo como batch (evita un push doble por alumno).
+    # return_exceptions=True: si una notificación in-app falla, las demás y el
+    # push FCM de abajo siguen su curso (antes una sola excepción abortaba todo).
     inapp_tasks = [
         use_case.execute(
             user_id=uid,
@@ -84,7 +86,10 @@ async def _notify_students(session: FermentationSession) -> None:
         )
         for uid, msg in targets
     ]
-    await asyncio.gather(*inapp_tasks)
+    results = await asyncio.gather(*inapp_tasks, return_exceptions=True)
+    for (uid, _), res in zip(targets, results):
+        if isinstance(res, Exception):
+            logger.warning("[start_fermentation] Notificación in-app falló — user=%s: %s", uid, res)
 
     # Push FCM a todos los user_ids de este lote.
     push_user_ids = [uid for uid, _ in targets]
@@ -92,11 +97,11 @@ async def _notify_students(session: FermentationSession) -> None:
         all_ids = await get_all_registered_user_ids()
         push_user_ids = list({*push_user_ids, *all_ids})
 
-    logger.info("[start_fermentation] Enviando push FCM a user_ids=%s", push_user_ids)
+    logger.warning("[start_fermentation] Enviando push FCM a user_ids=%s", push_user_ids)
     await send_push_to_users(
         user_ids=push_user_ids,
         title="🍵 Nueva fermentación iniciada",
         body=push_body,
         data={"type": "fermentation_started", "session_id": str(session.id)},
     )
-    logger.info("[start_fermentation] Push FCM enviado — session=%s", session.id)
+    logger.warning("[start_fermentation] Push FCM enviado — session=%s", session.id)
