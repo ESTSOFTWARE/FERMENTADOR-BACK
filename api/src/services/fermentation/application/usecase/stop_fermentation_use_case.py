@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, timezone
 
 from src.core.exceptions import (
@@ -7,6 +8,9 @@ from src.core.exceptions import (
 from src.core.rabbitmq.ws_events import to_room
 from src.core.threads.sensor_thread_manager import thread_manager
 from src.core.websocket.sensor_audience import invalidate_audience
+from src.services.fermentation.application.usecase.generate_report_notes_use_case import (
+    GenerateReportNotesUseCase,
+)
 from src.services.fermentation.domain.entities.fermentation_session import FermentationSession
 from src.services.fermentation.domain.repository import IFermentationRepository
 
@@ -32,7 +36,14 @@ class StopFermentationUseCase:
         status     = "interrupted" if interrupted_by else "completed"
         circuit_id = session.circuit_id
 
-        active_sensors = thread_manager.get_active_sensors(circuit_id)
+        # La fuente de verdad es la config del circuito en BD, no el
+        # thread_manager: ése vive sólo en memoria y si el proceso se reinició
+        # durante la fermentación (deploy, crash) se queda vacío, y entonces no
+        # se guardaría ninguna lectura final ni se podría calcular la
+        # eficiencia.
+        active_sensors = await self._fermentation_repo.get_active_sensors_for_circuit(
+            circuit_id
+        )
         for sensor_type in active_sensors:
             latest_value = await self._fermentation_repo.get_latest_sensor_reading(
                 circuit_id=circuit_id,
@@ -71,6 +82,14 @@ class StopFermentationUseCase:
             "type": "fermentation_stopped",
             "session_id": session_id,
         })
+
+        # La nota descriptiva la redacta el NLP y puede tardar (usa un LLM):
+        # va fire-and-forget para no retrasar la respuesta. Vive aquí y no en
+        # el controller para que las fermentaciones que expiran solas
+        # (AutoStopExpiredFermentationsUseCase) también la generen.
+        asyncio.ensure_future(
+            GenerateReportNotesUseCase(self._fermentation_repo).execute(session_id)
+        )
         return session
 
     async def _calculate_efficiency(self, session_id: int, session_status: str) -> None:
