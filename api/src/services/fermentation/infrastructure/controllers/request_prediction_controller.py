@@ -7,7 +7,9 @@ from src.core.config import settings
 from src.core.database import AsyncSessionLocal
 from src.core.groq.recommendation_service import generate_efficiency_recommendation
 from src.services.fermentation.infrastructure.adapters.postgres import FermentationRepository
-from src.services.notifications.application.usecase.send_notification_use_case import SendNotificationUseCase
+from src.services.notifications.application.usecase.send_notification_use_case import (
+    SendNotificationUseCase,
+)
 from src.services.notifications.infrastructure.adapters.postgres import NotificationRepository
 from src.services.sensors.infrastructure.adapters.postgres import SensorRepository
 
