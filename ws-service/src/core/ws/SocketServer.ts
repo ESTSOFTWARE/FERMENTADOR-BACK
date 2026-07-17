@@ -1,4 +1,6 @@
 import http from 'node:http'
+import https from 'node:https'
+import fs from 'node:fs'
 import { WebSocketServer, WebSocket } from 'ws'
 import type { Connection } from './Connection'
 import type { ChannelDescriptor } from './ChannelDescriptor'
@@ -21,7 +23,7 @@ function parseCookie(header: string | undefined, name: string): string | undefin
  * ChannelDescriptor que exporta cada feature y enruta según el path.
  */
 export class SocketServer {
-  private readonly httpServer: http.Server
+  private readonly httpServer: http.Server | https.Server
   private readonly wss: WebSocketServer
   private readonly byPath = new Map<string, ChannelDescriptor>()
 
@@ -33,14 +35,26 @@ export class SocketServer {
   ) {
     for (const d of descriptors) this.byPath.set(d.path, d)
 
-    this.httpServer = http.createServer((req, res) => {
+    const reqHandler = (req: http.IncomingMessage, res: http.ServerResponse) => {
       if (req.url === '/health') {
         res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end(JSON.stringify({ status: 'ok', connections: this.registry.size() }))
         return
       }
       res.writeHead(404); res.end()
-    })
+    }
+
+    // TLS nativo cuando se proveen certificados vía env vars (despliegue sin reverse proxy).
+    // Sin certs el servidor usa HTTP plano — apropiado cuando TLS lo termina el proxy
+    // (Railway, nginx, etc.) antes de llegar a este servicio.
+    const certPath = process.env.SSL_CERT_PATH
+    const keyPath  = process.env.SSL_KEY_PATH
+    this.httpServer = (certPath && keyPath)
+      ? https.createServer(
+          { cert: fs.readFileSync(certPath), key: fs.readFileSync(keyPath) },
+          reqHandler,
+        )
+      : http.createServer(reqHandler)
     this.wss = new WebSocketServer({ server: this.httpServer })
     this.wss.on('connection', (socket, req) => void this.onConnection(socket, req))
   }

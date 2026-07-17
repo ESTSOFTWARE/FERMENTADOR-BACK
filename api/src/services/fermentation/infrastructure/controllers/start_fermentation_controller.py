@@ -74,11 +74,13 @@ async def _notify_students(session: FermentationSession) -> None:
                 len(targets), session.id, session.group_id)
 
     # Notificaciones in-app (una por alumno).
+    # push=False: el FCM se envía abajo como batch (evita un push doble por alumno).
     inapp_tasks = [
         use_case.execute(
             user_id=uid,
             message=msg,
             notification_type="fermentation_started",
+            push=False,
         )
         for uid, msg in targets
     ]

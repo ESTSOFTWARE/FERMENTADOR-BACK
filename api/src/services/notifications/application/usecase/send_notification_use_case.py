@@ -17,6 +17,7 @@ class SendNotificationUseCase:
         message:           str,
         notification_type: str,
         session_id:        int | None = None,
+        push:              bool = True,
     ) -> int:
         notification = await self._repo.create(
             user_id=user_id,
@@ -46,15 +47,18 @@ class SendNotificationUseCase:
         await to_users("notifications", [user_id], notif_msg.model_dump(mode="json"))
 
         # Push FCM (app cerrada / segundo plano). Best-effort: no rompe si falla.
-        try:
-            from src.core.fcm.fcm_service import send_push_to_user
-            await send_push_to_user(
-                user_id=user_id,
-                title="Nich-Ká",
-                body=message,
-                data={"type": notification_type, "notification_id": notification.id},
-            )
-        except Exception:  # noqa: BLE001
-            pass
+        # push=False cuando el caller ya maneja FCM por su cuenta (p.ej. batch en
+        # start_fermentation) o cuando no se quiere push (p.ej. predicciones ML).
+        if push:
+            try:
+                from src.core.fcm.fcm_service import send_push_to_user
+                await send_push_to_user(
+                    user_id=user_id,
+                    title="Nich-Ká",
+                    body=message,
+                    data={"type": notification_type, "notification_id": notification.id},
+                )
+            except Exception:  # noqa: BLE001
+                pass
 
         return notification.id

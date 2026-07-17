@@ -7,6 +7,10 @@ from src.core.config import settings
 from src.core.database import AsyncSessionLocal
 from src.core.groq.recommendation_service import generate_efficiency_recommendation
 from src.services.fermentation.infrastructure.adapters.postgres import FermentationRepository
+from src.services.notifications.application.usecase.send_notification_use_case import (
+    SendNotificationUseCase,
+)
+from src.services.notifications.infrastructure.adapters.postgres import NotificationRepository
 from src.services.sensors.infrastructure.adapters.postgres import SensorRepository
 
 logger = logging.getLogger(__name__)
@@ -116,4 +120,19 @@ async def request_prediction(session_id: int) -> PredictionResult | None:
         efficiency_percent=efficiency,
         session_id=session_id,
     )
+
+    # Guardar en BD + enviar por WebSocket (sin FCM) para que el web
+    # también actualice su campanita/card via evento "efficiency".
+    try:
+        notif_repo = NotificationRepository(AsyncSessionLocal)
+        await SendNotificationUseCase(notif_repo).execute(
+            user_id=session.user_id,
+            message=message,
+            notification_type="efficiency",
+            session_id=session_id,
+            push=False,
+        )
+    except Exception:  # noqa: BLE001
+        logger.warning("[ML] No se pudo enviar notificación WebSocket — session=%s", session_id)
+
     return PredictionResult(efficiency=efficiency, message=message)
