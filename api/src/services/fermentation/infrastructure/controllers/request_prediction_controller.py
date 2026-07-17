@@ -121,8 +121,7 @@ async def request_prediction(session_id: int) -> PredictionResult | None:
         session_id=session_id,
     )
 
-    # Guardar en BD + enviar por WebSocket (sin FCM) para que el web
-    # también actualice su campanita/card via evento "efficiency".
+    # Guardar en BD + WebSocket (web/campanita) + push FCM con la predicción.
     try:
         notif_repo = NotificationRepository(AsyncSessionLocal)
         await SendNotificationUseCase(notif_repo).execute(
@@ -130,9 +129,8 @@ async def request_prediction(session_id: int) -> PredictionResult | None:
             message=message,
             notification_type="efficiency",
             session_id=session_id,
-            push=False,
         )
     except Exception:  # noqa: BLE001
-        logger.warning("[ML] No se pudo enviar notificación WebSocket — session=%s", session_id)
+        logger.warning("[ML] No se pudo enviar notificación — session=%s", session_id)
 
     return PredictionResult(efficiency=efficiency, message=message)
