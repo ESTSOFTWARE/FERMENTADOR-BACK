@@ -11,8 +11,9 @@ from src.core.rabbitmq.connection import rabbitmq
 logger = logging.getLogger(__name__)
 
 
-DB_SAVE_INTERVAL = 30  # segundos entre guardados en DB por sensor
+DB_SAVE_INTERVAL = 30
 
+SESSION_CACHE_TTL = 5
 
 class SensorConsumer:
 
@@ -22,8 +23,8 @@ class SensorConsumer:
         self._fermentation_repo    = None
         self._task_amqp            = None
         self._task_mqtt            = None
-        # (circuit_id, sensor_type) → último datetime en que se guardó en DB
         self._last_save: dict[tuple[int, str], datetime] = {}
+        self._session_cache: dict[int, tuple[int | None, datetime]] = {}
 
     def set_dependencies(
         self,
@@ -49,8 +50,6 @@ class SensorConsumer:
                 except asyncio.CancelledError:
                     pass
         logger.info("[Consumer] Tareas detenidas")
-
-    # ── Consumers ─────────────────────────────────────────────────────────────
 
     async def _consume_amqp(self):
         try:
@@ -88,8 +87,6 @@ class SensorConsumer:
         except Exception as e:
             logger.error(f"[Consumer:MQTT] Error: {e}")
 
-    # ── Handlers ──────────────────────────────────────────────────────────────
-
     async def _handle_amqp_message(self, message: IncomingMessage):
         async with message.process():
             try:
@@ -124,7 +121,6 @@ class SensorConsumer:
                     "circuit_id":  circuit_id,
                     "sensor_type": sensor_type,
                     "value":       float(body.get("value", 0)),
-                    "session_id":  body.get("session_id"),
                     "active":      body.get("active", True),
                 }
 
@@ -141,13 +137,34 @@ class SensorConsumer:
             except Exception as e:
                 logger.error(f"[Consumer:MQTT] Error procesando mensaje: {e}")
 
-    # ── Lógica compartida ─────────────────────────────────────────────────────
+    async def _resolve_session_id(self, circuit_id: int) -> int | None:
+        """Sesión de fermentación a la que pertenece una lectura.
+
+        La fuente de verdad es la BD, no el payload del dispositivo: el ESP32
+        no sabe en qué sesión está y nunca manda `session_id`, así que confiar
+        en él dejaba TODAS las lecturas huérfanas (session_id NULL). Eso
+        rompía el historial por sesión (get_history filtra por session_id y
+        devolvía cero filas) y las desactivaciones de sensores, que se
+        descartaban por no traer sesión.
+        """
+        if not self._fermentation_repo:
+            return None
+
+        now    = datetime.now(timezone.utc)
+        cached = self._session_cache.get(circuit_id)
+        if cached and (now - cached[1]).total_seconds() < SESSION_CACHE_TTL:
+            return cached[0]
+
+        session    = await self._fermentation_repo.get_active_session_by_circuit(circuit_id)
+        session_id = session.id if session else None
+        self._session_cache[circuit_id] = (session_id, now)
+        return session_id
 
     async def _handle_active_reading(self, data: dict):
         circuit_id  = data["circuit_id"]
         sensor_type = data["sensor_type"]
         value       = data["value"]
-        session_id  = data.get("session_id")
+        session_id  = await self._resolve_session_id(circuit_id)
 
         now = datetime.now(timezone.utc)
         key = (circuit_id, sensor_type)
@@ -181,7 +198,7 @@ class SensorConsumer:
         circuit_id  = data["circuit_id"]
         sensor_type = data["sensor_type"]
         value       = data.get("value", 0.0)
-        session_id  = data.get("session_id")
+        session_id  = await self._resolve_session_id(circuit_id)
 
         if session_id:
             await self._save_reading_uc.execute_deactivation(
