@@ -120,6 +120,9 @@ class Settings(BaseSettings):
     # ML service
     ML_SERVICE_URL: str = ""   # ej. http://ml-service:8001
 
+    # NLP service (genera las notas descriptivas de los reportes)
+    NLP_SERVICE_URL: str = ""  # ej. https://nlpfermentador-production.up.railway.app
+
     # Groq LLM
     GROQ_API_KEY: str = ""
 
