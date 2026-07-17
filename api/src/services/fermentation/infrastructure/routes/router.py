@@ -118,7 +118,10 @@ async def stop_fermentation(
     body: StopFermentationRequest,
     current_user: dict = Depends(require_admin_or_profesor),
 ):
-    return await stop(session_id, body, current_user["user_id"])
+    # Reenviamos el JWT del usuario al NLP para que genere y guarde la nota.
+    return await stop(
+        session_id, body, current_user["user_id"], current_user["token"],
+    )
 
 
 @router.post(

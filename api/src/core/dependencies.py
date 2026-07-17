@@ -63,6 +63,9 @@ async def get_current_user(
         "role":       role,
         "circuit_id": payload.get("circuit_id"),
         "sid":        token_sid,
+        # Token crudo: se reenvía a servicios internos (NLP) para que actúen
+        # en nombre del usuario, sin credenciales propias.
+        "token":      token,
     }
 
 
