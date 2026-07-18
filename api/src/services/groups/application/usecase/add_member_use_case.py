@@ -15,11 +15,17 @@ class AddMemberUseCase:
         self._group_repo = group_repo
         self._user_repo  = user_repo
 
-    async def execute(self, group_id: int, student_id: int, professor_id: int) -> Group:
+    async def execute(
+        self,
+        group_id: int,
+        student_id: int,
+        professor_id: int,
+        role: str = 'profesor',
+    ) -> Group:
         group = await self._group_repo.get_by_id(group_id)
         if not group:
             raise NotFoundException("Grupo no encontrado")
-        if group.professor_id != professor_id:
+        if role != 'admin' and group.professor_id != professor_id:
             raise ForbiddenException()
 
         student = await self._user_repo.get_by_id(student_id)

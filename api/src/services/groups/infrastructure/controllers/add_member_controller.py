@@ -9,13 +9,19 @@ from src.services.notifications.infrastructure.adapters.postgres import Notifica
 from src.services.users.infrastructure.adapters.postgres import UserRepository
 
 
-async def add_member(group_id: int, body: AddMemberRequest, professor_id: int) -> GroupResponse:
+async def add_member(
+    group_id: int,
+    body: AddMemberRequest,
+    professor_id: int,
+    role: str = 'profesor',
+) -> GroupResponse:
     group_repo = GroupRepository(AsyncSessionLocal)
     user_repo  = UserRepository(AsyncSessionLocal)
     group      = await AddMemberUseCase(group_repo, user_repo).execute(
         group_id=group_id,
         student_id=body.student_id,
         professor_id=professor_id,
+        role=role,
     )
 
     # Mensaje personalizado: quién te agregó y a qué grupo.
