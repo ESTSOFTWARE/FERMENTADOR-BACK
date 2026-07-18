@@ -55,6 +55,14 @@ class StopFermentationUseCase:
                     sensor_type=sensor_type,
                     value=latest_value,
                 )
+                # Última lectura: si el sensor se desactivó a media sesión ya la
+                # registró el evento sensor.deactivated y no se pisa; si llegó
+                # activo hasta el final, se guarda aquí.
+                await self._fermentation_repo.update_sensor_last_reading_if_null(
+                    session_id=session_id,
+                    sensor_type=sensor_type,
+                    value=latest_value,
+                )
 
         await self._calculate_efficiency(session_id, status)
 

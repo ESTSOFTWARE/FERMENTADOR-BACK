@@ -363,6 +363,31 @@ class FermentationRepository(IFermentationRepository):
             )
             await session.commit()
 
+    async def update_sensor_last_reading_if_null(
+        self,
+        session_id:  int,
+        sensor_type: str,
+        value:       float,
+    ) -> None:
+        """Guarda la última lectura SOLO si está vacía: si el sensor se desactivó
+        durante la sesión, el evento sensor.deactivated ya la registró y esa
+        (con su deactivated_at) es la que vale."""
+        cols = SENSOR_REPORT_MAP.get(sensor_type)
+        if not cols:
+            return
+        col_last = cols[3]
+
+        async with self._session_factory() as session:
+            await session.execute(
+                update(FermentationReportModel)
+                .where(
+                    FermentationReportModel.session_id == session_id,
+                    getattr(FermentationReportModel, col_last).is_(None),
+                )
+                .values({col_last: value})
+            )
+            await session.commit()
+
     async def update_sensor_initial(self, session_id: int, sensor_type: str, value: float) -> None:
         cols = SENSOR_REPORT_MAP.get(sensor_type)
         if not cols:
