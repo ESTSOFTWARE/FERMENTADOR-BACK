@@ -19,4 +19,4 @@ class UpdateBenefitUseCase:
             if value is not None:
                 setattr(benefit, key, value)
 
-        return await self._benefit_repo.update(benefit)
+        return await self._benefit_repo.update(benefit) 
