@@ -121,9 +121,9 @@ async def request_prediction(session_id: int) -> PredictionResult | None:
         session_id=session_id,
     )
 
-    # BD (historial campanita) + push FCM. Sin broadcast WS: el resultado lo
-    # recibe quien lo pidió en la respuesta HTTP; si se emitiera por WS le
-    # llegaría en vivo también a la otra plataforma (móvil pide → web lo ve).
+    # Solo BD (historial campanita). Sin WS ni FCM: el resultado lo recibe
+    # únicamente quien lo pidió en la respuesta HTTP, y esa plataforma genera
+    # su propia notificación local (móvil → notificación local, web → browser).
     try:
         notif_repo = NotificationRepository(AsyncSessionLocal)
         await SendNotificationUseCase(notif_repo).execute(
@@ -131,6 +131,7 @@ async def request_prediction(session_id: int) -> PredictionResult | None:
             message=message,
             notification_type="efficiency",
             session_id=session_id,
+            push=False,
             broadcast=False,
         )
     except Exception:  # noqa: BLE001
