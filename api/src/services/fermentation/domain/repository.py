@@ -111,6 +111,15 @@ class IFermentationRepository(ABC):
         ...
 
     @abstractmethod
+    async def update_sensor_last_reading_if_null(
+        self,
+        session_id:  int,
+        sensor_type: str,
+        value:       float,
+    ) -> None:
+        ...
+
+    @abstractmethod
     async def create_report_history(
         self,
         report_id: int,
