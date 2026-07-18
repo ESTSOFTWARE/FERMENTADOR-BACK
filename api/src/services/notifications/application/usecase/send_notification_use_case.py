@@ -18,6 +18,7 @@ class SendNotificationUseCase:
         notification_type: str,
         session_id:        int | None = None,
         push:              bool = True,
+        broadcast:         bool = True,
     ) -> int:
         notification = await self._repo.create(
             user_id=user_id,
@@ -34,17 +35,21 @@ class SendNotificationUseCase:
             occurred_at=notification.created_at or datetime.now(timezone.utc),
         )
 
-        # In-process (transición): solo si hay conexión local al /ws de este back.
-        if ws_manager.is_user_connected(user_id):
-            await ws_manager.broadcast_notification(
-                user_id=user_id,
-                message=notif_msg,
-            )
+        # broadcast=False cuando el resultado ya lo recibe quien lo pidió por la
+        # respuesta HTTP (p.ej. predicción ML): se guarda en BD para el historial
+        # pero no se empuja en vivo a las demás plataformas del usuario.
+        if broadcast:
+            # In-process (transición): solo si hay conexión local al /ws de este back.
+            if ws_manager.is_user_connected(user_id):
+                await ws_manager.broadcast_notification(
+                    user_id=user_id,
+                    message=notif_msg,
+                )
 
-        # RabbitMQ → ws-service (Node): siempre. El cliente puede estar conectado
-        # al Node (vía gateway), no al manager in-process. `data` = lo que ya
-        # recibía el front (mismo shape que model_dump_json).
-        await to_users("notifications", [user_id], notif_msg.model_dump(mode="json"))
+            # RabbitMQ → ws-service (Node): el cliente puede estar conectado
+            # al Node (vía gateway), no al manager in-process. `data` = lo que ya
+            # recibía el front (mismo shape que model_dump_json).
+            await to_users("notifications", [user_id], notif_msg.model_dump(mode="json"))
 
         # Push FCM (app cerrada / segundo plano). Best-effort: no rompe si falla.
         # push=False cuando el caller ya maneja FCM por su cuenta (p.ej. batch en

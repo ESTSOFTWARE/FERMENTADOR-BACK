@@ -121,7 +121,9 @@ async def request_prediction(session_id: int) -> PredictionResult | None:
         session_id=session_id,
     )
 
-    # Guardar en BD + WebSocket (web/campanita) + push FCM con la predicción.
+    # BD (historial campanita) + push FCM. Sin broadcast WS: el resultado lo
+    # recibe quien lo pidió en la respuesta HTTP; si se emitiera por WS le
+    # llegaría en vivo también a la otra plataforma (móvil pide → web lo ve).
     try:
         notif_repo = NotificationRepository(AsyncSessionLocal)
         await SendNotificationUseCase(notif_repo).execute(
@@ -129,6 +131,7 @@ async def request_prediction(session_id: int) -> PredictionResult | None:
             message=message,
             notification_type="efficiency",
             session_id=session_id,
+            broadcast=False,
         )
     except Exception:  # noqa: BLE001
         logger.warning("[ML] No se pudo enviar notificación — session=%s", session_id)
