@@ -7,11 +7,16 @@ from src.services.notifications.application.usecase.send_notification_use_case i
 from src.services.notifications.infrastructure.adapters.postgres import NotificationRepository
 
 
-async def remove_member(group_id: int, student_id: int, professor_id: int) -> None:
+async def remove_member(
+    group_id: int,
+    student_id: int,
+    professor_id: int,
+    role: str = 'profesor',
+) -> None:
     repo  = GroupRepository(AsyncSessionLocal)
     group = await repo.get_by_id(group_id)
 
-    await RemoveMemberUseCase(repo).execute(group_id, student_id, professor_id)
+    await RemoveMemberUseCase(repo).execute(group_id, student_id, professor_id, role)
 
     if group:
         notif_repo = NotificationRepository(AsyncSessionLocal)

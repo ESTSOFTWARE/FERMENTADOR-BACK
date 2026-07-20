@@ -75,7 +75,11 @@ async def delete_group_route(
     group_id: int,
     current_user: dict = Depends(require_admin_or_profesor),
 ):
-    await delete_group(group_id=group_id, professor_id=current_user["user_id"])
+    await delete_group(
+        group_id=group_id,
+        professor_id=current_user["user_id"],
+        role=current_user["role"],
+    )
 
 
 @router.post(
@@ -88,7 +92,12 @@ async def add_member_route(
     body: AddMemberRequest,
     current_user: dict = Depends(require_admin_or_profesor),
 ):
-    return await add_member(group_id=group_id, body=body, professor_id=current_user["user_id"])
+    return await add_member(
+        group_id=group_id,
+        body=body,
+        professor_id=current_user["user_id"],
+        role=current_user["role"],
+    )
 
 
 @router.post(
@@ -118,4 +127,5 @@ async def remove_member_route(
         group_id=group_id,
         student_id=student_id,
         professor_id=current_user["user_id"],
+        role=current_user["role"],
     )

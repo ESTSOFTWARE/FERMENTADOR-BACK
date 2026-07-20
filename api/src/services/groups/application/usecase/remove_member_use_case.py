@@ -7,11 +7,17 @@ class RemoveMemberUseCase:
     def __init__(self, repository: IGroupRepository):
         self._repo = repository
 
-    async def execute(self, group_id: int, student_id: int, professor_id: int) -> None:
+    async def execute(
+        self,
+        group_id: int,
+        student_id: int,
+        professor_id: int,
+        role: str = 'profesor',
+    ) -> None:
         group = await self._repo.get_by_id(group_id)
         if not group:
             raise NotFoundException("Grupo no encontrado")
-        if group.professor_id != professor_id:
+        if role != 'admin' and group.professor_id != professor_id:
             raise ForbiddenException()
 
         member_ids = [m.student_id for m in group.members]
