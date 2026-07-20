@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from src.core.dependencies import require_admin_or_profesor, require_any_role, require_feature
 from src.services.fermentation.domain.dto.fermentation_report_schema import (
@@ -83,8 +83,13 @@ async def get_sessions_history_route(current_user: dict = Depends(require_any_ro
     response_model=list[SessionWithReportResponse],
     summary="Sesiones + su reporte en una sola consulta (evita el N+1)",
 )
-async def get_sessions_with_reports_route(current_user: dict = Depends(require_any_role)):
-    return await get_sessions_with_reports(current_user["user_id"], current_user["role"])
+async def get_sessions_with_reports_route(
+    limit: int | None = Query(None, ge=1, le=200),
+    current_user: dict = Depends(require_any_role),
+):
+    return await get_sessions_with_reports(
+        current_user["user_id"], current_user["role"], limit,
+    )
 
 
 @router.get(
