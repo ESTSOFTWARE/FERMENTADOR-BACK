@@ -227,9 +227,13 @@ class FermentationRepository(IFermentationRepository):
         ]
 
     async def get_sessions_with_reports_visible_to(
-        self, user_id: int, role: str
+        self, user_id: int, role: str, limit: int | None = None
     ) -> list[tuple[FermentationSession, FermentationReport | None]]:
-        """Sesiones visibles + su reporte, en UNA sola consulta (evita el N+1)."""
+        """Sesiones visibles + su reporte, en UNA sola consulta (evita el N+1).
+
+        `limit` acota cuántas sesiones (las más recientes) se devuelven: sin él
+        se serializa el historial completo y la vista tarda proporcionalmente.
+        """
         from src.core.models.group_models import GroupMemberModel
         async with self._session_factory() as session:
             stmt = select(FermentationSessionModel).options(
@@ -248,6 +252,8 @@ class FermentationRepository(IFermentationRepository):
                     )
                 )
             stmt = stmt.order_by(FermentationSessionModel.id.desc())
+            if limit is not None:
+                stmt = stmt.limit(limit)
             result = await session.execute(stmt)
             models = result.scalars().all()
         return [

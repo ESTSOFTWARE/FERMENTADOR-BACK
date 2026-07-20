@@ -11,9 +11,11 @@ from src.services.fermentation.domain.dto.session_with_report_schema import (
 from src.services.fermentation.infrastructure.adapters.postgres import FermentationRepository
 
 
-async def get_sessions_with_reports(user_id: int, role: str) -> list[SessionWithReportResponse]:
+async def get_sessions_with_reports(
+    user_id: int, role: str, limit: int | None = None
+) -> list[SessionWithReportResponse]:
     repo = FermentationRepository(AsyncSessionLocal)
-    pairs = await repo.get_sessions_with_reports_visible_to(user_id, role)
+    pairs = await repo.get_sessions_with_reports_visible_to(user_id, role, limit)
     return [
         SessionWithReportResponse(
             session=FermentationSessionResponse.from_entity(s),
