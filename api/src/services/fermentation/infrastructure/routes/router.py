@@ -129,7 +129,7 @@ async def request_prediction_route(
     session_id: int,
     current_user: dict = Depends(require_any_role),
 ):
-    result = await request_prediction(session_id)
+    result = await request_prediction(session_id, current_user["user_id"])
     if result is None:
         return {"efficiency": None, "message": None}
     return {"efficiency": result.efficiency, "message": result.message}

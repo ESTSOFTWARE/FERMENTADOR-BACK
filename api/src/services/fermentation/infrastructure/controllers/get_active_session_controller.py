@@ -8,6 +8,9 @@ from src.services.fermentation.domain.dto.fermentation_session_schema import (
     FermentationSessionResponse,
 )
 from src.services.fermentation.infrastructure.adapters.postgres import FermentationRepository
+from src.services.fermentation.infrastructure.controllers.session_access import (
+    user_can_access_session,
+)
 
 
 async def get_active(circuit_id, user_id=None):
@@ -25,6 +28,11 @@ async def get_active(circuit_id, user_id=None):
         session = await GetActiveFermentationUseCase(FermentationRepository(AsyncSessionLocal)).execute(circuit_id)
         print(f"[get_active] session={session}", flush=True)
         if not session:
+            return None
+        # Sesión de grupo: solo su audiencia (docente, admins, miembros) la ve.
+        # Para el resto es como si no hubiera fermentación activa.
+        if not await user_can_access_session(session, user_id):
+            print(f"[get_active] user={user_id} fuera del grupo {session.group_id} — oculta", flush=True)
             return None
         resp = FermentationSessionResponse.from_entity(session)
         print(f"[get_active] resp built ok: id={resp.id} status={resp.status}", flush=True)

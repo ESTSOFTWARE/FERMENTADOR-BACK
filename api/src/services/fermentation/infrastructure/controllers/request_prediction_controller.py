@@ -2,6 +2,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 
 import httpx
+from fastapi import HTTPException
 
 from src.core.config import settings
 from src.core.database import AsyncSessionLocal
@@ -9,6 +10,9 @@ from src.core.groq.recommendation_service import generate_efficiency_recommendat
 from src.services.fermentation.infrastructure.adapters.postgres import FermentationRepository
 from src.services.notifications.application.usecase.send_notification_use_case import (
     SendNotificationUseCase,
+)
+from src.services.fermentation.infrastructure.controllers.session_access import (
+    user_can_access_session,
 )
 from src.services.notifications.infrastructure.adapters.postgres import NotificationRepository
 from src.services.sensors.infrastructure.adapters.postgres import SensorRepository
@@ -25,13 +29,17 @@ class PredictionResult:
         self.message = message
 
 
-async def request_prediction(session_id: int) -> PredictionResult | None:
+async def request_prediction(session_id: int, user_id: int | None = None) -> PredictionResult | None:
     ferm_repo    = FermentationRepository(AsyncSessionLocal)
     sensor_repo  = SensorRepository(AsyncSessionLocal)
 
     session = await ferm_repo.get_session_by_id(session_id)
     if session is None:
         raise ValueError(f"Sesión {session_id} no encontrada.")
+
+    # Sesión de grupo: solo su audiencia puede pedir predicciones.
+    if not await user_can_access_session(session, user_id):
+        raise HTTPException(status_code=403, detail="No perteneces al grupo de esta fermentación.")
 
     circuit_id = session.circuit_id
     now        = datetime.now(timezone.utc)
